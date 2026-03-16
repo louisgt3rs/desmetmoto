@@ -36,7 +36,9 @@ export default function AdminProducts() {
       name: form.name, description: form.description,
       brand_id: form.brand_id || null, category: form.category,
       sizes: form.sizes.split(",").map(s => s.trim()).filter(Boolean),
-      image_url: form.image_url || null, price_range: form.price_range || null,
+      image_url: form.images[0] || form.image_url || null,
+      images: form.images,
+      price_range: form.price_range || null,
     };
     if (editing) {
       const { error } = await supabase.from("products").update(payload).eq("id", editing.id);
