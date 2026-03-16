@@ -63,7 +63,7 @@ export default function ContactSection() {
               </Button>
               <Button asChild variant="outline" size="lg">
                 <a
-                  href="https://www.google.com/maps/dir/?api=1&destination=50.7167,4.6000"
+                  href="https://www.google.com/maps/dir/?api=1&destination=Chauss%C3%A9e+de+Wavre+491+1300+Wavre+Belgique"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
