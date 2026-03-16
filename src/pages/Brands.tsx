@@ -1,23 +1,21 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Layout from "@/components/Layout";
 import SectionHeading from "@/components/SectionHeading";
+import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
 
-const brands = [
-  { name: "Arai", desc: "Casques haut de gamme fabriqués à la main au Japon.", category: "Casques" },
-  { name: "Shoei", desc: "Casques premium réputés pour leur confort et sécurité.", category: "Casques" },
-  { name: "Shark", desc: "Casques innovants avec un excellent rapport qualité-prix.", category: "Casques" },
-  { name: "Alpinestars", desc: "Équipement technique pour motards exigeants.", category: "Textile & Cuir" },
-  { name: "Dainese", desc: "Protection et style à l'italienne depuis 1972.", category: "Textile & Cuir" },
-  { name: "Rev'It", desc: "Vêtements moto innovants et stylés.", category: "Textile & Cuir" },
-  { name: "Held", desc: "Gants et équipements allemands de qualité supérieure.", category: "Gants" },
-  { name: "Bering", desc: "Gants et bloussons moto de qualité française.", category: "Gants" },
-  { name: "Sidi", desc: "Bottes de course et touring fabriquées en Italie.", category: "Bottes" },
-  { name: "TCX", desc: "Chaussures et bottes moto au design moderne.", category: "Bottes" },
-  { name: "Oxford", desc: "Accessoires et bagagerie pour motards.", category: "Accessoires" },
-  { name: "Cardo", desc: "Intercoms Bluetooth pour communication en moto.", category: "Accessoires" },
-];
+type Brand = Tables<"brands">;
 
 export default function BrandsPage() {
+  const [brands, setBrands] = useState<Brand[]>([]);
+
+  useEffect(() => {
+    supabase.from("brands").select("*").order("sort_order").then(({ data }) => {
+      if (data) setBrands(data);
+    });
+  }, []);
+
   return (
     <Layout>
       <section className="py-24">
@@ -26,18 +24,23 @@ export default function BrandsPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {brands.map((brand, i) => (
               <motion.div
-                key={brand.name}
+                key={brand.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.05 }}
-                className="bg-card border border-border rounded-lg p-6 hover:border-primary/50 transition-all group"
+                className="group bg-card border border-border rounded-lg p-6 hover:border-primary/50 hover:shadow-[0_0_30px_hsl(var(--glow-soft))] transition-all duration-300"
               >
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-display text-2xl text-foreground group-hover:text-primary transition-colors">{brand.name}</h3>
+                  <div className="flex items-center gap-3">
+                    {brand.logo_url && (
+                      <img src={brand.logo_url} alt={brand.name} className="w-10 h-10 object-contain" />
+                    )}
+                    <h3 className="font-display text-2xl text-foreground group-hover:text-primary transition-colors">{brand.name}</h3>
+                  </div>
                   <span className="text-xs text-primary bg-primary/10 px-2 py-1 rounded">{brand.category}</span>
                 </div>
-                <p className="text-muted-foreground text-sm">{brand.desc}</p>
+                <p className="text-muted-foreground text-sm">{brand.description}</p>
               </motion.div>
             ))}
           </div>

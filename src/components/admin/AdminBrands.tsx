@@ -1,0 +1,106 @@
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
+import { Plus, Pencil, Trash2, X, Save } from "lucide-react";
+import type { Tables } from "@/integrations/supabase/types";
+
+type Brand = Tables<"brands">;
+
+export default function AdminBrands() {
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [editing, setEditing] = useState<Brand | null>(null);
+  const [adding, setAdding] = useState(false);
+  const [form, setForm] = useState({ name: "", description: "", category: "", logo_url: "" });
+
+  const load = async () => {
+    const { data } = await supabase.from("brands").select("*").order("sort_order");
+    if (data) setBrands(data);
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const handleSave = async () => {
+    if (!form.name.trim()) { toast.error("Le nom est requis"); return; }
+    if (editing) {
+      const { error } = await supabase.from("brands").update({
+        name: form.name, description: form.description, category: form.category, logo_url: form.logo_url,
+      }).eq("id", editing.id);
+      if (error) { toast.error("Erreur: " + error.message); return; }
+      toast.success("Marque modifiée");
+    } else {
+      const { error } = await supabase.from("brands").insert({
+        name: form.name, description: form.description, category: form.category, logo_url: form.logo_url,
+        sort_order: brands.length + 1,
+      });
+      if (error) { toast.error("Erreur: " + error.message); return; }
+      toast.success("Marque ajoutée");
+    }
+    setEditing(null); setAdding(false);
+    setForm({ name: "", description: "", category: "", logo_url: "" });
+    load();
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Supprimer cette marque ?")) return;
+    const { error } = await supabase.from("brands").delete().eq("id", id);
+    if (error) { toast.error("Erreur: " + error.message); return; }
+    toast.success("Marque supprimée");
+    load();
+  };
+
+  const startEdit = (b: Brand) => {
+    setEditing(b); setAdding(false);
+    setForm({ name: b.name, description: b.description || "", category: b.category || "", logo_url: b.logo_url || "" });
+  };
+
+  const startAdd = () => {
+    setAdding(true); setEditing(null);
+    setForm({ name: "", description: "", category: "", logo_url: "" });
+  };
+
+  const cancel = () => { setAdding(false); setEditing(null); };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="font-display text-2xl text-foreground">MARQUES ({brands.length})</h2>
+        <Button size="sm" onClick={startAdd}><Plus className="w-4 h-4 mr-2" /> Ajouter</Button>
+      </div>
+
+      {(adding || editing) && (
+        <div className="bg-card border border-primary/30 rounded-lg p-6 mb-6 space-y-4">
+          <h3 className="font-display text-lg text-foreground">{editing ? "Modifier" : "Nouvelle"} marque</h3>
+          <Input placeholder="Nom" value={form.name} onChange={e => setForm({...form, name: e.target.value})} className="bg-secondary border-border" />
+          <Textarea placeholder="Description" value={form.description} onChange={e => setForm({...form, description: e.target.value})} className="bg-secondary border-border" />
+          <Input placeholder="Catégorie (ex: Casques, Gants...)" value={form.category} onChange={e => setForm({...form, category: e.target.value})} className="bg-secondary border-border" />
+          <Input placeholder="URL du logo" value={form.logo_url} onChange={e => setForm({...form, logo_url: e.target.value})} className="bg-secondary border-border" />
+          <div className="flex gap-2">
+            <Button onClick={handleSave}><Save className="w-4 h-4 mr-2" /> Enregistrer</Button>
+            <Button variant="outline" onClick={cancel}><X className="w-4 h-4 mr-2" /> Annuler</Button>
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-3">
+        {brands.map(b => (
+          <div key={b.id} className="bg-card border border-border rounded-lg p-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4 min-w-0">
+              {b.logo_url && <img src={b.logo_url} alt={b.name} className="w-10 h-10 object-contain rounded" />}
+              <div className="min-w-0">
+                <p className="text-foreground font-medium truncate">{b.name}</p>
+                <p className="text-xs text-muted-foreground truncate">{b.category} • {b.description}</p>
+              </div>
+            </div>
+            <div className="flex gap-1 shrink-0">
+              <Button variant="ghost" size="sm" onClick={() => startEdit(b)}><Pencil className="w-4 h-4" /></Button>
+              <Button variant="ghost" size="sm" onClick={() => handleDelete(b.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

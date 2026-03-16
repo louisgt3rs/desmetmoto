@@ -1,40 +1,23 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { MapPin, Calendar, Clock, Coffee } from "lucide-react";
 import Layout from "@/components/Layout";
 import SectionHeading from "@/components/SectionHeading";
+import { supabase } from "@/integrations/supabase/client";
 import bikesCoffeeImg from "@/assets/bikes-coffee.jpg";
+import type { Tables } from "@/integrations/supabase/types";
 
-const events = [
-  {
-    title: "Bikes & Coffee – Édition 1",
-    date: "Samedi 28 Mars",
-    time: "10:00",
-    location: "Desmet Équipement – Wavre",
-    desc: "Un rassemblement convivial devant le magasin où les motards se retrouvent pour partager un café, admirer les motos et discuter entre passionnés.",
-    image: bikesCoffeeImg,
-    status: "upcoming" as const,
-  },
-  {
-    title: "Bikes & Coffee – Édition 2",
-    date: "À venir",
-    time: "TBD",
-    location: "Desmet Équipement – Wavre",
-    desc: "La deuxième édition de notre rassemblement communautaire. Restez connectés pour plus de détails !",
-    image: null,
-    status: "planned" as const,
-  },
-  {
-    title: "Bikes & Coffee – Édition 3",
-    date: "À venir",
-    time: "TBD",
-    location: "Desmet Équipement – Wavre",
-    desc: "Plus de détails bientôt...",
-    image: null,
-    status: "planned" as const,
-  },
-];
+type Event = Tables<"events">;
 
 export default function CommunityPage() {
+  const [events, setEvents] = useState<Event[]>([]);
+
+  useEffect(() => {
+    supabase.from("events").select("*").order("date", { ascending: false }).then(({ data }) => {
+      if (data) setEvents(data);
+    });
+  }, []);
+
   return (
     <Layout>
       <section className="py-24">
@@ -44,63 +27,40 @@ export default function CommunityPage() {
           <div className="space-y-12">
             {events.map((event, i) => (
               <motion.div
-                key={event.title}
+                key={event.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
-                className={`bg-card border border-border rounded-lg overflow-hidden ${event.status === "planned" ? "opacity-70" : ""}`}
+                className="bg-card border border-border rounded-lg overflow-hidden hover:border-primary/50 transition-all duration-300"
               >
                 <div className="grid lg:grid-cols-2">
-                  {event.image ? (
-                    <img src={event.image} alt={event.title} className="w-full h-64 lg:h-full object-cover" />
+                  {event.image_url ? (
+                    <img src={event.image_url} alt={event.title} className="w-full h-64 lg:h-full object-cover" />
                   ) : (
                     <div className="h-64 lg:h-auto bg-secondary flex items-center justify-center">
                       <Coffee className="w-16 h-16 text-muted-foreground" />
                     </div>
                   )}
                   <div className="p-8">
-                    {event.status === "upcoming" && (
-                      <span className="text-xs font-medium bg-primary/10 text-primary px-3 py-1 rounded mb-4 inline-block">
-                        Prochain événement
-                      </span>
-                    )}
                     <h3 className="font-display text-3xl text-foreground mb-3">{event.title}</h3>
-                    <p className="text-muted-foreground text-sm mb-6">{event.desc}</p>
+                    <p className="text-muted-foreground text-sm mb-6">{event.description}</p>
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <MapPin className="w-4 h-4 text-primary" /> {event.location}
                       </div>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Calendar className="w-4 h-4 text-primary" /> {event.date}
+                        <Calendar className="w-4 h-4 text-primary" />
+                        {event.date ? new Date(event.date).toLocaleDateString("fr-BE", { weekday: "long", day: "numeric", month: "long" }) : "À venir"}
                       </div>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Clock className="w-4 h-4 text-primary" /> {event.time}
+                        <Clock className="w-4 h-4 text-primary" /> {event.time || "TBD"}
                       </div>
                     </div>
                   </div>
                 </div>
               </motion.div>
             ))}
-          </div>
-
-          {/* Gallery placeholder */}
-          <div className="mt-24">
-            <SectionHeading title="GALERIE PHOTOS" subtitle="Les meilleurs moments de nos événements" />
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {[bikesCoffeeImg, bikesCoffeeImg, bikesCoffeeImg].map((img, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: i * 0.1 }}
-                  className="aspect-video rounded-lg overflow-hidden"
-                >
-                  <img src={img} alt={`Event photo ${i + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
-                </motion.div>
-              ))}
-            </div>
           </div>
         </div>
       </section>
