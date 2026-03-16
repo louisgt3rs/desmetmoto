@@ -7,7 +7,7 @@ import ReservationModal from "@/components/ReservationModal";
 import { supabase } from "@/integrations/supabase/client";
 import helmetHeroImg from "@/assets/helmet-hero.jpg";
 import araiStoreWall from "@/assets/arai-store-wall.jpg";
-import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
+
 
 /* ───── types ───── */
 interface HelmetModel {
@@ -33,55 +33,45 @@ interface Colorway {
   sort_order: number | null;
 }
 
-/* ───── 360 viewer ───── */
-function Viewer360({ images }: { images: string[] }) {
-  const [index, setIndex] = useState(0);
-  const [dragging, setDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
 
-  const handlePointerDown = (e: React.PointerEvent) => { setDragging(true); setStartX(e.clientX); };
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!dragging) return;
-    const diff = e.clientX - startX;
-    if (Math.abs(diff) > 20) {
-      setIndex(i => (i + (diff > 0 ? 1 : -1) + images.length) % images.length);
-      setStartX(e.clientX);
-    }
-  };
-  const handlePointerUp = () => setDragging(false);
-
-  return (
-    <div className="relative select-none touch-none" onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerLeave={handlePointerUp}>
-      <img src={images[index]} alt="360° view" className="w-full h-full object-contain" draggable={false} />
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border">
-        <RotateCcw className="w-3 h-3 text-primary" />
-        <span className="text-xs text-muted-foreground">Glissez pour tourner</span>
-      </div>
-    </div>
-  );
-}
-
-/* ───── image gallery ───── */
-function ImageGallery({ images }: { images: string[] }) {
+/* ───── image gallery with thumbnails ───── */
+function ImageGallery({ images, altPrefix }: { images: string[]; altPrefix: string }) {
   const [idx, setIdx] = useState(0);
   if (images.length === 0) return null;
   return (
-    <div className="relative">
-      <img src={images[idx]} alt="Gallery" className="w-full h-full object-contain" />
+    <div className="flex flex-col gap-3">
+      {/* Main image */}
+      <div className="aspect-[4/3] bg-secondary/30 rounded-xl overflow-hidden">
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={idx}
+            src={images[idx]}
+            alt={`${altPrefix} - vue ${idx + 1}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="w-full h-full object-contain"
+          />
+        </AnimatePresence>
+      </div>
+      {/* Thumbnails */}
       {images.length > 1 && (
-        <>
-          <button onClick={() => setIdx((idx - 1 + images.length) % images.length)} className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/70 backdrop-blur-sm border border-border rounded-full p-1.5 hover:bg-background transition-colors">
-            <ChevronLeft className="w-4 h-4 text-foreground" />
-          </button>
-          <button onClick={() => setIdx((idx + 1) % images.length)} className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/70 backdrop-blur-sm border border-border rounded-full p-1.5 hover:bg-background transition-colors">
-            <ChevronRight className="w-4 h-4 text-foreground" />
-          </button>
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-            {images.map((_, i) => (
-              <button key={i} onClick={() => setIdx(i)} className={`w-2 h-2 rounded-full transition-colors ${i === idx ? "bg-primary" : "bg-muted-foreground/40"}`} />
-            ))}
-          </div>
-        </>
+        <div className="flex gap-2 justify-center">
+          {images.map((src, i) => (
+            <button
+              key={i}
+              onClick={() => setIdx(i)}
+              className={`rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                i === idx
+                  ? "border-primary shadow-[0_0_10px_hsl(var(--glow-soft))]"
+                  : "border-border hover:border-muted-foreground/50 opacity-60 hover:opacity-100"
+              }`}
+            >
+              <img src={src} alt={`Miniature ${i + 1}`} className="w-16 h-16 md:w-20 md:h-20 object-cover" />
+            </button>
+          ))}
+        </div>
       )}
     </div>
   );
@@ -91,15 +81,19 @@ function ImageGallery({ images }: { images: string[] }) {
 function HelmetCard({ model, colorways, onReserve }: { model: HelmetModel; colorways: Colorway[]; onReserve: (name: string) => void }) {
   const availableColorways = colorways.filter(c => c.available !== false);
   const [selectedCw, setSelectedCw] = useState<Colorway | null>(availableColorways[0] || null);
-  const [viewMode, setViewMode] = useState<"main" | "360" | "gallery">("main");
 
   useEffect(() => {
     setSelectedCw(availableColorways[0] || null);
-    setViewMode("main");
   }, [model.id]);
 
-  const has360 = selectedCw && (selectedCw.images_360 || []).length > 0;
-  const hasGallery = selectedCw && (selectedCw.gallery_images || []).length > 0;
+  // Build the image list: gallery_images if available, otherwise just the main image
+  const allImages = selectedCw
+    ? (selectedCw.gallery_images && selectedCw.gallery_images.length > 0)
+      ? selectedCw.gallery_images
+      : selectedCw.main_image_url
+        ? [selectedCw.main_image_url]
+        : []
+    : [];
 
   return (
     <motion.div
@@ -109,55 +103,19 @@ function HelmetCard({ model, colorways, onReserve }: { model: HelmetModel; color
       transition={{ duration: 0.5 }}
       className="bg-card border border-border rounded-xl overflow-hidden hover:border-primary/40 transition-all duration-300 hover:shadow-[0_0_30px_hsl(var(--glow-soft))]"
     >
-      {/* Image area */}
-      <div className="aspect-[4/3] bg-secondary/30 overflow-hidden relative">
-        <AnimatePresence mode="wait">
-          {selectedCw?.main_image_url && viewMode === "main" && (
-            <motion.img
-              key={selectedCw.id + "-main"}
-              src={selectedCw.main_image_url}
-              alt={`${model.name} - ${selectedCw.name}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="w-full h-full object-cover"
-            />
-          )}
-          {viewMode === "360" && has360 && (
-            <motion.div key="360" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full">
-              <Viewer360 images={selectedCw!.images_360!} />
-            </motion.div>
-          )}
-          {viewMode === "gallery" && hasGallery && (
-            <motion.div key="gallery" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full">
-              <ImageGallery images={selectedCw!.gallery_images!} />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* View mode toggles */}
-        {(has360 || hasGallery) && (
-          <div className="absolute top-3 right-3 flex gap-1.5">
-            <button onClick={() => setViewMode("main")} className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${viewMode === "main" ? "bg-primary text-primary-foreground" : "bg-background/70 backdrop-blur-sm text-foreground border border-border"}`}>
-              Photo
-            </button>
-            {has360 && (
-              <button onClick={() => setViewMode("360")} className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${viewMode === "360" ? "bg-primary text-primary-foreground" : "bg-background/70 backdrop-blur-sm text-foreground border border-border"}`}>
-                360°
-              </button>
-            )}
-            {hasGallery && (
-              <button onClick={() => setViewMode("gallery")} className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${viewMode === "gallery" ? "bg-primary text-primary-foreground" : "bg-background/70 backdrop-blur-sm text-foreground border border-border"}`}>
-                Galerie
-              </button>
-            )}
+      {/* Image gallery area */}
+      <div className="p-4 md:p-6">
+        {allImages.length > 0 ? (
+          <ImageGallery images={allImages} altPrefix={`${model.name}${selectedCw ? ` - ${selectedCw.name}` : ""}`} />
+        ) : (
+          <div className="aspect-[4/3] bg-secondary/30 rounded-xl flex items-center justify-center">
+            <p className="text-muted-foreground text-sm">Image à venir</p>
           </div>
         )}
       </div>
 
       {/* Content */}
-      <div className="p-6 md:p-8">
+      <div className="p-6 md:p-8 pt-0">
         <h3 className="font-display text-3xl md:text-4xl text-foreground mb-2">{model.name}</h3>
         {model.description && <p className="text-muted-foreground text-sm mb-4 leading-relaxed">{model.description}</p>}
 
@@ -169,7 +127,7 @@ function HelmetCard({ model, colorways, onReserve }: { model: HelmetModel; color
               {availableColorways.map(cw => (
                 <button
                   key={cw.id}
-                  onClick={() => { setSelectedCw(cw); setViewMode("main"); }}
+                  onClick={() => setSelectedCw(cw)}
                   className={`group relative rounded-lg overflow-hidden border-2 transition-all duration-200 ${
                     selectedCw?.id === cw.id
                       ? "border-primary shadow-[0_0_12px_hsl(var(--glow-soft))]"
