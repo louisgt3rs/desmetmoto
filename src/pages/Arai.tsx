@@ -108,15 +108,19 @@ function ImageGallery({ images, altPrefix }: { images: string[]; altPrefix: stri
 function HelmetCard({ model, colorways, onReserve }: { model: HelmetModel; colorways: Colorway[]; onReserve: (name: string) => void }) {
   const availableColorways = colorways.filter(c => c.available !== false);
   const [selectedCw, setSelectedCw] = useState<Colorway | null>(availableColorways[0] || null);
-  const [viewMode, setViewMode] = useState<"main" | "360" | "gallery">("main");
 
   useEffect(() => {
     setSelectedCw(availableColorways[0] || null);
-    setViewMode("main");
   }, [model.id]);
 
-  const has360 = selectedCw && (selectedCw.images_360 || []).length > 0;
-  const hasGallery = selectedCw && (selectedCw.gallery_images || []).length > 0;
+  // Build the image list: gallery_images if available, otherwise just the main image
+  const allImages = selectedCw
+    ? (selectedCw.gallery_images && selectedCw.gallery_images.length > 0)
+      ? selectedCw.gallery_images
+      : selectedCw.main_image_url
+        ? [selectedCw.main_image_url]
+        : []
+    : [];
 
   return (
     <motion.div
@@ -126,52 +130,15 @@ function HelmetCard({ model, colorways, onReserve }: { model: HelmetModel; color
       transition={{ duration: 0.5 }}
       className="bg-card border border-border rounded-xl overflow-hidden hover:border-primary/40 transition-all duration-300 hover:shadow-[0_0_30px_hsl(var(--glow-soft))]"
     >
-      {/* Image area */}
-      <div className="aspect-[4/3] bg-secondary/30 overflow-hidden relative">
-        <AnimatePresence mode="wait">
-          {selectedCw?.main_image_url && viewMode === "main" && (
-            <motion.img
-              key={selectedCw.id + "-main"}
-              src={selectedCw.main_image_url}
-              alt={`${model.name} - ${selectedCw.name}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="w-full h-full object-cover"
-            />
-          )}
-          {viewMode === "360" && has360 && (
-            <motion.div key="360" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full">
-              <Viewer360 images={selectedCw!.images_360!} />
-            </motion.div>
-          )}
-          {viewMode === "gallery" && hasGallery && (
-            <motion.div key="gallery" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full">
-              <ImageGallery images={selectedCw!.gallery_images!} />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* View mode toggles */}
-        {(has360 || hasGallery) && (
-          <div className="absolute top-3 right-3 flex gap-1.5">
-            <button onClick={() => setViewMode("main")} className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${viewMode === "main" ? "bg-primary text-primary-foreground" : "bg-background/70 backdrop-blur-sm text-foreground border border-border"}`}>
-              Photo
-            </button>
-            {has360 && (
-              <button onClick={() => setViewMode("360")} className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${viewMode === "360" ? "bg-primary text-primary-foreground" : "bg-background/70 backdrop-blur-sm text-foreground border border-border"}`}>
-                360°
-              </button>
-            )}
-            {hasGallery && (
-              <button onClick={() => setViewMode("gallery")} className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${viewMode === "gallery" ? "bg-primary text-primary-foreground" : "bg-background/70 backdrop-blur-sm text-foreground border border-border"}`}>
-                Galerie
-              </button>
-            )}
+      {/* Image gallery area */}
+      <div className="p-4 md:p-6">
+        {allImages.length > 0 ? (
+          <ImageGallery images={allImages} altPrefix={`${model.name}${selectedCw ? ` - ${selectedCw.name}` : ""}`} />
+        ) : (
+          <div className="aspect-[4/3] bg-secondary/30 rounded-xl flex items-center justify-center">
+            <p className="text-muted-foreground text-sm">Image à venir</p>
           </div>
         )}
-      </div>
 
       {/* Content */}
       <div className="p-6 md:p-8">
