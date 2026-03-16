@@ -33,33 +33,6 @@ interface Colorway {
   sort_order: number | null;
 }
 
-/* ───── 360 viewer ───── */
-function Viewer360({ images }: { images: string[] }) {
-  const [index, setIndex] = useState(0);
-  const [dragging, setDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-
-  const handlePointerDown = (e: React.PointerEvent) => { setDragging(true); setStartX(e.clientX); };
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!dragging) return;
-    const diff = e.clientX - startX;
-    if (Math.abs(diff) > 20) {
-      setIndex(i => (i + (diff > 0 ? 1 : -1) + images.length) % images.length);
-      setStartX(e.clientX);
-    }
-  };
-  const handlePointerUp = () => setDragging(false);
-
-  return (
-    <div className="relative select-none touch-none" onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerLeave={handlePointerUp}>
-      <img src={images[index]} alt="360° view" className="w-full h-full object-contain" draggable={false} />
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border">
-        <RotateCcw className="w-3 h-3 text-primary" />
-        <span className="text-xs text-muted-foreground">Glissez pour tourner</span>
-      </div>
-    </div>
-  );
-}
 
 /* ───── image gallery with thumbnails ───── */
 function ImageGallery({ images, altPrefix }: { images: string[]; altPrefix: string }) {
