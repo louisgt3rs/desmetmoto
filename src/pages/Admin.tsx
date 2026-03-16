@@ -2,16 +2,18 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { LogOut, Package, Tag, CalendarDays, BookOpen, Settings, Loader2 } from "lucide-react";
+import { LogOut, Package, Tag, CalendarDays, BookOpen, Settings, Loader2, HardHat } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import AdminBrands from "@/components/admin/AdminBrands";
 import AdminProducts from "@/components/admin/AdminProducts";
 import AdminEvents from "@/components/admin/AdminEvents";
 import AdminReservations from "@/components/admin/AdminReservations";
 import AdminSettings from "@/components/admin/AdminSettings";
+import AdminHelmetModels from "@/components/admin/AdminHelmetModels";
 
 const tabs = [
   { id: "reservations", label: "Réservations", icon: BookOpen },
+  { id: "helmets", label: "Casques Arai", icon: HardHat },
   { id: "brands", label: "Marques", icon: Tag },
   { id: "products", label: "Produits", icon: Package },
   { id: "events", label: "Événements", icon: CalendarDays },
