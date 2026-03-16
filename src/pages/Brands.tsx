@@ -2,62 +2,68 @@ import { motion } from "framer-motion";
 import Layout from "@/components/Layout";
 import SectionHeading from "@/components/SectionHeading";
 
-import araiLogo from "@/assets/brands/arai.png";
-import shoeiLogo from "@/assets/brands/shoei.png";
-import sharkLogo from "@/assets/brands/shark.png";
-import alpinestarsLogo from "@/assets/brands/alpinestars.png";
-import daineseLogo from "@/assets/brands/dainese.png";
-import revitLogo from "@/assets/brands/revit.png";
-import beringLogo from "@/assets/brands/bering.png";
-import tcxLogo from "@/assets/brands/tcx.png";
-import sidiLogo from "@/assets/brands/sidi.png";
-import cardoLogo from "@/assets/brands/cardo.png";
-
-const brands = [
-  { name: "Arai", logo: araiLogo, category: "Casques" },
-  { name: "Shoei", logo: shoeiLogo, category: "Casques" },
-  { name: "Shark", logo: sharkLogo, category: "Casques" },
-  { name: "Alpinestars", logo: alpinestarsLogo, category: "Textile & Cuir" },
-  { name: "Dainese", logo: daineseLogo, category: "Textile & Cuir" },
-  { name: "Rev'it", logo: revitLogo, category: "Textile & Cuir" },
-  { name: "Bering", logo: beringLogo, category: "Textile & Cuir" },
-  { name: "TCX", logo: tcxLogo, category: "Bottes" },
-  { name: "Sidi", logo: sidiLogo, category: "Bottes" },
-  { name: "Cardo", logo: cardoLogo, category: "Accessoires" },
+const brands1 = [
+  "Arai", "Abus", "Muc-Off", "Bell Helmets", "Scoot", "Helite", "Bihr",
+  "Tech-Air", "Erwax", "D3O", "TomTom", "Richa", "RST", "Kappa", "Cardo",
+  "Bering", "Motul", "SW-Motech",
 ];
+
+const brands2 = [
+  "Premier Helmet", "Shark", "Garmin", "Auvray", "Sena", "Alpinestars",
+  "Optimate", "Bowtex", "Fly Racing", "Six2", "LS2", "Midland", "Zandona",
+  "TCX", "Segura", "Shoei",
+];
+
+function MarqueeRow({ items, reverse = false, duration = 30 }: { items: string[]; reverse?: boolean; duration?: number }) {
+  const doubled = [...items, ...items];
+  return (
+    <div className="overflow-hidden py-6">
+      <motion.div
+        className="flex whitespace-nowrap"
+        animate={{ x: reverse ? ["0%", "-50%"] : ["-50%", "0%"] }}
+        transition={{ duration, repeat: Infinity, ease: "linear" }}
+      >
+        {doubled.map((brand, i) => (
+          <span
+            key={`${brand}-${i}`}
+            className="inline-flex items-center gap-6 mx-4 md:mx-8 shrink-0"
+          >
+            <span className="font-display text-4xl md:text-6xl lg:text-7xl xl:text-8xl text-muted-foreground/40 hover:text-primary transition-colors duration-300 cursor-default select-none tracking-wide uppercase">
+              {brand}
+            </span>
+            <span className="text-muted-foreground/20 text-2xl md:text-3xl select-none">•</span>
+          </span>
+        ))}
+      </motion.div>
+    </div>
+  );
+}
 
 export default function BrandsPage() {
   return (
     <Layout>
-      <section className="py-24">
-        <div className="container mx-auto px-4">
+      <section className="py-24 min-h-[80vh] flex flex-col justify-center overflow-hidden">
+        <div className="container mx-auto px-4 mb-12">
           <SectionHeading
             title="NOS MARQUES"
-            subtitle="Les meilleures marques d'équipement moto disponibles chez Desmet Équipement"
+            subtitle="Retrouvez en magasin une sélection de grandes marques d'équipement et d'accessoires moto."
           />
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {brands.map((brand, i) => (
-              <motion.div
-                key={brand.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.05 }}
-                whileHover={{ scale: 1.05 }}
-                className="group bg-card border border-border rounded-xl p-6 flex flex-col items-center justify-center gap-4 hover:border-primary/50 hover:shadow-[0_0_30px_hsl(var(--glow-soft))] transition-all duration-300 cursor-pointer aspect-square"
-              >
-                <img
-                  src={brand.logo}
-                  alt={brand.name}
-                  className="w-20 h-20 object-contain grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300 invert"
-                />
-                <span className="font-display text-lg text-muted-foreground group-hover:text-primary transition-colors duration-300">
-                  {brand.name}
-                </span>
-                <span className="text-xs text-muted-foreground/60">{brand.category}</span>
-              </motion.div>
-            ))}
-          </div>
+        </div>
+
+        <div className="space-y-4">
+          <MarqueeRow items={brands1} duration={35} />
+          <MarqueeRow items={brands2} reverse duration={40} />
+        </div>
+
+        <div className="container mx-auto px-4 mt-16 text-center">
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-muted-foreground text-sm md:text-base max-w-2xl mx-auto"
+          >
+            Et bien d'autres marques disponibles en magasin. N'hésitez pas à nous contacter pour toute demande spécifique.
+          </motion.p>
         </div>
       </section>
     </Layout>
