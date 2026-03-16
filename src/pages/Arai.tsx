@@ -6,6 +6,7 @@ import SectionHeading from "@/components/SectionHeading";
 import ReservationModal from "@/components/ReservationModal";
 import { supabase } from "@/integrations/supabase/client";
 import helmetHeroImg from "@/assets/helmet-hero.jpg";
+import araiStoreWall from "@/assets/arai-store-wall.jpg";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Product = Tables<"products">;
@@ -39,6 +40,33 @@ export default function AraiPage() {
               Découvrez notre gamme de casques Arai. Fabriqués à la main au Japon, chaque casque est un
               chef-d'œuvre de protection et de confort.
             </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Store Photo */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-8"
+          >
+            <h2 className="font-display text-4xl md:text-5xl text-foreground mb-3">Notre espace Arai en magasin</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Découvrez notre mur de casques Arai et venez essayer les différents modèles directement en magasin.
+            </p>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+            className="rounded-xl overflow-hidden border border-border shadow-[0_0_40px_hsl(var(--glow-soft))]"
+          >
+            <img src={araiStoreWall} alt="Espace Arai en magasin — mur de casques" className="w-full h-auto object-cover" />
           </motion.div>
         </div>
       </section>
