@@ -3,6 +3,7 @@ import HeroSection from "@/components/home/HeroSection";
 import AboutPreview from "@/components/home/AboutPreview";
 import BrandsSection from "@/components/home/BrandsSection";
 import CategoriesSection from "@/components/home/CategoriesSection";
+import ServiceSection from "@/components/home/ServiceSection";
 import PopularProducts from "@/components/home/PopularProducts";
 import EventsSection from "@/components/home/EventsSection";
 import ReviewsSection from "@/components/home/ReviewsSection";
@@ -15,6 +16,7 @@ export default function HomePage() {
       <AboutPreview />
       <BrandsSection />
       <CategoriesSection />
+      <ServiceSection />
       <PopularProducts />
       <EventsSection />
       <ReviewsSection />
