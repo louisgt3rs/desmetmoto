@@ -5,9 +5,9 @@ import Layout from "@/components/Layout";
 import SectionHeading from "@/components/SectionHeading";
 import ReservationModal from "@/components/ReservationModal";
 import { supabase } from "@/integrations/supabase/client";
+import ImageGallery from "@/components/ImageGallery";
 import helmetHeroImg from "@/assets/helmet-hero.jpg";
 import araiStoreWall from "@/assets/arai-store-wall.jpg";
-
 
 /* ───── types ───── */
 interface HelmetModel {
@@ -31,21 +31,19 @@ interface Colorway {
   gallery_images: string[] | null;
   images_360: string[] | null;
   sort_order: number | null;
+  stock_by_size: Record<string, number> | null;
 }
-
-
-import ImageGallery from "@/components/ImageGallery";
 
 /* ───── Helmet Card ───── */
 function HelmetCard({ model, colorways, onReserve }: { model: HelmetModel; colorways: Colorway[]; onReserve: (name: string) => void }) {
-  const availableColorways = colorways.filter(c => c.available !== false);
-  const [selectedCw, setSelectedCw] = useState<Colorway | null>(availableColorways[0] || null);
+  const [selectedCw, setSelectedCw] = useState<Colorway | null>(colorways[0] || null);
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
 
   useEffect(() => {
-    setSelectedCw(availableColorways[0] || null);
+    setSelectedCw(colorways[0] || null);
+    setSelectedSize(null);
   }, [model.id]);
 
-  // Build the image list: gallery_images if available, otherwise just the main image
   const allImages = selectedCw
     ? (selectedCw.gallery_images && selectedCw.gallery_images.length > 0)
       ? selectedCw.gallery_images
@@ -53,6 +51,12 @@ function HelmetCard({ model, colorways, onReserve }: { model: HelmetModel; color
         ? [selectedCw.main_image_url]
         : []
     : [];
+
+  const stockMap = (selectedCw?.stock_by_size as Record<string, number>) || {};
+  const totalStock = Object.values(stockMap).reduce((a, b) => a + (b || 0), 0);
+  const cwIsOutOfStock = selectedCw?.available === false || (Object.keys(stockMap).length > 0 && totalStock === 0);
+
+  const sizeStock = (size: string) => stockMap[size] ?? null;
 
   return (
     <motion.div
@@ -62,7 +66,7 @@ function HelmetCard({ model, colorways, onReserve }: { model: HelmetModel; color
       transition={{ duration: 0.5 }}
       className="bg-card border border-border rounded-xl overflow-hidden hover:border-primary/40 transition-all duration-300 hover:shadow-[0_0_30px_hsl(var(--glow-soft))]"
     >
-      {/* Image gallery area */}
+      {/* Image gallery */}
       <div className="p-4 md:p-6">
         {allImages.length > 0 ? (
           <ImageGallery images={allImages} altPrefix={`${model.name}${selectedCw ? ` - ${selectedCw.name}` : ""}`} />
@@ -79,45 +83,84 @@ function HelmetCard({ model, colorways, onReserve }: { model: HelmetModel; color
         {model.description && <p className="text-muted-foreground text-sm mb-4 leading-relaxed">{model.description}</p>}
 
         {/* Colorway swatches */}
-        {availableColorways.length > 0 && (
+        {colorways.length > 0 && (
           <div className="mb-5">
             <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Coloris disponibles</p>
             <div className="flex flex-wrap gap-2">
-              {availableColorways.map(cw => (
-                <button
-                  key={cw.id}
-                  onClick={() => setSelectedCw(cw)}
-                  className={`group relative rounded-lg overflow-hidden border-2 transition-all duration-200 ${
-                    selectedCw?.id === cw.id
-                      ? "border-primary shadow-[0_0_12px_hsl(var(--glow-soft))]"
-                      : "border-border hover:border-muted-foreground/50"
-                  }`}
-                >
-                  {cw.thumbnail_url ? (
-                    <img src={cw.thumbnail_url} alt={cw.name} className="w-14 h-14 md:w-16 md:h-16 object-cover" />
-                  ) : (
-                    <div className="w-14 h-14 md:w-16 md:h-16 bg-muted flex items-center justify-center">
-                      <span className="text-[10px] text-muted-foreground text-center px-1">{cw.name}</span>
-                    </div>
-                  )}
-                </button>
-              ))}
+              {colorways.map(cw => {
+                const cwStock = (cw.stock_by_size as Record<string, number>) || {};
+                const cwTotal = Object.values(cwStock).reduce((a, b) => a + (b || 0), 0);
+                const isOut = cw.available === false || (Object.keys(cwStock).length > 0 && cwTotal === 0);
+                return (
+                  <button
+                    key={cw.id}
+                    onClick={() => { setSelectedCw(cw); setSelectedSize(null); }}
+                    className={`group relative rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                      selectedCw?.id === cw.id
+                        ? "border-primary shadow-[0_0_12px_hsl(var(--glow-soft))]"
+                        : "border-border hover:border-muted-foreground/50"
+                    } ${isOut ? "opacity-40" : ""}`}
+                  >
+                    {cw.thumbnail_url ? (
+                      <img src={cw.thumbnail_url} alt={cw.name} className="w-14 h-14 md:w-16 md:h-16 object-cover" />
+                    ) : (
+                      <div className="w-14 h-14 md:w-16 md:h-16 bg-muted flex items-center justify-center">
+                        <span className="text-[10px] text-muted-foreground text-center px-1">{cw.name}</span>
+                      </div>
+                    )}
+                    {isOut && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-background/60">
+                        <span className="text-[9px] font-bold text-destructive uppercase">Épuisé</span>
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
             {selectedCw && (
-              <p className="text-sm text-primary font-medium mt-2">{selectedCw.name}</p>
+              <p className="text-sm font-medium mt-2">
+                <span className="text-primary">{selectedCw.name}</span>
+                {cwIsOutOfStock && <span className="text-destructive ml-2 text-xs">— Rupture de stock</span>}
+              </p>
             )}
           </div>
         )}
 
-        {/* Sizes */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          {(model.sizes || []).map(s => (
-            <span key={s} className="text-xs font-medium bg-secondary text-secondary-foreground px-3 py-1 rounded">{s}</span>
-          ))}
+        {/* Sizes with stock indication */}
+        <div className="mb-6">
+          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Tailles</p>
+          <div className="flex flex-wrap gap-2">
+            {(model.sizes || []).map(s => {
+              const stock = sizeStock(s);
+              const outOfStock = stock !== null && stock === 0;
+              const isSelected = selectedSize === s;
+              return (
+                <button
+                  key={s}
+                  onClick={() => setSelectedSize(isSelected ? null : s)}
+                  disabled={outOfStock}
+                  className={`text-xs font-medium px-3 py-1.5 rounded border transition-all duration-200 ${
+                    outOfStock
+                      ? "bg-secondary/30 text-muted-foreground/40 border-border line-through cursor-not-allowed"
+                      : isSelected
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-secondary text-secondary-foreground border-border hover:border-primary/50"
+                  }`}
+                >
+                  {s}
+                  {outOfStock && <span className="ml-1 text-[9px] text-destructive no-underline">✗</span>}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        <Button onClick={() => onReserve(model.name + (selectedCw ? ` — ${selectedCw.name}` : ""))}>
-          Réserver en Magasin
+        <Button
+          onClick={() => onReserve(model.name + (selectedCw ? ` — ${selectedCw.name}` : "") + (selectedSize ? ` (${selectedSize})` : ""))}
+          disabled={cwIsOutOfStock}
+          className={cwIsOutOfStock ? "opacity-50" : ""}
+        >
+          {cwIsOutOfStock ? "Rupture de stock" : "Réserver en Magasin"}
         </Button>
       </div>
     </motion.div>
