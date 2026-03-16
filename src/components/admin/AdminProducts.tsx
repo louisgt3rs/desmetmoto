@@ -64,7 +64,8 @@ export default function AdminProducts() {
     setForm({
       name: p.name, description: p.description || "", brand_id: p.brand_id || "",
       category: p.category || "", sizes: (p.sizes || []).join(", "),
-      image_url: p.image_url || "", price_range: p.price_range || "",
+      image_url: p.image_url || "", images: (p as any).images || (p.image_url ? [p.image_url] : []),
+      price_range: p.price_range || "",
     });
   };
 
