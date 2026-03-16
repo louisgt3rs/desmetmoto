@@ -1,46 +1,60 @@
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Layout from "@/components/Layout";
 import SectionHeading from "@/components/SectionHeading";
-import { supabase } from "@/integrations/supabase/client";
-import type { Tables } from "@/integrations/supabase/types";
 
-type Brand = Tables<"brands">;
+import araiLogo from "@/assets/brands/arai.png";
+import shoeiLogo from "@/assets/brands/shoei.png";
+import sharkLogo from "@/assets/brands/shark.png";
+import alpinestarsLogo from "@/assets/brands/alpinestars.png";
+import daineseLogo from "@/assets/brands/dainese.png";
+import revitLogo from "@/assets/brands/revit.png";
+import beringLogo from "@/assets/brands/bering.png";
+import tcxLogo from "@/assets/brands/tcx.png";
+import sidiLogo from "@/assets/brands/sidi.png";
+import cardoLogo from "@/assets/brands/cardo.png";
+
+const brands = [
+  { name: "Arai", logo: araiLogo, category: "Casques" },
+  { name: "Shoei", logo: shoeiLogo, category: "Casques" },
+  { name: "Shark", logo: sharkLogo, category: "Casques" },
+  { name: "Alpinestars", logo: alpinestarsLogo, category: "Textile & Cuir" },
+  { name: "Dainese", logo: daineseLogo, category: "Textile & Cuir" },
+  { name: "Rev'it", logo: revitLogo, category: "Textile & Cuir" },
+  { name: "Bering", logo: beringLogo, category: "Textile & Cuir" },
+  { name: "TCX", logo: tcxLogo, category: "Bottes" },
+  { name: "Sidi", logo: sidiLogo, category: "Bottes" },
+  { name: "Cardo", logo: cardoLogo, category: "Accessoires" },
+];
 
 export default function BrandsPage() {
-  const [brands, setBrands] = useState<Brand[]>([]);
-
-  useEffect(() => {
-    supabase.from("brands").select("*").order("sort_order").then(({ data }) => {
-      if (data) setBrands(data);
-    });
-  }, []);
-
   return (
     <Layout>
       <section className="py-24">
         <div className="container mx-auto px-4">
-          <SectionHeading title="NOS MARQUES" subtitle="Les meilleures marques d'équipement moto disponibles chez Desmet Équipement" />
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <SectionHeading
+            title="NOS MARQUES"
+            subtitle="Les meilleures marques d'équipement moto disponibles chez Desmet Équipement"
+          />
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             {brands.map((brand, i) => (
               <motion.div
-                key={brand.id}
+                key={brand.name}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.05 }}
-                className="group bg-card border border-border rounded-lg p-6 hover:border-primary/50 hover:shadow-[0_0_30px_hsl(var(--glow-soft))] transition-all duration-300"
+                whileHover={{ scale: 1.05 }}
+                className="group bg-card border border-border rounded-xl p-6 flex flex-col items-center justify-center gap-4 hover:border-primary/50 hover:shadow-[0_0_30px_hsl(var(--glow-soft))] transition-all duration-300 cursor-pointer aspect-square"
               >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    {brand.logo_url && (
-                      <img src={brand.logo_url} alt={brand.name} className="w-10 h-10 object-contain" />
-                    )}
-                    <h3 className="font-display text-2xl text-foreground group-hover:text-primary transition-colors">{brand.name}</h3>
-                  </div>
-                  <span className="text-xs text-primary bg-primary/10 px-2 py-1 rounded">{brand.category}</span>
-                </div>
-                <p className="text-muted-foreground text-sm">{brand.description}</p>
+                <img
+                  src={brand.logo}
+                  alt={brand.name}
+                  className="w-20 h-20 object-contain grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300 invert"
+                />
+                <span className="font-display text-lg text-muted-foreground group-hover:text-primary transition-colors duration-300">
+                  {brand.name}
+                </span>
+                <span className="text-xs text-muted-foreground/60">{brand.category}</span>
               </motion.div>
             ))}
           </div>
