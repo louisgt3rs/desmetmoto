@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, X, Save, GripVertical, ChevronDown, ChevronRight } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Save, GripVertical, ChevronDown, ChevronRight, Package } from "lucide-react";
 import { ImageUploadSingle, ImageUploadMulti } from "./ImageUpload";
 import { Image as ImageIcon } from "lucide-react";
 
@@ -32,10 +32,42 @@ interface Colorway {
   gallery_images: string[] | null;
   images_360: string[] | null;
   sort_order: number | null;
+  stock_by_size: Record<string, number> | null;
 }
 
 const slugify = (s: string) =>
   s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+/* ── Stock editor sub-component ── */
+function StockEditor({ sizes, stock, onChange }: {
+  sizes: string[];
+  stock: Record<string, number>;
+  onChange: (s: Record<string, number>) => void;
+}) {
+  const totalStock = Object.values(stock).reduce((a, b) => a + b, 0);
+  return (
+    <div className="space-y-2">
+      <p className="text-xs text-muted-foreground flex items-center gap-1">
+        <Package className="w-3 h-3" /> Stock par taille
+        <span className="ml-auto text-primary font-medium">Total: {totalStock}</span>
+      </p>
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+        {sizes.map(size => (
+          <div key={size} className="flex flex-col items-center gap-1">
+            <label className="text-xs font-medium text-foreground">{size}</label>
+            <Input
+              type="number"
+              min={0}
+              value={stock[size] ?? 0}
+              onChange={e => onChange({ ...stock, [size]: Math.max(0, parseInt(e.target.value) || 0) })}
+              className="bg-secondary border-border text-center h-8 w-full text-sm"
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function AdminHelmetModels() {
   const [models, setModels] = useState<HelmetModel[]>([]);
@@ -51,6 +83,7 @@ export default function AdminHelmetModels() {
   const [cwForm, setCwForm] = useState({
     name: "", available: true, thumbnail_url: "", main_image_url: "",
     gallery_images: [] as string[], images_360: [] as string[],
+    stock_by_size: {} as Record<string, number>,
   });
 
   const load = useCallback(async () => {
@@ -107,23 +140,37 @@ export default function AdminHelmetModels() {
     toast.success("Modèle supprimé"); load();
   };
 
+  /* helper: get sizes for a model */
+  const getModelSizes = (modelId: string): string[] => {
+    const m = models.find(mod => mod.id === modelId);
+    return m?.sizes || [];
+  };
+
   /* ── COLORWAY CRUD ── */
   const startAddCw = (modelId: string) => {
     setAddingCwFor(modelId); setEditingCw(null);
-    setCwForm({ name: "", available: true, thumbnail_url: "", main_image_url: "", gallery_images: [], images_360: [] });
+    const sizes = getModelSizes(modelId);
+    const defaultStock: Record<string, number> = {};
+    sizes.forEach(s => defaultStock[s] = 0);
+    setCwForm({ name: "", available: true, thumbnail_url: "", main_image_url: "", gallery_images: [], images_360: [], stock_by_size: defaultStock });
   };
   const startEditCw = (c: Colorway) => {
     setEditingCw(c); setAddingCwFor(null);
+    const sizes = getModelSizes(c.model_id);
+    const stock: Record<string, number> = {};
+    sizes.forEach(s => stock[s] = (c.stock_by_size as Record<string, number>)?.[s] ?? 0);
     setCwForm({
       name: c.name, available: c.available !== false,
       thumbnail_url: c.thumbnail_url || "", main_image_url: c.main_image_url || "",
       gallery_images: c.gallery_images || [], images_360: c.images_360 || [],
+      stock_by_size: stock,
     });
   };
   const cancelCw = () => { setAddingCwFor(null); setEditingCw(null); };
 
   const saveCw = async (modelId: string) => {
     if (!cwForm.name.trim()) { toast.error("Le nom du coloris est requis"); return; }
+    const totalStock = Object.values(cwForm.stock_by_size).reduce((a, b) => a + b, 0);
     const payload = {
       model_id: modelId, name: cwForm.name, slug: slugify(cwForm.name),
       available: cwForm.available,
@@ -131,6 +178,7 @@ export default function AdminHelmetModels() {
       main_image_url: cwForm.main_image_url || null,
       gallery_images: cwForm.gallery_images,
       images_360: cwForm.images_360,
+      stock_by_size: cwForm.stock_by_size,
     };
     if (editingCw) {
       const { error } = await supabase.from("helmet_colorways").update(payload).eq("id", editingCw.id);
@@ -150,6 +198,11 @@ export default function AdminHelmetModels() {
     const { error } = await supabase.from("helmet_colorways").delete().eq("id", id);
     if (error) { toast.error(error.message); return; }
     toast.success("Coloris supprimé"); load();
+  };
+
+  const getStockTotal = (c: Colorway) => {
+    if (!c.stock_by_size || typeof c.stock_by_size !== 'object') return null;
+    return Object.values(c.stock_by_size as Record<string, number>).reduce((a, b) => a + (b || 0), 0);
   };
 
   return (
@@ -246,6 +299,15 @@ export default function AdminHelmetModels() {
                         label="Images 360° (optionnel)"
                       />
 
+                      {/* Stock by size */}
+                      {getModelSizes(editingCw?.model_id || addingCwFor || "").length > 0 && (
+                        <StockEditor
+                          sizes={getModelSizes(editingCw?.model_id || addingCwFor || "")}
+                          stock={cwForm.stock_by_size}
+                          onChange={s => setCwForm({ ...cwForm, stock_by_size: s })}
+                        />
+                      )}
+
                       <div className="flex gap-2">
                         <Button size="sm" onClick={() => saveCw(m.id)}><Save className="w-3 h-3 mr-1" /> Enregistrer</Button>
                         <Button size="sm" variant="outline" onClick={cancelCw}><X className="w-3 h-3 mr-1" /> Annuler</Button>
@@ -255,29 +317,32 @@ export default function AdminHelmetModels() {
 
                   {/* CW LIST */}
                   {mColorways.length === 0 && <p className="text-xs text-muted-foreground">Aucun coloris ajouté.</p>}
-                  {mColorways.map(c => (
-                    <div key={c.id} className="bg-secondary/30 border border-border rounded-lg p-3 flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3 min-w-0">
-                        {c.thumbnail_url ? (
-                          <img src={c.thumbnail_url} alt={c.name} className="w-10 h-10 object-cover rounded" />
-                        ) : (
-                          <div className="w-10 h-10 bg-muted rounded flex items-center justify-center"><ImageIcon className="w-4 h-4 text-muted-foreground" /></div>
-                        )}
-                        <div className="min-w-0">
-                          <p className="text-sm text-foreground truncate">{c.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {c.available !== false ? "✓ Disponible" : "✗ Indisponible"}
-                            {(c.gallery_images || []).length > 0 && ` • ${(c.gallery_images || []).length} photos`}
-                            {(c.images_360 || []).length > 0 && " • 360°"}
-                          </p>
+                  {mColorways.map(c => {
+                    const total = getStockTotal(c);
+                    return (
+                      <div key={c.id} className="bg-secondary/30 border border-border rounded-lg p-3 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          {c.thumbnail_url ? (
+                            <img src={c.thumbnail_url} alt={c.name} className="w-10 h-10 object-cover rounded" />
+                          ) : (
+                            <div className="w-10 h-10 bg-muted rounded flex items-center justify-center"><ImageIcon className="w-4 h-4 text-muted-foreground" /></div>
+                          )}
+                          <div className="min-w-0">
+                            <p className="text-sm text-foreground truncate">{c.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {c.available !== false ? "✓ Disponible" : "✗ Indisponible"}
+                              {total !== null && ` • Stock: ${total}`}
+                              {(c.gallery_images || []).length > 0 && ` • ${(c.gallery_images || []).length} photos`}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-1 shrink-0">
+                          <Button variant="ghost" size="sm" onClick={() => startEditCw(c)}><Pencil className="w-3 h-3" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => deleteCw(c.id)}><Trash2 className="w-3 h-3 text-destructive" /></Button>
                         </div>
                       </div>
-                      <div className="flex gap-1 shrink-0">
-                        <Button variant="ghost" size="sm" onClick={() => startEditCw(c)}><Pencil className="w-3 h-3" /></Button>
-                        <Button variant="ghost" size="sm" onClick={() => deleteCw(c.id)}><Trash2 className="w-3 h-3 text-destructive" /></Button>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

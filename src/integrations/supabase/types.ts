@@ -136,6 +136,7 @@ export type Database = {
           name: string
           slug: string
           sort_order: number | null
+          stock_by_size: Json | null
           thumbnail_url: string | null
           updated_at: string
         }
@@ -150,6 +151,7 @@ export type Database = {
           name: string
           slug: string
           sort_order?: number | null
+          stock_by_size?: Json | null
           thumbnail_url?: string | null
           updated_at?: string
         }
@@ -164,6 +166,7 @@ export type Database = {
           name?: string
           slug?: string
           sort_order?: number | null
+          stock_by_size?: Json | null
           thumbnail_url?: string | null
           updated_at?: string
         }
