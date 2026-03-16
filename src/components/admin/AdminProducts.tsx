@@ -69,7 +69,7 @@ export default function AdminProducts() {
     });
   };
 
-  const startAdd = () => { setAdding(true); setEditing(null); setForm({ name: "", description: "", brand_id: "", category: "", sizes: "", image_url: "", price_range: "" }); };
+  const startAdd = () => { setAdding(true); setEditing(null); setForm({ name: "", description: "", brand_id: "", category: "", sizes: "", image_url: "", images: [], price_range: "" }); };
   const cancel = () => { setAdding(false); setEditing(null); };
 
   const getBrandName = (id: string | null) => brands.find(b => b.id === id)?.name || "—";
