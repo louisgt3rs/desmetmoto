@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, X, Save } from "lucide-react";
+import { ImageUploadSingle } from "./ImageUpload";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Event = Tables<"events">;
@@ -71,7 +72,7 @@ export default function AdminEvents() {
             <Input placeholder="Heure (ex: 10:00)" value={form.time} onChange={e => setForm({...form, time: e.target.value})} className="bg-secondary border-border" />
           </div>
           <Input placeholder="Lieu" value={form.location} onChange={e => setForm({...form, location: e.target.value})} className="bg-secondary border-border" />
-          <Input placeholder="URL de l'image" value={form.image_url} onChange={e => setForm({...form, image_url: e.target.value})} className="bg-secondary border-border" />
+          <ImageUploadSingle value={form.image_url} onChange={v => setForm({...form, image_url: v})} folder="events" label="Image de l'événement" />
           <div className="flex gap-2">
             <Button onClick={handleSave}><Save className="w-4 h-4 mr-2" /> Enregistrer</Button>
             <Button variant="outline" onClick={cancel}><X className="w-4 h-4 mr-2" /> Annuler</Button>

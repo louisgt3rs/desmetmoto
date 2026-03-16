@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, X, Save } from "lucide-react";
+import { ImageUploadSingle } from "./ImageUpload";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Brand = Tables<"brands">;
@@ -76,7 +77,7 @@ export default function AdminBrands() {
           <Input placeholder="Nom" value={form.name} onChange={e => setForm({...form, name: e.target.value})} className="bg-secondary border-border" />
           <Textarea placeholder="Description" value={form.description} onChange={e => setForm({...form, description: e.target.value})} className="bg-secondary border-border" />
           <Input placeholder="Catégorie (ex: Casques, Gants...)" value={form.category} onChange={e => setForm({...form, category: e.target.value})} className="bg-secondary border-border" />
-          <Input placeholder="URL du logo" value={form.logo_url} onChange={e => setForm({...form, logo_url: e.target.value})} className="bg-secondary border-border" />
+          <ImageUploadSingle value={form.logo_url} onChange={v => setForm({...form, logo_url: v})} folder="brands" label="Logo de la marque" />
           <div className="flex gap-2">
             <Button onClick={handleSave}><Save className="w-4 h-4 mr-2" /> Enregistrer</Button>
             <Button variant="outline" onClick={cancel}><X className="w-4 h-4 mr-2" /> Annuler</Button>
