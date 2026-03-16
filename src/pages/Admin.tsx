@@ -92,6 +92,7 @@ export default function AdminPage() {
         </div>
 
         {tab === "reservations" && <AdminReservations />}
+        {tab === "helmets" && <AdminHelmetModels />}
         {tab === "brands" && <AdminBrands />}
         {tab === "products" && <AdminProducts />}
         {tab === "events" && <AdminEvents />}
