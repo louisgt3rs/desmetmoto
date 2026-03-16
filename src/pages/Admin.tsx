@@ -1,63 +1,65 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Trash2, Plus, LogOut } from "lucide-react";
+import { LogOut, Package, Tag, CalendarDays, BookOpen, Settings, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import AdminBrands from "@/components/admin/AdminBrands";
+import AdminProducts from "@/components/admin/AdminProducts";
+import AdminEvents from "@/components/admin/AdminEvents";
+import AdminReservations from "@/components/admin/AdminReservations";
+import AdminSettings from "@/components/admin/AdminSettings";
 
-const ADMIN_PASS = "desmet2024"; // Simple auth for now
+const tabs = [
+  { id: "reservations", label: "Réservations", icon: BookOpen },
+  { id: "brands", label: "Marques", icon: Tag },
+  { id: "products", label: "Produits", icon: Package },
+  { id: "events", label: "Événements", icon: CalendarDays },
+  { id: "settings", label: "Paramètres", icon: Settings },
+] as const;
 
-interface Reservation {
-  id: number;
-  name: string;
-  phone: string;
-  email: string;
-  model: string;
-  size: string;
-  message: string;
-  date: string;
-}
+type TabId = typeof tabs[number]["id"];
 
 export default function AdminPage() {
-  const [authenticated, setAuthenticated] = useState(false);
+  const { user, loading, isAdmin, signIn, signOut } = useAuth();
+  const [tab, setTab] = useState<TabId>("reservations");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [tab, setTab] = useState<"reservations" | "helmets" | "events">("reservations");
-  const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [loginLoading, setLoginLoading] = useState(false);
 
-  useEffect(() => {
-    const res = JSON.parse(localStorage.getItem("reservations") || "[]");
-    setReservations(res);
-  }, []);
-
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === ADMIN_PASS) {
-      setAuthenticated(true);
-    } else {
-      toast.error("Mot de passe incorrect");
-    }
+    setLoginLoading(true);
+    const { error } = await signIn(email, password);
+    setLoginLoading(false);
+    if (error) toast.error("Connexion échouée: " + error.message);
   };
 
-  const deleteReservation = (id: number) => {
-    const updated = reservations.filter((r) => r.id !== id);
-    setReservations(updated);
-    localStorage.setItem("reservations", JSON.stringify(updated));
-    toast.success("Réservation supprimée");
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
-  if (!authenticated) {
+  if (!user || !isAdmin) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <div className="bg-card border border-border rounded-lg p-8 w-full max-w-sm">
-          <h1 className="font-display text-3xl text-foreground text-center mb-6">ADMIN</h1>
+          <h1 className="font-display text-3xl text-foreground text-center mb-2">ADMIN</h1>
+          <p className="text-muted-foreground text-center text-sm mb-6">Panneau d'administration Desmet</p>
+          {user && !isAdmin && (
+            <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 mb-4">
+              <p className="text-sm text-destructive">Ce compte n'a pas les droits administrateur.</p>
+            </div>
+          )}
           <form onSubmit={handleLogin} className="space-y-4">
-            <Input
-              type="password"
-              placeholder="Mot de passe"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="bg-secondary border-border"
-            />
-            <Button type="submit" className="w-full">Connexion</Button>
+            <Input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required className="bg-secondary border-border" />
+            <Input type="password" placeholder="Mot de passe" value={password} onChange={e => setPassword(e.target.value)} required className="bg-secondary border-border" />
+            <Button type="submit" className="w-full" disabled={loginLoading}>
+              {loginLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Connexion
+            </Button>
           </form>
         </div>
       </div>
@@ -69,72 +71,29 @@ export default function AdminPage() {
       <div className="border-b border-border bg-card">
         <div className="container mx-auto px-4 flex items-center justify-between h-14">
           <h1 className="font-display text-xl text-foreground">DESMET <span className="text-primary">ADMIN</span></h1>
-          <Button variant="ghost" size="sm" onClick={() => setAuthenticated(false)}>
-            <LogOut className="w-4 h-4 mr-2" /> Déconnexion
-          </Button>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-muted-foreground hidden sm:block">{user.email}</span>
+            <Button variant="ghost" size="sm" onClick={signOut}>
+              <LogOut className="w-4 h-4 mr-2" /> Déconnexion
+            </Button>
+          </div>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Tabs */}
-        <div className="flex gap-2 mb-8">
-          {(["reservations", "helmets", "events"] as const).map((t) => (
-            <Button
-              key={t}
-              variant={tab === t ? "default" : "outline"}
-              size="sm"
-              onClick={() => setTab(t)}
-            >
-              {t === "reservations" ? "Réservations" : t === "helmets" ? "Casques" : "Événements"}
+        <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
+          {tabs.map(t => (
+            <Button key={t.id} variant={tab === t.id ? "default" : "outline"} size="sm" onClick={() => setTab(t.id)} className="shrink-0">
+              <t.icon className="w-4 h-4 mr-2" /> {t.label}
             </Button>
           ))}
         </div>
 
-        {tab === "reservations" && (
-          <div>
-            <h2 className="font-display text-2xl text-foreground mb-6">RÉSERVATIONS</h2>
-            {reservations.length === 0 ? (
-              <p className="text-muted-foreground">Aucune réservation pour le moment.</p>
-            ) : (
-              <div className="space-y-4">
-                {reservations.map((r) => (
-                  <div key={r.id} className="bg-card border border-border rounded-lg p-4 flex items-start justify-between gap-4">
-                    <div className="space-y-1">
-                      <p className="text-foreground font-medium">{r.name}</p>
-                      <p className="text-sm text-muted-foreground">{r.phone} • {r.email}</p>
-                      <p className="text-sm text-primary">{r.model} – Taille {r.size}</p>
-                      {r.message && <p className="text-sm text-muted-foreground italic">{r.message}</p>}
-                      <p className="text-xs text-muted-foreground">{new Date(r.date).toLocaleDateString("fr-BE")}</p>
-                    </div>
-                    <Button variant="ghost" size="sm" onClick={() => deleteReservation(r.id)}>
-                      <Trash2 className="w-4 h-4 text-destructive" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {tab === "helmets" && (
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="font-display text-2xl text-foreground">GESTION DES CASQUES</h2>
-              <Button size="sm"><Plus className="w-4 h-4 mr-2" /> Ajouter</Button>
-            </div>
-            <p className="text-muted-foreground">Gestion des casques disponible avec Lovable Cloud.</p>
-          </div>
-        )}
-
-        {tab === "events" && (
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="font-display text-2xl text-foreground">GESTION DES ÉVÉNEMENTS</h2>
-              <Button size="sm"><Plus className="w-4 h-4 mr-2" /> Créer</Button>
-            </div>
-            <p className="text-muted-foreground">Gestion des événements disponible avec Lovable Cloud.</p>
-          </div>
-        )}
+        {tab === "reservations" && <AdminReservations />}
+        {tab === "brands" && <AdminBrands />}
+        {tab === "products" && <AdminProducts />}
+        {tab === "events" && <AdminEvents />}
+        {tab === "settings" && <AdminSettings />}
       </div>
     </div>
   );
