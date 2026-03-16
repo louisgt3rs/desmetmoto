@@ -17,7 +17,7 @@ export default function AdminProducts() {
   const [brands, setBrands] = useState<Brand[]>([]);
   const [editing, setEditing] = useState<Product | null>(null);
   const [adding, setAdding] = useState(false);
-  const [form, setForm] = useState({ name: "", description: "", brand_id: "", category: "", sizes: "", image_url: "", price_range: "" });
+  const [form, setForm] = useState({ name: "", description: "", brand_id: "", category: "", sizes: "", image_url: "", images: [] as string[], price_range: "" });
 
   const load = async () => {
     const [{ data: p }, { data: b }] = await Promise.all([
