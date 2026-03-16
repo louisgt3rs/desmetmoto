@@ -1,36 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout";
 import SectionHeading from "@/components/SectionHeading";
 import ReservationModal from "@/components/ReservationModal";
+import { supabase } from "@/integrations/supabase/client";
 import helmetHeroImg from "@/assets/helmet-hero.jpg";
+import type { Tables } from "@/integrations/supabase/types";
 
-const helmets = [
-  {
-    name: "RX-7V EVO",
-    desc: "Le casque de course ultime d'Arai. Technologie de pointe pour une protection maximale sur piste et route.",
-    sizes: ["XS", "S", "M", "L", "XL"],
-  },
-  {
-    name: "Quantic",
-    desc: "Le touring premium par Arai. Confort exceptionnel pour les longs trajets avec ventilation optimale.",
-    sizes: ["S", "M", "L", "XL", "XXL"],
-  },
-  {
-    name: "Concept-XE",
-    desc: "Le modulable haut de gamme. Polyvalence et protection avec la qualité Arai.",
-    sizes: ["XS", "S", "M", "L", "XL"],
-  },
-  {
-    name: "Tour-X",
-    desc: "L'aventurier par excellence. Conçu pour l'aventure et le tout-terrain avec visière longue.",
-    sizes: ["S", "M", "L", "XL"],
-  },
-];
+type Product = Tables<"products">;
 
 export default function AraiPage() {
+  const [products, setProducts] = useState<Product[]>([]);
   const [reserveModel, setReserveModel] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase
+      .from("products")
+      .select("*, brands!inner(name)")
+      .eq("brands.name", "Arai")
+      .order("sort_order")
+      .then(({ data }) => { if (data) setProducts(data); });
+  }, []);
 
   return (
     <Layout>
@@ -57,27 +48,34 @@ export default function AraiPage() {
         <div className="container mx-auto px-4">
           <SectionHeading title="MODÈLES DISPONIBLES" subtitle="Essayez-les en magasin et trouvez votre taille idéale" />
           <div className="grid md:grid-cols-2 gap-8">
-            {helmets.map((helmet, i) => (
+            {products.map((product, i) => (
               <motion.div
-                key={helmet.name}
+                key={product.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="bg-card border border-border rounded-lg p-8 hover:border-primary/50 transition-all"
+                className="group bg-card border border-border rounded-lg overflow-hidden hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_30px_hsl(var(--glow-soft))]"
               >
-                <h3 className="font-display text-3xl text-foreground mb-3">{helmet.name}</h3>
-                <p className="text-muted-foreground text-sm mb-4">{helmet.desc}</p>
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {helmet.sizes.map((s) => (
-                    <span key={s} className="text-xs font-medium bg-secondary text-secondary-foreground px-3 py-1 rounded">
-                      {s}
-                    </span>
-                  ))}
+                {product.image_url && (
+                  <div className="aspect-video overflow-hidden">
+                    <img src={product.image_url} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  </div>
+                )}
+                <div className="p-8">
+                  <h3 className="font-display text-3xl text-foreground mb-3 group-hover:text-primary transition-colors">{product.name}</h3>
+                  <p className="text-muted-foreground text-sm mb-4">{product.description}</p>
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    {(product.sizes || []).map(s => (
+                      <span key={s} className="text-xs font-medium bg-secondary text-secondary-foreground px-3 py-1 rounded">
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                  <Button onClick={() => setReserveModel(product.name)}>
+                    Réserver en Magasin
+                  </Button>
                 </div>
-                <Button onClick={() => setReserveModel(helmet.name)}>
-                  Réserver en Magasin
-                </Button>
               </motion.div>
             ))}
           </div>
