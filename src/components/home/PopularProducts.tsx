@@ -4,10 +4,11 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import SectionHeading from "@/components/SectionHeading";
 import ReservationModal from "@/components/ReservationModal";
+import ImageGallery from "@/components/ImageGallery";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 
-type Product = Tables<"products"> & { brands?: { name: string } | null };
+type Product = Tables<"products"> & { brands?: { name: string } | null; images?: string[] | null };
 
 const categories = ["Tous", "Casques", "Vestes", "Gants", "Bottes", "Accessoires"];
 
