@@ -139,9 +139,10 @@ function HelmetCard({ model, colorways, onReserve }: { model: HelmetModel; color
             <p className="text-muted-foreground text-sm">Image à venir</p>
           </div>
         )}
+      </div>
 
       {/* Content */}
-      <div className="p-6 md:p-8">
+      <div className="p-6 md:p-8 pt-0">
         <h3 className="font-display text-3xl md:text-4xl text-foreground mb-2">{model.name}</h3>
         {model.description && <p className="text-muted-foreground text-sm mb-4 leading-relaxed">{model.description}</p>}
 
@@ -153,7 +154,7 @@ function HelmetCard({ model, colorways, onReserve }: { model: HelmetModel; color
               {availableColorways.map(cw => (
                 <button
                   key={cw.id}
-                  onClick={() => { setSelectedCw(cw); setViewMode("main"); }}
+                  onClick={() => setSelectedCw(cw)}
                   className={`group relative rounded-lg overflow-hidden border-2 transition-all duration-200 ${
                     selectedCw?.id === cw.id
                       ? "border-primary shadow-[0_0_12px_hsl(var(--glow-soft))]"
