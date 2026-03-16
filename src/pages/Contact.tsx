@@ -1,12 +1,22 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { MapPin, Phone, Clock, Mail } from "lucide-react";
+import { MapPin, Phone, Clock, Mail, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import Layout from "@/components/Layout";
 import SectionHeading from "@/components/SectionHeading";
+
+const hours = [
+  { day: "Lundi", time: "Fermé", closed: true },
+  { day: "Mardi", time: "10h – 18h", closed: false },
+  { day: "Mercredi", time: "10h – 18h", closed: false },
+  { day: "Jeudi", time: "10h – 18h", closed: false },
+  { day: "Vendredi", time: "10h – 18h", closed: false },
+  { day: "Samedi", time: "10h – 17h", closed: false },
+  { day: "Dimanche", time: "Fermé", closed: true },
+];
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
@@ -33,7 +43,7 @@ export default function ContactPage() {
             >
               <div className="space-y-6 mb-8">
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                     <MapPin className="w-5 h-5 text-primary" />
                   </div>
                   <div>
@@ -42,7 +52,7 @@ export default function ContactPage() {
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                     <Phone className="w-5 h-5 text-primary" />
                   </div>
                   <div>
@@ -51,7 +61,7 @@ export default function ContactPage() {
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                     <Mail className="w-5 h-5 text-primary" />
                   </div>
                   <div>
@@ -60,22 +70,36 @@ export default function ContactPage() {
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                     <Clock className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-display text-lg text-foreground">Heures d'ouverture</h3>
-                    <div className="text-muted-foreground text-sm space-y-1">
-                      <p>Lundi - Vendredi: 10h00 - 18h00</p>
-                      <p>Samedi: 10h00 - 17h00</p>
-                      <p>Dimanche: Fermé</p>
+                    <h3 className="font-display text-lg text-foreground">Horaires d'ouverture</h3>
+                    <div className="text-sm space-y-1 mt-1">
+                      {hours.map(h => (
+                        <div key={h.day} className="flex justify-between gap-8">
+                          <span className={h.closed ? "text-muted-foreground" : "text-foreground"}>{h.day}</span>
+                          <span className={h.closed ? "text-destructive" : "text-primary font-medium"}>{h.time}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
               </div>
 
+              <div className="flex flex-wrap gap-3 mb-8">
+                <Button asChild size="lg">
+                  <a href="tel:010842139"><Phone className="w-4 h-4" /> Appeler</a>
+                </Button>
+                <Button asChild variant="outline" size="lg">
+                  <a href="https://www.google.com/maps/dir/?api=1&destination=50.7167,4.6000" target="_blank" rel="noopener noreferrer">
+                    <Navigation className="w-4 h-4" /> Itinéraire
+                  </a>
+                </Button>
+              </div>
+
               {/* Map */}
-              <div className="rounded-lg overflow-hidden border border-border aspect-video">
+              <div className="rounded-xl overflow-hidden border border-border aspect-video">
                 <iframe
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2527.5!2d4.6!3d50.72!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNTDCsDQzJzEyLjAiTiA0wrAzNicwMC4wIkU!5e0!3m2!1sfr!2sbe!4v1234567890"
                   width="100%"
@@ -95,7 +119,7 @@ export default function ContactPage() {
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
             >
-              <div className="bg-card border border-border rounded-lg p-8">
+              <div className="bg-card border border-border rounded-xl p-8">
                 <h3 className="font-display text-2xl text-foreground mb-6">ENVOYEZ-NOUS UN MESSAGE</h3>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <Input
