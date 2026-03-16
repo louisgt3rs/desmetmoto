@@ -6,6 +6,7 @@ import SectionHeading from "@/components/SectionHeading";
 import ReservationModal from "@/components/ReservationModal";
 import { supabase } from "@/integrations/supabase/client";
 import helmetHeroImg from "@/assets/helmet-hero.jpg";
+import araiStoreWall from "@/assets/arai-store-wall.jpg";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Product = Tables<"products">;
