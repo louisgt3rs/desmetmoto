@@ -4,10 +4,11 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import SectionHeading from "@/components/SectionHeading";
 import ReservationModal from "@/components/ReservationModal";
+import ImageGallery from "@/components/ImageGallery";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 
-type Product = Tables<"products"> & { brands?: { name: string } | null };
+type Product = Tables<"products"> & { brands?: { name: string } | null; images?: string[] | null };
 
 const categories = ["Tous", "Casques", "Vestes", "Gants", "Bottes", "Accessoires"];
 
@@ -62,18 +63,25 @@ export default function PopularProducts() {
               layout
               className="group bg-background border border-border rounded-xl overflow-hidden hover:border-primary/50 hover:shadow-[0_0_30px_hsl(var(--glow-soft))] transition-all duration-500"
             >
-              <div className="aspect-square overflow-hidden bg-secondary">
-                {product.image_url ? (
-                  <img
-                    src={product.image_url}
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <span className="font-display text-3xl text-muted-foreground/30">{product.name.charAt(0)}</span>
-                  </div>
-                )}
+              <div className="overflow-hidden bg-secondary">
+                {(() => {
+                  const imgs = (product.images && product.images.length > 0) ? product.images : product.image_url ? [product.image_url] : [];
+                  if (imgs.length > 1) {
+                    return (
+                      <div className="p-3">
+                        <ImageGallery images={imgs} altPrefix={product.name} aspectRatio="aspect-square" thumbnailSize="w-12 h-12" />
+                      </div>
+                    );
+                  }
+                  if (imgs.length === 1) {
+                    return <img src={imgs[0]} alt={product.name} className="w-full aspect-square object-cover group-hover:scale-110 transition-transform duration-700" />;
+                  }
+                  return (
+                    <div className="w-full aspect-square flex items-center justify-center">
+                      <span className="font-display text-3xl text-muted-foreground/30">{product.name.charAt(0)}</span>
+                    </div>
+                  );
+                })()}
               </div>
               <div className="p-5">
                 {product.brands?.name && (

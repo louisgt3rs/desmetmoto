@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, X, Save } from "lucide-react";
-import { ImageUploadSingle } from "./ImageUpload";
+import { ImageUploadSingle, ImageUploadMulti } from "./ImageUpload";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Product = Tables<"products">;
@@ -17,7 +17,7 @@ export default function AdminProducts() {
   const [brands, setBrands] = useState<Brand[]>([]);
   const [editing, setEditing] = useState<Product | null>(null);
   const [adding, setAdding] = useState(false);
-  const [form, setForm] = useState({ name: "", description: "", brand_id: "", category: "", sizes: "", image_url: "", price_range: "" });
+  const [form, setForm] = useState({ name: "", description: "", brand_id: "", category: "", sizes: "", image_url: "", images: [] as string[], price_range: "" });
 
   const load = async () => {
     const [{ data: p }, { data: b }] = await Promise.all([
@@ -36,7 +36,9 @@ export default function AdminProducts() {
       name: form.name, description: form.description,
       brand_id: form.brand_id || null, category: form.category,
       sizes: form.sizes.split(",").map(s => s.trim()).filter(Boolean),
-      image_url: form.image_url || null, price_range: form.price_range || null,
+      image_url: form.images[0] || form.image_url || null,
+      images: form.images,
+      price_range: form.price_range || null,
     };
     if (editing) {
       const { error } = await supabase.from("products").update(payload).eq("id", editing.id);
@@ -62,11 +64,12 @@ export default function AdminProducts() {
     setForm({
       name: p.name, description: p.description || "", brand_id: p.brand_id || "",
       category: p.category || "", sizes: (p.sizes || []).join(", "),
-      image_url: p.image_url || "", price_range: p.price_range || "",
+      image_url: p.image_url || "", images: (p as any).images || (p.image_url ? [p.image_url] : []),
+      price_range: p.price_range || "",
     });
   };
 
-  const startAdd = () => { setAdding(true); setEditing(null); setForm({ name: "", description: "", brand_id: "", category: "", sizes: "", image_url: "", price_range: "" }); };
+  const startAdd = () => { setAdding(true); setEditing(null); setForm({ name: "", description: "", brand_id: "", category: "", sizes: "", image_url: "", images: [], price_range: "" }); };
   const cancel = () => { setAdding(false); setEditing(null); };
 
   const getBrandName = (id: string | null) => brands.find(b => b.id === id)?.name || "—";
@@ -89,7 +92,7 @@ export default function AdminProducts() {
           </Select>
           <Input placeholder="Catégorie" value={form.category} onChange={e => setForm({...form, category: e.target.value})} className="bg-secondary border-border" />
           <Input placeholder="Tailles (séparées par des virgules: XS, S, M, L)" value={form.sizes} onChange={e => setForm({...form, sizes: e.target.value})} className="bg-secondary border-border" />
-          <ImageUploadSingle value={form.image_url} onChange={v => setForm({...form, image_url: v})} folder="products" label="Image du produit" />
+          <ImageUploadMulti value={form.images} onChange={v => setForm({...form, images: v, image_url: v[0] || ""})} folder="products" label="Images du produit (la première sera l'image principale)" />
           <Input placeholder="Fourchette de prix (optionnel)" value={form.price_range} onChange={e => setForm({...form, price_range: e.target.value})} className="bg-secondary border-border" />
           <div className="flex gap-2">
             <Button onClick={handleSave}><Save className="w-4 h-4 mr-2" /> Enregistrer</Button>
