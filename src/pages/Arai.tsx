@@ -61,27 +61,44 @@ function Viewer360({ images }: { images: string[] }) {
   );
 }
 
-/* ───── image gallery ───── */
-function ImageGallery({ images }: { images: string[] }) {
+/* ───── image gallery with thumbnails ───── */
+function ImageGallery({ images, altPrefix }: { images: string[]; altPrefix: string }) {
   const [idx, setIdx] = useState(0);
   if (images.length === 0) return null;
   return (
-    <div className="relative">
-      <img src={images[idx]} alt="Gallery" className="w-full h-full object-contain" />
+    <div className="flex flex-col gap-3">
+      {/* Main image */}
+      <div className="aspect-[4/3] bg-secondary/30 rounded-xl overflow-hidden">
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={idx}
+            src={images[idx]}
+            alt={`${altPrefix} - vue ${idx + 1}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="w-full h-full object-contain"
+          />
+        </AnimatePresence>
+      </div>
+      {/* Thumbnails */}
       {images.length > 1 && (
-        <>
-          <button onClick={() => setIdx((idx - 1 + images.length) % images.length)} className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/70 backdrop-blur-sm border border-border rounded-full p-1.5 hover:bg-background transition-colors">
-            <ChevronLeft className="w-4 h-4 text-foreground" />
-          </button>
-          <button onClick={() => setIdx((idx + 1) % images.length)} className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/70 backdrop-blur-sm border border-border rounded-full p-1.5 hover:bg-background transition-colors">
-            <ChevronRight className="w-4 h-4 text-foreground" />
-          </button>
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-            {images.map((_, i) => (
-              <button key={i} onClick={() => setIdx(i)} className={`w-2 h-2 rounded-full transition-colors ${i === idx ? "bg-primary" : "bg-muted-foreground/40"}`} />
-            ))}
-          </div>
-        </>
+        <div className="flex gap-2 justify-center">
+          {images.map((src, i) => (
+            <button
+              key={i}
+              onClick={() => setIdx(i)}
+              className={`rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                i === idx
+                  ? "border-primary shadow-[0_0_10px_hsl(var(--glow-soft))]"
+                  : "border-border hover:border-muted-foreground/50 opacity-60 hover:opacity-100"
+              }`}
+            >
+              <img src={src} alt={`Miniature ${i + 1}`} className="w-16 h-16 md:w-20 md:h-20 object-cover" />
+            </button>
+          ))}
+        </div>
       )}
     </div>
   );
