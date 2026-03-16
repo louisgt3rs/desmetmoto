@@ -48,7 +48,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-display text-lg text-foreground">Adresse</h3>
-                    <p className="text-muted-foreground text-sm">Chaussée de Louvain 491<br />1300 Wavre, Belgique</p>
+                    <p className="text-muted-foreground text-sm">Chaussée de Wavre 491<br />1300 Wavre, Belgique</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">

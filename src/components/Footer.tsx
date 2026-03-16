@@ -41,7 +41,7 @@ export default function Footer() {
             <div className="flex flex-col gap-3 text-sm text-muted-foreground">
               <div className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                <span>Chaussée de Louvain 491<br />1300 Wavre, Belgique</span>
+                <span>Chaussée de Wavre 491<br />1300 Wavre, Belgique</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-primary shrink-0" />
