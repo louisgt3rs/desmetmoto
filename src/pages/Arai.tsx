@@ -7,7 +7,7 @@ import ReservationModal from "@/components/ReservationModal";
 import { supabase } from "@/integrations/supabase/client";
 import helmetHeroImg from "@/assets/helmet-hero.jpg";
 import araiStoreWall from "@/assets/arai-store-wall.jpg";
-import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
+
 
 /* ───── types ───── */
 interface HelmetModel {
