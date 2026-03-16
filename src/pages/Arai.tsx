@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout";
 import SectionHeading from "@/components/SectionHeading";
@@ -7,22 +7,229 @@ import ReservationModal from "@/components/ReservationModal";
 import { supabase } from "@/integrations/supabase/client";
 import helmetHeroImg from "@/assets/helmet-hero.jpg";
 import araiStoreWall from "@/assets/arai-store-wall.jpg";
-import type { Tables } from "@/integrations/supabase/types";
+import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 
-type Product = Tables<"products">;
+/* ───── types ───── */
+interface HelmetModel {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  sizes: string[] | null;
+  sort_order: number | null;
+  is_published: boolean | null;
+}
 
-export default function AraiPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [reserveModel, setReserveModel] = useState<string | null>(null);
+interface Colorway {
+  id: string;
+  model_id: string;
+  name: string;
+  slug: string;
+  available: boolean | null;
+  thumbnail_url: string | null;
+  main_image_url: string | null;
+  gallery_images: string[] | null;
+  images_360: string[] | null;
+  sort_order: number | null;
+}
+
+/* ───── 360 viewer ───── */
+function Viewer360({ images }: { images: string[] }) {
+  const [index, setIndex] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+
+  const handlePointerDown = (e: React.PointerEvent) => { setDragging(true); setStartX(e.clientX); };
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!dragging) return;
+    const diff = e.clientX - startX;
+    if (Math.abs(diff) > 20) {
+      setIndex(i => (i + (diff > 0 ? 1 : -1) + images.length) % images.length);
+      setStartX(e.clientX);
+    }
+  };
+  const handlePointerUp = () => setDragging(false);
+
+  return (
+    <div className="relative select-none touch-none" onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerLeave={handlePointerUp}>
+      <img src={images[index]} alt="360° view" className="w-full h-full object-contain" draggable={false} />
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border">
+        <RotateCcw className="w-3 h-3 text-primary" />
+        <span className="text-xs text-muted-foreground">Glissez pour tourner</span>
+      </div>
+    </div>
+  );
+}
+
+/* ───── image gallery ───── */
+function ImageGallery({ images }: { images: string[] }) {
+  const [idx, setIdx] = useState(0);
+  if (images.length === 0) return null;
+  return (
+    <div className="relative">
+      <img src={images[idx]} alt="Gallery" className="w-full h-full object-contain" />
+      {images.length > 1 && (
+        <>
+          <button onClick={() => setIdx((idx - 1 + images.length) % images.length)} className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/70 backdrop-blur-sm border border-border rounded-full p-1.5 hover:bg-background transition-colors">
+            <ChevronLeft className="w-4 h-4 text-foreground" />
+          </button>
+          <button onClick={() => setIdx((idx + 1) % images.length)} className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/70 backdrop-blur-sm border border-border rounded-full p-1.5 hover:bg-background transition-colors">
+            <ChevronRight className="w-4 h-4 text-foreground" />
+          </button>
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+            {images.map((_, i) => (
+              <button key={i} onClick={() => setIdx(i)} className={`w-2 h-2 rounded-full transition-colors ${i === idx ? "bg-primary" : "bg-muted-foreground/40"}`} />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ───── Helmet Card ───── */
+function HelmetCard({ model, colorways, onReserve }: { model: HelmetModel; colorways: Colorway[]; onReserve: (name: string) => void }) {
+  const availableColorways = colorways.filter(c => c.available !== false);
+  const [selectedCw, setSelectedCw] = useState<Colorway | null>(availableColorways[0] || null);
+  const [viewMode, setViewMode] = useState<"main" | "360" | "gallery">("main");
 
   useEffect(() => {
-    supabase
-      .from("products")
-      .select("*, brands!inner(name)")
-      .eq("brands.name", "Arai")
-      .order("sort_order")
-      .then(({ data }) => { if (data) setProducts(data); });
+    setSelectedCw(availableColorways[0] || null);
+    setViewMode("main");
+  }, [model.id]);
+
+  const has360 = selectedCw && (selectedCw.images_360 || []).length > 0;
+  const hasGallery = selectedCw && (selectedCw.gallery_images || []).length > 0;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5 }}
+      className="bg-card border border-border rounded-xl overflow-hidden hover:border-primary/40 transition-all duration-300 hover:shadow-[0_0_30px_hsl(var(--glow-soft))]"
+    >
+      {/* Image area */}
+      <div className="aspect-[4/3] bg-secondary/30 overflow-hidden relative">
+        <AnimatePresence mode="wait">
+          {selectedCw?.main_image_url && viewMode === "main" && (
+            <motion.img
+              key={selectedCw.id + "-main"}
+              src={selectedCw.main_image_url}
+              alt={`${model.name} - ${selectedCw.name}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="w-full h-full object-cover"
+            />
+          )}
+          {viewMode === "360" && has360 && (
+            <motion.div key="360" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full">
+              <Viewer360 images={selectedCw!.images_360!} />
+            </motion.div>
+          )}
+          {viewMode === "gallery" && hasGallery && (
+            <motion.div key="gallery" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full">
+              <ImageGallery images={selectedCw!.gallery_images!} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* View mode toggles */}
+        {(has360 || hasGallery) && (
+          <div className="absolute top-3 right-3 flex gap-1.5">
+            <button onClick={() => setViewMode("main")} className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${viewMode === "main" ? "bg-primary text-primary-foreground" : "bg-background/70 backdrop-blur-sm text-foreground border border-border"}`}>
+              Photo
+            </button>
+            {has360 && (
+              <button onClick={() => setViewMode("360")} className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${viewMode === "360" ? "bg-primary text-primary-foreground" : "bg-background/70 backdrop-blur-sm text-foreground border border-border"}`}>
+                360°
+              </button>
+            )}
+            {hasGallery && (
+              <button onClick={() => setViewMode("gallery")} className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${viewMode === "gallery" ? "bg-primary text-primary-foreground" : "bg-background/70 backdrop-blur-sm text-foreground border border-border"}`}>
+                Galerie
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="p-6 md:p-8">
+        <h3 className="font-display text-3xl md:text-4xl text-foreground mb-2">{model.name}</h3>
+        {model.description && <p className="text-muted-foreground text-sm mb-4 leading-relaxed">{model.description}</p>}
+
+        {/* Colorway swatches */}
+        {availableColorways.length > 0 && (
+          <div className="mb-5">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Coloris disponibles</p>
+            <div className="flex flex-wrap gap-2">
+              {availableColorways.map(cw => (
+                <button
+                  key={cw.id}
+                  onClick={() => { setSelectedCw(cw); setViewMode("main"); }}
+                  className={`group relative rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                    selectedCw?.id === cw.id
+                      ? "border-primary shadow-[0_0_12px_hsl(var(--glow-soft))]"
+                      : "border-border hover:border-muted-foreground/50"
+                  }`}
+                >
+                  {cw.thumbnail_url ? (
+                    <img src={cw.thumbnail_url} alt={cw.name} className="w-14 h-14 md:w-16 md:h-16 object-cover" />
+                  ) : (
+                    <div className="w-14 h-14 md:w-16 md:h-16 bg-muted flex items-center justify-center">
+                      <span className="text-[10px] text-muted-foreground text-center px-1">{cw.name}</span>
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+            {selectedCw && (
+              <p className="text-sm text-primary font-medium mt-2">{selectedCw.name}</p>
+            )}
+          </div>
+        )}
+
+        {/* Sizes */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          {(model.sizes || []).map(s => (
+            <span key={s} className="text-xs font-medium bg-secondary text-secondary-foreground px-3 py-1 rounded">{s}</span>
+          ))}
+        </div>
+
+        <Button onClick={() => onReserve(model.name + (selectedCw ? ` — ${selectedCw.name}` : ""))}>
+          Réserver en Magasin
+        </Button>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   ARAI PAGE
+   ════════════════════════════════════════════════════════ */
+export default function AraiPage() {
+  const [models, setModels] = useState<HelmetModel[]>([]);
+  const [colorways, setColorways] = useState<Record<string, Colorway[]>>({});
+  const [reserveModel, setReserveModel] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    const { data: m } = await supabase.from("helmet_models").select("*").eq("is_published", true).order("sort_order");
+    if (m) setModels(m as HelmetModel[]);
+    const { data: cw } = await supabase.from("helmet_colorways").select("*").order("sort_order");
+    if (cw) {
+      const grouped: Record<string, Colorway[]> = {};
+      (cw as Colorway[]).forEach(c => {
+        if (!grouped[c.model_id]) grouped[c.model_id] = [];
+        grouped[c.model_id].push(c);
+      });
+      setColorways(grouped);
+    }
   }, []);
+
+  useEffect(() => { load(); }, [load]);
 
   return (
     <Layout>
@@ -47,25 +254,11 @@ export default function AraiPage() {
       {/* Store Photo */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-8"
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-8">
             <h2 className="font-display text-4xl md:text-5xl text-foreground mb-3">Notre espace Arai en magasin</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Découvrez notre mur de casques Arai et venez essayer les différents modèles directement en magasin.
-            </p>
+            <p className="text-muted-foreground max-w-2xl mx-auto">Découvrez notre mur de casques Arai et venez essayer les différents modèles directement en magasin.</p>
           </motion.div>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-            className="rounded-xl overflow-hidden border border-border shadow-[0_0_40px_hsl(var(--glow-soft))]"
-          >
+          <motion.div initial={{ opacity: 0, scale: 0.98 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="rounded-xl overflow-hidden border border-border shadow-[0_0_40px_hsl(var(--glow-soft))]">
             <img src={araiStoreWall} alt="Espace Arai en magasin — mur de casques" className="w-full h-auto object-cover" />
           </motion.div>
         </div>
@@ -75,36 +268,17 @@ export default function AraiPage() {
       <section className="py-24">
         <div className="container mx-auto px-4">
           <SectionHeading title="MODÈLES DISPONIBLES" subtitle="Essayez-les en magasin et trouvez votre taille idéale" />
+          {models.length === 0 && (
+            <p className="text-center text-muted-foreground py-12">Les modèles seront bientôt disponibles.</p>
+          )}
           <div className="grid md:grid-cols-2 gap-8">
-            {products.map((product, i) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="group bg-card border border-border rounded-lg overflow-hidden hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_30px_hsl(var(--glow-soft))]"
-              >
-                {product.image_url && (
-                  <div className="aspect-video overflow-hidden">
-                    <img src={product.image_url} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  </div>
-                )}
-                <div className="p-8">
-                  <h3 className="font-display text-3xl text-foreground mb-3 group-hover:text-primary transition-colors">{product.name}</h3>
-                  <p className="text-muted-foreground text-sm mb-4">{product.description}</p>
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    {(product.sizes || []).map(s => (
-                      <span key={s} className="text-xs font-medium bg-secondary text-secondary-foreground px-3 py-1 rounded">
-                        {s}
-                      </span>
-                    ))}
-                  </div>
-                  <Button onClick={() => setReserveModel(product.name)}>
-                    Réserver en Magasin
-                  </Button>
-                </div>
-              </motion.div>
+            {models.map(model => (
+              <HelmetCard
+                key={model.id}
+                model={model}
+                colorways={colorways[model.id] || []}
+                onReserve={setReserveModel}
+              />
             ))}
           </div>
         </div>

@@ -124,6 +124,95 @@ export type Database = {
           },
         ]
       }
+      helmet_colorways: {
+        Row: {
+          available: boolean | null
+          created_at: string
+          gallery_images: string[] | null
+          id: string
+          images_360: string[] | null
+          main_image_url: string | null
+          model_id: string
+          name: string
+          slug: string
+          sort_order: number | null
+          thumbnail_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          available?: boolean | null
+          created_at?: string
+          gallery_images?: string[] | null
+          id?: string
+          images_360?: string[] | null
+          main_image_url?: string | null
+          model_id: string
+          name: string
+          slug: string
+          sort_order?: number | null
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          available?: boolean | null
+          created_at?: string
+          gallery_images?: string[] | null
+          id?: string
+          images_360?: string[] | null
+          main_image_url?: string | null
+          model_id?: string
+          name?: string
+          slug?: string
+          sort_order?: number | null
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helmet_colorways_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "helmet_models"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      helmet_models: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_published: boolean | null
+          name: string
+          sizes: string[] | null
+          slug: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean | null
+          name: string
+          sizes?: string[] | null
+          slug: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean | null
+          name?: string
+          sizes?: string[] | null
+          slug?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           brand_id: string | null
