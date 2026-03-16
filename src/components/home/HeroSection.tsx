@@ -1,6 +1,55 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import { motion } from "framer-motion";
-import heroHelmet from "@/assets/hero-helmet.png";
+import heroMoto from "@/assets/hero-motorcycle.png";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+
+function Particles({ count = 30 }: { count?: number }) {
+  const particles = useMemo(
+    () =>
+      Array.from({ length: count }, (_, i) => ({
+        id: i,
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        size: Math.random() * 3 + 1,
+        duration: Math.random() * 4 + 3,
+        delay: Math.random() * 5,
+        opacity: Math.random() * 0.6 + 0.2,
+      })),
+    [count]
+  );
+
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden z-[1]">
+      {particles.map((p) => (
+        <motion.div
+          key={p.id}
+          className="absolute rounded-full"
+          style={{
+            left: `${p.x}%`,
+            top: `${p.y}%`,
+            width: p.size,
+            height: p.size,
+            background: "hsl(var(--primary))",
+            boxShadow: `0 0 ${p.size * 3}px hsl(var(--primary))`,
+          }}
+          animate={{
+            y: [0, -40 - Math.random() * 60],
+            x: [0, (Math.random() - 0.5) * 30],
+            opacity: [0, p.opacity, 0],
+            scale: [0.5, 1.2, 0],
+          }}
+          transition={{
+            duration: p.duration,
+            delay: p.delay,
+            repeat: Infinity,
+            ease: "easeOut",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
 
 export default function HeroSection() {
   const imgRef = useRef<HTMLImageElement>(null);
@@ -9,8 +58,8 @@ export default function HeroSection() {
     const handleScroll = () => {
       if (!imgRef.current) return;
       const scrollY = window.scrollY;
-      const rotation = scrollY * 0.15; // degrees per pixel scrolled
-      imgRef.current.style.transform = `perspective(1200px) rotateY(${rotation}deg)`;
+      const rotation = scrollY * 0.12;
+      imgRef.current.style.transform = `perspective(1200px) rotateY(${rotation}deg) rotate(-3deg)`;
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
@@ -25,21 +74,28 @@ export default function HeroSection() {
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: "radial-gradient(ellipse 60% 50% at 50% 55%, rgba(192, 57, 43, 0.35) 0%, transparent 70%)",
+          background:
+            "radial-gradient(ellipse 55% 50% at 50% 55%, rgba(192,57,43,0.4) 0%, transparent 70%)",
         }}
       />
 
-      {/* Title above */}
-      <motion.h1
+      {/* Particles */}
+      <Particles count={35} />
+
+      {/* Title */}
+      <motion.div
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="relative z-10 font-display text-5xl md:text-7xl lg:text-9xl text-white text-center leading-none tracking-wide"
+        className="relative z-10 text-center"
       >
-        DESMET ÉQUIPEMENT
-      </motion.h1>
+        <h1 className="font-display text-5xl md:text-7xl lg:text-9xl text-white leading-none tracking-wide">
+          DESMET EQUIPMENT
+        </h1>
+        <div className="mx-auto mt-2 h-1 w-32 md:w-48 rounded-full bg-primary" />
+      </motion.div>
 
-      {/* 3D rotating helmet */}
+      {/* Motorcycle */}
       <motion.div
         initial={{ opacity: 0, scale: 0.85 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -48,23 +104,36 @@ export default function HeroSection() {
       >
         <img
           ref={imgRef}
-          src={heroHelmet}
-          alt="Arai Helmet"
-          className="w-[70vw] max-w-[500px] md:max-w-[600px] lg:max-w-[700px] h-auto drop-shadow-[0_0_80px_rgba(192,57,43,0.4)]"
-          style={{ transformStyle: "preserve-3d", willChange: "transform" }}
+          src={heroMoto}
+          alt="Moto sportive"
+          className="w-[85vw] max-w-[550px] md:max-w-[650px] lg:max-w-[750px] h-auto drop-shadow-[0_0_80px_rgba(192,57,43,0.5)]"
+          style={{
+            transformStyle: "preserve-3d",
+            willChange: "transform",
+            transform: "perspective(1200px) rotateY(0deg) rotate(-3deg)",
+          }}
         />
       </motion.div>
 
-      {/* Subtitle below */}
-      <motion.p
+      {/* Subtitle + CTA */}
+      <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.5 }}
-        className="relative z-10 font-display text-3xl md:text-5xl lg:text-6xl tracking-widest"
-        style={{ color: "#C0392B" }}
+        className="relative z-10 flex flex-col items-center gap-5"
       >
-        LE HAVRE
-      </motion.p>
+        <p className="font-body text-lg md:text-xl tracking-wide text-muted-foreground text-center px-4">
+          Votre spécialiste moto à Wavre
+        </p>
+        <Link to="/contact">
+          <Button
+            size="lg"
+            className="text-lg px-8 py-6 shadow-[0_0_30px_hsl(var(--primary)/0.4)] hover:shadow-[0_0_50px_hsl(var(--primary)/0.6)] transition-shadow duration-300"
+          >
+            Nous contacter
+          </Button>
+        </Link>
+      </motion.div>
     </section>
   );
 }
