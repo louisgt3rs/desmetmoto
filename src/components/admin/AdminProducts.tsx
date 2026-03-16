@@ -92,7 +92,7 @@ export default function AdminProducts() {
           </Select>
           <Input placeholder="Catégorie" value={form.category} onChange={e => setForm({...form, category: e.target.value})} className="bg-secondary border-border" />
           <Input placeholder="Tailles (séparées par des virgules: XS, S, M, L)" value={form.sizes} onChange={e => setForm({...form, sizes: e.target.value})} className="bg-secondary border-border" />
-          <ImageUploadSingle value={form.image_url} onChange={v => setForm({...form, image_url: v})} folder="products" label="Image du produit" />
+          <ImageUploadMulti value={form.images} onChange={v => setForm({...form, images: v, image_url: v[0] || ""})} folder="products" label="Images du produit (la première sera l'image principale)" />
           <Input placeholder="Fourchette de prix (optionnel)" value={form.price_range} onChange={e => setForm({...form, price_range: e.target.value})} className="bg-secondary border-border" />
           <div className="flex gap-2">
             <Button onClick={handleSave}><Save className="w-4 h-4 mr-2" /> Enregistrer</Button>
