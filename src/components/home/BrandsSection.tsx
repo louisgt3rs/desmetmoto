@@ -76,18 +76,15 @@ export default function BrandsSection() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="flex flex-wrap justify-center gap-3 max-w-4xl mx-auto"
         >
-          {brandNames.map((name, i) => (
-            <motion.button
+          {brandNames.map((name) => (
+            <button
               key={name}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.3, delay: i * 0.02 }}
+              type="button"
               onClick={() => setSelected(brandData[name])}
-              className="inline-flex items-center px-4 py-2 rounded-full bg-secondary text-foreground text-sm font-medium border border-primary/20 cursor-pointer transition-all duration-300 hover:border-primary hover:shadow-[0_0_15px_hsl(var(--primary)/0.4)] hover:bg-primary/10"
+              className="inline-flex items-center px-4 py-2 rounded-full bg-secondary text-foreground text-sm font-medium border border-primary/20 cursor-pointer transition-all duration-300 hover:border-primary hover:shadow-[0_0_15px_hsl(var(--primary)/0.4)] hover:bg-primary/10 active:scale-95"
             >
               {name}
-            </motion.button>
+            </button>
           ))}
         </motion.div>
       </div>
