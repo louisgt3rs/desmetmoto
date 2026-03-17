@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import ImageGallery from "@/components/ImageGallery";
 import helmetHeroImg from "@/assets/helmet-hero.jpg";
 import araiStoreWall from "@/assets/arai-store-wall.jpg";
-import heroHelmet from "@/assets/helmets/rx7v-evo-diamond-black-front.jpeg";
+import heroHelmet from "@/assets/helmets/arai-rx7v-white-hero.png";
 import araiBadge from "@/assets/brands/arai.png";
 
 /* ───── Gold Particles ───── */
@@ -267,10 +267,20 @@ export default function AraiPage() {
           transition={{ duration: 1, delay: 0.5 }}
         />
 
-        {/* 3D Rotating Helmet */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ perspective: "1200px" }}>
+        {/* 3D Rotating Helmet — right side */}
+        <div className="absolute right-0 top-0 bottom-0 w-[55%] md:w-[50%] flex items-center justify-center pointer-events-none" style={{ perspective: "1200px" }}>
+          {/* Red glow behind helmet */}
+          <div
+            className="absolute rounded-full"
+            style={{
+              width: "70%",
+              height: "70%",
+              background: "radial-gradient(circle, rgba(192,57,43,0.6) 0%, rgba(192,57,43,0.25) 40%, transparent 70%)",
+              filter: "blur(40px)",
+            }}
+          />
           <motion.div
-            className="w-[60vw] md:w-[40vw] max-w-[500px]"
+            className="w-[80%] max-w-[450px] relative z-10"
             animate={{ rotateY: 360 }}
             transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
             style={{ transformStyle: "preserve-3d" }}
@@ -278,7 +288,7 @@ export default function AraiPage() {
             <img
               src={heroHelmet}
               alt="Arai RX-7V EVO"
-              className="w-full h-auto drop-shadow-[0_0_80px_rgba(192,57,43,0.6)]"
+              className="w-full h-auto drop-shadow-[0_0_100px_rgba(192,57,43,0.7)]"
               style={{ background: "transparent" }}
             />
           </motion.div>
