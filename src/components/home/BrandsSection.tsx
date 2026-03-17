@@ -195,13 +195,18 @@ export default function BrandsSection() {
           </p>
         </motion.div>
 
-        <div className="flex flex-wrap justify-center gap-3 max-w-4xl mx-auto">
+        <div className="flex flex-wrap justify-center gap-3 max-w-4xl mx-auto select-none">
           {brandNames.map((name) => (
             <button
               key={name}
               type="button"
-              onClick={() => setSelectedBrand(brandData[name])}
-              className="inline-flex items-center px-4 py-2 rounded-full bg-secondary text-foreground text-sm font-medium border border-primary/20 cursor-pointer transition-all duration-300 hover:border-primary hover:shadow-[0_0_15px_hsl(var(--primary)/0.4)] hover:bg-primary/10 active:scale-95"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setSelectedBrand(brandData[name]);
+              }}
+              style={{ WebkitTapHighlightColor: "transparent", WebkitUserSelect: "none", userSelect: "none", cursor: "pointer" }}
+              className="inline-flex items-center px-4 py-2 rounded-full bg-secondary text-foreground text-sm font-medium border border-primary/20 cursor-pointer transition-all duration-300 hover:border-primary hover:shadow-[0_0_15px_hsl(var(--primary)/0.4)] hover:bg-primary/10 active:scale-95 select-none"
             >
               {name}
             </button>
