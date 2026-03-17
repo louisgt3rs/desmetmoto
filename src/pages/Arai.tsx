@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout";
@@ -8,6 +8,51 @@ import { supabase } from "@/integrations/supabase/client";
 import ImageGallery from "@/components/ImageGallery";
 import helmetHeroImg from "@/assets/helmet-hero.jpg";
 import araiStoreWall from "@/assets/arai-store-wall.jpg";
+import heroHelmet from "@/assets/helmets/rx7v-evo-diamond-black-front.jpeg";
+import araiBadge from "@/assets/brands/arai.png";
+
+/* ───── Gold Particles ───── */
+function GoldParticles() {
+  const particles = Array.from({ length: 24 }, (_, i) => ({
+    id: i,
+    x: Math.random() * 100,
+    y: Math.random() * 100,
+    size: Math.random() * 3 + 1.5,
+    duration: Math.random() * 6 + 4,
+    delay: Math.random() * 4,
+    opacity: Math.random() * 0.5 + 0.2,
+  }));
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {particles.map((p) => (
+        <motion.div
+          key={p.id}
+          className="absolute rounded-full"
+          style={{
+            left: `${p.x}%`,
+            top: `${p.y}%`,
+            width: p.size,
+            height: p.size,
+            background: `radial-gradient(circle, rgba(212,175,55,${p.opacity}), rgba(212,175,55,0))`,
+            boxShadow: `0 0 ${p.size * 2}px rgba(212,175,55,${p.opacity * 0.6})`,
+          }}
+          animate={{
+            y: [0, -40, 0],
+            x: [0, Math.random() * 20 - 10, 0],
+            opacity: [p.opacity * 0.4, p.opacity, p.opacity * 0.4],
+          }}
+          transition={{
+            duration: p.duration,
+            delay: p.delay,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
 
 /* ───── types ───── */
 interface HelmetModel {
