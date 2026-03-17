@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import ImageGallery from "@/components/ImageGallery";
 import helmetHeroImg from "@/assets/helmet-hero.jpg";
 import araiStoreWall from "@/assets/arai-store-wall.jpg";
-import heroHelmet from "@/assets/helmets/rx7v-evo-diamond-black-front.jpeg";
+import heroHelmet from "@/assets/helmets/arai-rx7v-white-hero.png";
 import araiBadge from "@/assets/brands/arai.png";
 
 /* ───── Gold Particles ───── */
