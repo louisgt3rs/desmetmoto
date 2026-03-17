@@ -278,7 +278,8 @@ export default function AraiPage() {
             <img
               src={heroHelmet}
               alt="Arai RX-7V EVO"
-              className="w-full h-auto drop-shadow-[0_0_60px_rgba(192,57,43,0.4)] opacity-30 md:opacity-40"
+              className="w-full h-auto drop-shadow-[0_0_80px_rgba(192,57,43,0.6)]"
+              style={{ background: "transparent" }}
             />
           </motion.div>
         </div>
