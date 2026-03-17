@@ -25,7 +25,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border" style={{ backgroundColor: "#0A0A0A" }}>
         <div className="container mx-auto flex items-center justify-between h-16 px-4">
           <Link to="/" className="font-display text-2xl tracking-wider text-foreground">
             DESMET <span className="text-primary">ÉQUIPEMENT</span>

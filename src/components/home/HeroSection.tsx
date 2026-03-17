@@ -90,7 +90,7 @@ export default function HeroSection() {
         className="relative z-10 text-center"
       >
         <h1 className="font-display text-5xl md:text-7xl lg:text-9xl text-white leading-none tracking-wide">
-          DESMET EQUIPMENT
+          DESMET ÉQUIPEMENT
         </h1>
         <div className="mx-auto mt-2 h-1 w-32 md:w-48 rounded-full bg-primary" />
       </motion.div>
