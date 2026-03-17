@@ -244,7 +244,7 @@ export default function AraiPage() {
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse 60% 60% at 50% 50%, rgba(192,57,43,0.25) 0%, rgba(192,57,43,0.08) 40%, transparent 70%)",
+            background: "radial-gradient(ellipse 55% 55% at 50% 50%, rgba(192,57,43,0.5) 0%, rgba(192,57,43,0.2) 35%, rgba(192,57,43,0.05) 60%, transparent 75%)",
           }}
         />
         {/* Subtle vignette */}
@@ -278,7 +278,8 @@ export default function AraiPage() {
             <img
               src={heroHelmet}
               alt="Arai RX-7V EVO"
-              className="w-full h-auto drop-shadow-[0_0_60px_rgba(192,57,43,0.4)] opacity-30 md:opacity-40"
+              className="w-full h-auto drop-shadow-[0_0_80px_rgba(192,57,43,0.6)]"
+              style={{ background: "transparent" }}
             />
           </motion.div>
         </div>
