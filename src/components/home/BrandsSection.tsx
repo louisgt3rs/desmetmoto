@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { brandData, brandNames } from "./brands-data";
 import type { BrandInfo } from "./brands-data";
@@ -6,14 +6,6 @@ import BrandModal from "./BrandModal";
 
 export default function BrandsSection() {
   const [selectedBrand, setSelectedBrand] = useState<BrandInfo | null>(null);
-
-  const handleOpen = useCallback((name: string) => {
-    setSelectedBrand(brandData[name]);
-  }, []);
-
-  const handleClose = useCallback(() => {
-    setSelectedBrand(null);
-  }, []);
 
   return (
     <section className="py-20 bg-background">
@@ -33,20 +25,13 @@ export default function BrandsSection() {
           </p>
         </motion.div>
 
-        <div
-          className="flex flex-wrap justify-center gap-3 max-w-4xl mx-auto select-none"
-          style={{ WebkitUserSelect: "none", userSelect: "none" }}
-        >
+        <div className="mx-auto flex max-w-4xl flex-wrap justify-center gap-3 select-none [webkit-user-select:none]">
           {brandNames.map((name) => (
             <button
               key={name}
               type="button"
-              onPointerDown={(e) => {
-                e.preventDefault();
-                handleOpen(name);
-              }}
-              className="inline-flex items-center px-4 py-2 rounded-full bg-secondary text-foreground text-sm font-medium border border-primary/20 cursor-pointer transition-all duration-300 hover:border-primary hover:shadow-[0_0_15px_hsl(var(--primary)/0.4)] hover:bg-primary/10 active:scale-95 select-none"
-              style={{ WebkitTapHighlightColor: "transparent", cursor: "pointer" }}
+              onClick={() => setSelectedBrand(brandData[name])}
+              className="inline-flex cursor-pointer select-none items-center rounded-full border border-primary/20 bg-secondary px-4 py-2 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary hover:bg-primary/10 hover:shadow-[0_0_15px_hsl(var(--primary)/0.4)] active:scale-95 [webkit-tap-highlight-color:transparent]"
             >
               {name}
             </button>
@@ -54,8 +39,8 @@ export default function BrandsSection() {
         </div>
       </div>
 
-      {selectedBrand !== null && (
-        <BrandModal brand={selectedBrand} onClose={handleClose} />
+      {selectedBrand && (
+        <BrandModal brand={selectedBrand} onClose={() => setSelectedBrand(null)} />
       )}
     </section>
   );
