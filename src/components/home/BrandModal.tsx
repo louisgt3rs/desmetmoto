@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X, MapPin, ExternalLink, ShoppingBag } from "lucide-react";
 import type { BrandInfo } from "./brands-data";
 
@@ -26,7 +27,7 @@ export default function BrandModal({ brand, onClose }: BrandModalProps) {
     };
   }, [onClose]);
 
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
@@ -137,7 +138,8 @@ export default function BrandModal({ brand, onClose }: BrandModalProps) {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
