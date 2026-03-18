@@ -27,7 +27,7 @@ export default function BrandModal({ brand, onClose }: BrandModalProps) {
     };
   }, [onClose]);
 
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
@@ -138,7 +138,8 @@ export default function BrandModal({ brand, onClose }: BrandModalProps) {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
