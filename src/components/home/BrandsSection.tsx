@@ -1,12 +1,7 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
-import { brandData, brandNames } from "./brands-data";
-import type { BrandInfo } from "./brands-data";
-import BrandModal from "./BrandModal";
+import { brands } from "./brands-data";
 
 export default function BrandsSection() {
-  const [selectedBrand, setSelectedBrand] = useState<BrandInfo | null>(null);
-
   return (
     <section className="py-20 bg-background">
       <div className="container mx-auto px-4">
@@ -25,23 +20,40 @@ export default function BrandsSection() {
           </p>
         </motion.div>
 
-        <div className="mx-auto flex max-w-4xl flex-wrap justify-center gap-3 select-none [webkit-user-select:none]">
-          {brandNames.map((name) => (
-            <button
-              key={name}
-              type="button"
-              onClick={() => setSelectedBrand(brandData[name])}
-              className="inline-flex cursor-pointer select-none items-center rounded-full border border-primary/20 bg-secondary px-4 py-2 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary hover:bg-primary/10 hover:shadow-[0_0_15px_hsl(var(--primary)/0.4)] active:scale-95 [webkit-tap-highlight-color:transparent]"
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {brands.map((brand, i) => (
+            <motion.div
+              key={brand.name}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.03 }}
+              className="rounded-xl overflow-hidden bg-card border border-border"
             >
-              {name}
-            </button>
+              <img
+                src={brand.image}
+                alt={brand.name}
+                loading="lazy"
+                className="w-full h-32 md:h-40 object-cover"
+              />
+              <div className="p-3 md:p-4">
+                <h3 className="font-display text-lg md:text-xl text-foreground leading-tight">
+                  {brand.name}
+                </h3>
+                <p className="text-muted-foreground text-xs mt-1">
+                  {brand.country} · {brand.year}
+                </p>
+                <p className="text-secondary-foreground text-xs md:text-sm mt-2 line-clamp-3">
+                  {brand.description}
+                </p>
+                <span className="inline-block mt-3 rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-medium text-primary">
+                  {brand.category}
+                </span>
+              </div>
+            </motion.div>
           ))}
         </div>
       </div>
-
-      {selectedBrand && (
-        <BrandModal brand={selectedBrand} onClose={() => setSelectedBrand(null)} />
-      )}
     </section>
   );
 }
