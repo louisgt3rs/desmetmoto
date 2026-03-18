@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X, MapPin, ExternalLink, ShoppingBag } from "lucide-react";
 import type { BrandInfo } from "./brands-data";
 
