@@ -9,33 +9,32 @@ export function useAuth() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    const resolveAdminState = async (nextSession: Session | null) => {
+      setSession(nextSession);
+      setUser(nextSession?.user ?? null);
+
+      if (nextSession?.user) {
+        const { data } = await supabase.rpc("has_role", {
+          _user_id: nextSession.user.id,
+          _role: "admin",
+        });
+
+        setIsAdmin(!!data);
+      } else {
+        setIsAdmin(false);
+      }
+
+      setLoading(false);
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          const { data } = await supabase.rpc("has_role", {
-            _user_id: session.user.id,
-            _role: "admin",
-          });
-          setIsAdmin(!!data);
-        } else {
-          setIsAdmin(false);
-        }
-        setLoading(false);
+        await resolveAdminState(session);
       }
     );
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        supabase.rpc("has_role", {
-          _user_id: session.user.id,
-          _role: "admin",
-        }).then(({ data }) => setIsAdmin(!!data));
-      }
-      setLoading(false);
+      void resolveAdminState(session);
     });
 
     return () => subscription.unsubscribe();
