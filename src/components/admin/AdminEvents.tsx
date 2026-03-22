@@ -3,31 +3,40 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, X, Save } from "lucide-react";
 import { ImageUploadSingle } from "./ImageUpload";
 import type { Tables } from "@/integrations/supabase/types";
 
-type Event = Tables<"events">;
+type Event = Tables<"events"> & {
+  event_date?: string | null;
+  is_upcoming?: boolean | null;
+};
 
 export default function AdminEvents() {
   const [events, setEvents] = useState<Event[]>([]);
   const [editing, setEditing] = useState<Event | null>(null);
   const [adding, setAdding] = useState(false);
-  const [form, setForm] = useState({ title: "", description: "", date: "", time: "", location: "", image_url: "" });
+  const [form, setForm] = useState({ title: "", description: "", event_date: "", image_url: "", is_upcoming: true });
 
   const load = async () => {
     const { data } = await supabase.from("events").select("*").order("date", { ascending: false });
-    if (data) setEvents(data);
+    if (data) setEvents(data as Event[]);
   };
 
   useEffect(() => { load(); }, []);
 
   const handleSave = async () => {
     if (!form.title.trim()) { toast.error("Le titre est requis"); return; }
-    const payload = {
-      title: form.title, description: form.description, date: form.date || null,
-      time: form.time || null, location: form.location || null, image_url: form.image_url || null,
+    const payload: any = {
+      title: form.title,
+      description: form.description || null,
+      event_date: form.event_date || null,
+      date: form.event_date || null,
+      image_url: form.image_url || null,
+      is_upcoming: form.is_upcoming,
+      is_published: true,
     };
     if (editing) {
       const { error } = await supabase.from("events").update(payload).eq("id", editing.id);
@@ -49,10 +58,10 @@ export default function AdminEvents() {
 
   const startEdit = (e: Event) => {
     setEditing(e); setAdding(false);
-    setForm({ title: e.title, description: e.description || "", date: e.date || "", time: e.time || "", location: e.location || "", image_url: e.image_url || "" });
+    setForm({ title: e.title, description: e.description || "", event_date: e.event_date || e.date || "", image_url: e.image_url || "", is_upcoming: e.is_upcoming !== false });
   };
 
-  const startAdd = () => { setAdding(true); setEditing(null); setForm({ title: "", description: "", date: "", time: "", location: "", image_url: "" }); };
+  const startAdd = () => { setAdding(true); setEditing(null); setForm({ title: "", description: "", event_date: "", image_url: "", is_upcoming: true }); };
   const cancel = () => { setAdding(false); setEditing(null); };
 
   return (
@@ -67,11 +76,13 @@ export default function AdminEvents() {
           <h3 className="font-display text-lg text-foreground">{editing ? "Modifier" : "Nouvel"} événement</h3>
           <Input placeholder="Titre" value={form.title} onChange={e => setForm({...form, title: e.target.value})} className="bg-secondary border-border" />
           <Textarea placeholder="Description" value={form.description} onChange={e => setForm({...form, description: e.target.value})} className="bg-secondary border-border" />
-          <div className="grid grid-cols-2 gap-4">
-            <Input type="date" value={form.date} onChange={e => setForm({...form, date: e.target.value})} className="bg-secondary border-border" />
-            <Input placeholder="Heure (ex: 10:00)" value={form.time} onChange={e => setForm({...form, time: e.target.value})} className="bg-secondary border-border" />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Input type="date" value={form.event_date} onChange={e => setForm({...form, event_date: e.target.value})} className="bg-secondary border-border" />
+            <div className="flex items-center gap-3 rounded-lg border border-border bg-secondary px-4 py-3">
+              <Switch checked={form.is_upcoming} onCheckedChange={v => setForm({...form, is_upcoming: v})} />
+              <span className="text-sm text-foreground">Événement à venir</span>
+            </div>
           </div>
-          <Input placeholder="Lieu" value={form.location} onChange={e => setForm({...form, location: e.target.value})} className="bg-secondary border-border" />
           <ImageUploadSingle value={form.image_url} onChange={v => setForm({...form, image_url: v})} folder="events" label="Image de l'événement" />
           <div className="flex gap-2">
             <Button onClick={handleSave}><Save className="w-4 h-4 mr-2" /> Enregistrer</Button>
@@ -85,7 +96,7 @@ export default function AdminEvents() {
           <div key={e.id} className="bg-card border border-border rounded-lg p-4 flex items-center justify-between gap-4">
             <div className="min-w-0">
               <p className="text-foreground font-medium truncate">{e.title}</p>
-              <p className="text-xs text-muted-foreground">{e.date ? new Date(e.date).toLocaleDateString("fr-BE") : "Date TBD"} • {e.time || "—"} • {e.location}</p>
+              <p className="text-xs text-muted-foreground">{(e.event_date || e.date) ? new Date(e.event_date || e.date || "").toLocaleDateString("fr-BE") : "Date TBD"} • {e.is_upcoming === false ? "Passé" : "À venir"}</p>
             </div>
             <div className="flex gap-1 shrink-0">
               <Button variant="ghost" size="sm" onClick={() => startEdit(e)}><Pencil className="w-4 h-4" /></Button>

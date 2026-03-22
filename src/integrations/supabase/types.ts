@@ -16,34 +16,46 @@ export type Database = {
     Tables: {
       brands: {
         Row: {
+          categories: string[]
           category: string | null
+          country: string | null
           created_at: string
           description: string | null
+          founded_year: number | null
           id: string
           logo_url: string | null
           name: string
           sort_order: number | null
           updated_at: string
+          website_url: string | null
         }
         Insert: {
+          categories?: string[]
           category?: string | null
+          country?: string | null
           created_at?: string
           description?: string | null
+          founded_year?: number | null
           id?: string
           logo_url?: string | null
           name: string
           sort_order?: number | null
           updated_at?: string
+          website_url?: string | null
         }
         Update: {
+          categories?: string[]
           category?: string | null
+          country?: string | null
           created_at?: string
           description?: string | null
+          founded_year?: number | null
           id?: string
           logo_url?: string | null
           name?: string
           sort_order?: number | null
           updated_at?: string
+          website_url?: string | null
         }
         Relationships: []
       }
@@ -52,9 +64,11 @@ export type Database = {
           created_at: string
           date: string | null
           description: string | null
+          event_date: string | null
           id: string
           image_url: string | null
           is_published: boolean | null
+          is_upcoming: boolean
           location: string | null
           sort_order: number | null
           time: string | null
@@ -65,9 +79,11 @@ export type Database = {
           created_at?: string
           date?: string | null
           description?: string | null
+          event_date?: string | null
           id?: string
           image_url?: string | null
           is_published?: boolean | null
+          is_upcoming?: boolean
           location?: string | null
           sort_order?: number | null
           time?: string | null
@@ -78,9 +94,11 @@ export type Database = {
           created_at?: string
           date?: string | null
           description?: string | null
+          event_date?: string | null
           id?: string
           image_url?: string | null
           is_published?: boolean | null
+          is_upcoming?: boolean
           location?: string | null
           sort_order?: number | null
           time?: string | null
@@ -218,6 +236,7 @@ export type Database = {
       }
       products: {
         Row: {
+          brand: string | null
           brand_id: string | null
           category: string | null
           created_at: string
@@ -225,14 +244,17 @@ export type Database = {
           id: string
           image_url: string | null
           images: string[] | null
+          in_stock: boolean
           is_featured: boolean | null
           name: string
+          price: number | null
           price_range: string | null
           sizes: string[] | null
           sort_order: number | null
           updated_at: string
         }
         Insert: {
+          brand?: string | null
           brand_id?: string | null
           category?: string | null
           created_at?: string
@@ -240,14 +262,17 @@ export type Database = {
           id?: string
           image_url?: string | null
           images?: string[] | null
+          in_stock?: boolean
           is_featured?: boolean | null
           name: string
+          price?: number | null
           price_range?: string | null
           sizes?: string[] | null
           sort_order?: number | null
           updated_at?: string
         }
         Update: {
+          brand?: string | null
           brand_id?: string | null
           category?: string | null
           created_at?: string
@@ -255,8 +280,10 @@ export type Database = {
           id?: string
           image_url?: string | null
           images?: string[] | null
+          in_stock?: boolean
           is_featured?: boolean | null
           name?: string
+          price?: number | null
           price_range?: string | null
           sizes?: string[] | null
           sort_order?: number | null

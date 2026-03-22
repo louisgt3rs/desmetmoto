@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { MapPin, Calendar, Clock, Coffee, Users } from "lucide-react";
+import { Calendar, Coffee } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SectionHeading from "@/components/SectionHeading";
 import { supabase } from "@/integrations/supabase/client";
 import bikesCoffeeImg from "@/assets/bikes-coffee.jpg";
 import type { Tables } from "@/integrations/supabase/types";
 
-type Event = Tables<"events">;
+type Event = Tables<"events"> & {
+  event_date?: string | null;
+  is_upcoming?: boolean | null;
+};
 
 function useCountdown(targetDate: string | null) {
   const [time, setTime] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
@@ -38,14 +41,18 @@ export default function EventsSection() {
     supabase
       .from("events")
       .select("*")
-      .gte("date", new Date().toISOString().split("T")[0])
       .order("date", { ascending: true })
-      .limit(1)
-      .then(({ data }) => { if (data && data.length > 0) setNextEvent(data[0]); });
+      .then(({ data }) => {
+        const events = (data as Event[] | null) ?? [];
+        const today = new Date().toISOString().split("T")[0];
+        const upcoming = events.find((event) => (event.event_date || event.date || "") >= today && event.is_upcoming !== false);
+        setNextEvent(upcoming ?? events[0] ?? null);
+      });
   }, []);
 
-  const countdown = useCountdown(nextEvent?.date || null);
-  const hasCountdown = nextEvent && nextEvent.date && new Date(nextEvent.date) > new Date();
+  const effectiveDate = nextEvent?.event_date || nextEvent?.date || null;
+  const countdown = useCountdown(effectiveDate);
+  const hasCountdown = !!(effectiveDate && new Date(effectiveDate) > new Date());
 
   return (
     <section className="py-20">
@@ -62,7 +69,7 @@ export default function EventsSection() {
             <div className="relative rounded-xl overflow-hidden group">
               <img
                 src={nextEvent?.image_url || bikesCoffeeImg}
-                alt="Bikes & Coffee"
+                alt={nextEvent?.title || "Bikes & Coffee"}
                 className="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-700"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
@@ -79,24 +86,14 @@ export default function EventsSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <p className="text-muted-foreground leading-relaxed mb-6">
-              Café offert, discussions moto et découverte des nouveautés. Rejoignez-nous devant le magasin
-              pour un moment convivial entre passionnés.
-            </p>
-
             {nextEvent ? (
               <div className="bg-card border border-border rounded-xl p-6 space-y-4 mb-6">
                 <h3 className="font-display text-2xl text-foreground">{nextEvent.title}</h3>
                 <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                  <MapPin className="w-4 h-4 text-primary" /> {nextEvent.location || "Desmet Équipement – Wavre"}
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground text-sm">
                   <Calendar className="w-4 h-4 text-primary" />
-                  {nextEvent.date ? new Date(nextEvent.date).toLocaleDateString("fr-BE", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "À venir"}
+                  {effectiveDate ? new Date(effectiveDate).toLocaleDateString("fr-BE", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "À venir"}
                 </div>
-                <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                  <Clock className="w-4 h-4 text-primary" /> {nextEvent.time || "10:00"}
-                </div>
+                {nextEvent.description && <p className="text-muted-foreground leading-relaxed">{nextEvent.description}</p>}
 
                 {/* Countdown */}
                 {hasCountdown && (
