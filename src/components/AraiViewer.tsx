@@ -133,9 +133,7 @@ export default function AraiViewer() {
         }}
       />
 
-      <div
-        className="pointer-events-none absolute left-1/2 top-1/2 z-0 -translate-x-1/2 -translate-y-1/2 select-none whitespace-nowrap font-display text-[clamp(3.5rem,9vw,7rem)] tracking-[0.2em] text-foreground/5"
-      >
+      <div className="pointer-events-none absolute left-1/2 top-1/2 z-0 -translate-x-1/2 -translate-y-1/2 select-none whitespace-nowrap font-display text-[clamp(3.5rem,9vw,7rem)] tracking-[0.2em] text-foreground/5">
         SZ·R·EVO
       </div>
 
