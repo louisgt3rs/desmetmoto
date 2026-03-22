@@ -198,12 +198,50 @@ export default function AraiPage() {
       {/* Store Photo */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-8">
-            <h2 className="font-display text-4xl md:text-5xl text-foreground mb-3">Notre espace Arai en magasin</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">Découvrez notre mur de casques Arai et venez essayer les différents modèles directement en magasin.</p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="mb-10 text-center"
+          >
+            <p className="mb-3 text-[11px] uppercase tracking-[0.42em] text-primary md:text-xs">
+              Notre espace · en magasin
+            </p>
+            <h2 className="font-display text-[clamp(4rem,10vw,7rem)] leading-[0.9] text-foreground">
+              ARAI
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-[11px] uppercase tracking-[0.22em] text-muted-foreground md:text-xs">
+              Découvrez notre mur de casques Arai et venez essayer les différents modèles directement en magasin.
+            </p>
           </motion.div>
-          <motion.div initial={{ opacity: 0, scale: 0.98 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="rounded-xl overflow-hidden border border-border shadow-[0_0_40px_hsl(var(--glow-soft))]">
-            <img src={araiStoreWall} alt="Espace Arai en magasin — mur de casques" className="w-full h-auto object-cover" />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+            className="relative overflow-hidden rounded-xl border border-primary/20 bg-card shadow-[0_0_40px_hsl(var(--glow-soft))]"
+          >
+            {[
+              "top-4 left-4 border-t border-l",
+              "top-4 right-4 border-t border-r",
+              "bottom-4 left-4 border-b border-l",
+              "bottom-4 right-4 border-b border-r",
+            ].map((position) => (
+              <div
+                key={position}
+                className={`pointer-events-none absolute z-20 h-4 w-4 border-primary/40 ${position}`}
+              />
+            ))}
+
+            <div className="absolute inset-0 z-10 bg-background/50" />
+            <div className="absolute inset-x-0 bottom-0 z-10 h-32 bg-gradient-to-t from-background via-background/50 to-transparent" />
+
+            <img
+              src={araiStoreWall}
+              alt="Espace Arai en magasin — mur de casques"
+              className="h-auto w-full object-cover"
+            />
           </motion.div>
         </div>
       </section>
