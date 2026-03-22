@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { MapPin, Phone, Clock, Facebook, Instagram } from "lucide-react";
+import { MapPin, Phone, Clock, Instagram } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -62,10 +62,7 @@ export default function Footer() {
           <div>
             <h4 className="font-display text-lg text-foreground mb-4">SUIVEZ-NOUS</h4>
             <div className="flex gap-4">
-              <a href="#" className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors">
-                <Facebook className="w-5 h-5" />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors">
+              <a href="https://www.instagram.com/desmetmotowavre" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors">
                 <Instagram className="w-5 h-5" />
               </a>
             </div>
