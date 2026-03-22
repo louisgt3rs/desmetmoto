@@ -1,58 +1,13 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout";
 import SectionHeading from "@/components/SectionHeading";
 import ReservationModal from "@/components/ReservationModal";
 import { supabase } from "@/integrations/supabase/client";
 import ImageGallery from "@/components/ImageGallery";
-import helmetHeroImg from "@/assets/helmet-hero.jpg";
 import araiStoreWall from "@/assets/arai-store-wall.jpg";
-import heroHelmet from "@/assets/helmets/arai-rx7v-white-hero.png";
-import araiBadge from "@/assets/brands/arai.png";
-
-/* ───── Gold Particles ───── */
-function GoldParticles() {
-  const particles = Array.from({ length: 24 }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: Math.random() * 3 + 1.5,
-    duration: Math.random() * 6 + 4,
-    delay: Math.random() * 4,
-    opacity: Math.random() * 0.5 + 0.2,
-  }));
-
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {particles.map((p) => (
-        <motion.div
-          key={p.id}
-          className="absolute rounded-full"
-          style={{
-            left: `${p.x}%`,
-            top: `${p.y}%`,
-            width: p.size,
-            height: p.size,
-            background: `radial-gradient(circle, rgba(212,175,55,${p.opacity}), rgba(212,175,55,0))`,
-            boxShadow: `0 0 ${p.size * 2}px rgba(212,175,55,${p.opacity * 0.6})`,
-          }}
-          animate={{
-            y: [0, -40, 0],
-            x: [0, Math.random() * 20 - 10, 0],
-            opacity: [p.opacity * 0.4, p.opacity, p.opacity * 0.4],
-          }}
-          transition={{
-            duration: p.duration,
-            delay: p.delay,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-      ))}
-    </div>
-  );
-}
+import AraiViewer from "@/components/AraiViewer";
 
 /* ───── types ───── */
 interface HelmetModel {
@@ -238,83 +193,7 @@ export default function AraiPage() {
 
   return (
     <Layout>
-      {/* Hero — Dark Luxury Showroom */}
-      <section className="relative min-h-[85vh] flex items-center overflow-hidden" style={{ backgroundColor: "#0A0A0A" }}>
-        {/* Red radial glow */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: "radial-gradient(ellipse 55% 55% at 50% 50%, rgba(192,57,43,0.5) 0%, rgba(192,57,43,0.2) 35%, rgba(192,57,43,0.05) 60%, transparent 75%)",
-          }}
-        />
-        {/* Subtle vignette */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: "radial-gradient(ellipse 80% 80% at 50% 50%, transparent 50%, rgba(0,0,0,0.7) 100%)",
-          }}
-        />
-
-        <GoldParticles />
-
-        {/* Arai badge top-right */}
-        <motion.img
-          src={araiBadge}
-          alt="Arai Official"
-          className="absolute top-24 right-6 md:right-12 w-16 md:w-24 opacity-80 z-10"
-          initial={{ opacity: 0, scale: 0.7 }}
-          animate={{ opacity: 0.8, scale: 1 }}
-          transition={{ duration: 1, delay: 0.5 }}
-        />
-
-        {/* 3D Rotating Helmet — right side */}
-        <div className="absolute right-0 top-0 bottom-0 w-[55%] md:w-[50%] flex items-center justify-center pointer-events-none" style={{ perspective: "1200px" }}>
-          {/* Red glow behind helmet */}
-          <div
-            className="absolute rounded-full"
-            style={{
-              width: "70%",
-              height: "70%",
-              background: "radial-gradient(circle, rgba(192,57,43,0.6) 0%, rgba(192,57,43,0.25) 40%, transparent 70%)",
-              filter: "blur(40px)",
-            }}
-          />
-          <motion.div
-            className="w-[80%] max-w-[450px] relative z-10"
-            animate={{ rotateY: 360 }}
-            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-            style={{ transformStyle: "preserve-3d" }}
-          >
-            <img
-              src={heroHelmet}
-              alt="Arai RX-7V EVO"
-              className="w-full h-auto drop-shadow-[0_0_100px_rgba(192,57,43,0.7)]"
-              style={{ background: "transparent" }}
-            />
-          </motion.div>
-        </div>
-
-        {/* Content */}
-        <div className="container mx-auto px-4 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-            className="max-w-xl"
-          >
-            <span className="text-primary font-bold tracking-[0.25em] uppercase text-sm md:text-base">
-              Revendeur Officiel
-            </span>
-            <h1 className="font-display text-6xl md:text-8xl lg:text-9xl text-white mt-3 mb-5 leading-[0.9]">
-              ARAI<br />HELMETS
-            </h1>
-            <p className="text-gray-400 max-w-lg text-base md:text-lg leading-relaxed">
-              Découvrez notre gamme de casques Arai. Fabriqués à la main au Japon, chaque casque est un
-              chef-d'œuvre de protection et de confort.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <AraiViewer />
 
       {/* Store Photo */}
       <section className="py-20">
