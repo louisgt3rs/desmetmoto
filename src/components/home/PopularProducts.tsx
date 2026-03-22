@@ -8,26 +8,48 @@ import ImageGallery from "@/components/ImageGallery";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 
-type Product = Tables<"products"> & { brands?: { name: string } | null; images?: string[] | null };
+type Product = Tables<"products"> & {
+  brands?: { name: string } | null;
+  images?: string[] | null;
+  brand?: string | null;
+  price?: number | null;
+  in_stock?: boolean | null;
+};
 
-const categories = ["Tous", "Casques", "Vestes", "Gants", "Bottes", "Accessoires"];
+const categories = [
+  { label: "Tous", value: "all" },
+  { label: "Casques", value: "casques" },
+  { label: "Vestes", value: "vestes" },
+  { label: "Gants", value: "gants" },
+  { label: "Bottes", value: "bottes" },
+  { label: "Accessoires", value: "accessoires" },
+];
+
+const priceFormatter = new Intl.NumberFormat("fr-BE", {
+  style: "currency",
+  currency: "EUR",
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+});
 
 export default function PopularProducts() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [active, setActive] = useState("Tous");
+  const [active, setActive] = useState("all");
   const [reserveModel, setReserveModel] = useState<string | null>(null);
 
   useEffect(() => {
     supabase
       .from("products")
       .select("*, brands(name)")
-      .eq("is_featured", true)
+      .filter("in_stock", "eq", "true")
       .order("sort_order")
       .limit(8)
       .then(({ data }) => { if (data) setProducts(data as Product[]); });
   }, []);
 
-  const filtered = active === "Tous" ? products : products.filter(p => p.category === active);
+  const filtered = active === "all"
+    ? products
+    : products.filter((product) => (product.category || "").toLowerCase() === active);
 
   return (
     <section className="py-20 bg-card">
@@ -36,17 +58,17 @@ export default function PopularProducts() {
 
         {/* Category filter */}
         <div className="flex flex-wrap justify-center gap-2 mb-10">
-          {categories.map(cat => (
+            {categories.map((cat) => (
             <button
-              key={cat}
-              onClick={() => setActive(cat)}
+                key={cat.value}
+                onClick={() => setActive(cat.value)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                active === cat
+                  active === cat.value
                   ? "bg-primary text-primary-foreground shadow-[0_0_15px_hsl(var(--glow-soft))]"
                   : "bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/80"
               }`}
             >
-              {cat}
+                {cat.label}
             </button>
           ))}
         </div>
@@ -84,15 +106,17 @@ export default function PopularProducts() {
                 })()}
               </div>
               <div className="p-5">
-                {product.brands?.name && (
-                  <span className="text-xs font-medium text-primary tracking-wider uppercase">{product.brands.name}</span>
+                {(product.brands?.name || product.brand) && (
+                  <span className="text-xs font-medium text-primary tracking-wider uppercase">{product.brands?.name || product.brand}</span>
                 )}
                 <h3 className="font-display text-xl text-foreground mt-1 mb-1 group-hover:text-primary transition-colors">
                   {product.name}
                 </h3>
-                {product.price_range && (
+                {typeof product.price === "number" ? (
+                  <p className="text-sm text-muted-foreground mb-3">{priceFormatter.format(product.price)}</p>
+                ) : product.price_range ? (
                   <p className="text-sm text-muted-foreground mb-3">{product.price_range}</p>
-                )}
+                ) : null}
                 <Button
                   size="sm"
                   variant="outline"
