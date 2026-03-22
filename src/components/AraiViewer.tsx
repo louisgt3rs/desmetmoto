@@ -3,10 +3,10 @@ import { useEffect, useRef, useState } from "react";
 const LABELS = ["3/4 AVANT", "CÔTÉ GAUCHE", "3/4 ARRIÈRE", "DERRIÈRE"];
 
 const FRAMES = [
-  "https://qatsudgpieczmodjbynh.supabase.co/storage/v1/object/public/Helmets/IMG_1101.jpeg",
-  "https://qatsudgpieczmodjbynh.supabase.co/storage/v1/object/public/Helmets/IMG_1103.jpeg",
-  "https://qatsudgpieczmodjbynh.supabase.co/storage/v1/object/public/Helmets/IMG_1102.jpeg",
-  "https://qatsudgpieczmodjbynh.supabase.co/storage/v1/object/public/Helmets/IMG_1104.jpeg",
+  "https://qatsudgpieczmodjbynh.supabase.co/storage/v1/object/public/Helmets/IMG_1133.png",
+  "https://qatsudgpieczmodjbynh.supabase.co/storage/v1/object/public/Helmets/IMG_1134.png",
+  "https://qatsudgpieczmodjbynh.supabase.co/storage/v1/object/public/Helmets/IMG_1136.png",
+  "https://qatsudgpieczmodjbynh.supabase.co/storage/v1/object/public/Helmets/IMG_1137.png",
 ] as const;
 
 const SPECS_LEFT = [
