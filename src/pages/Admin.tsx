@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,6 +32,12 @@ export default function AdminPage() {
   const [loginLoading, setLoginLoading] = useState(false);
   const currentTab = useMemo(() => tabs.find((item) => item.id === tab), [tab]);
 
+  useEffect(() => {
+    if (!loading && user && !isAdmin) {
+      toast.error("Accès refusé : ce compte n'a pas les droits administrateur.");
+    }
+  }, [loading, user, isAdmin]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginLoading(true);
@@ -54,7 +60,6 @@ export default function AdminPage() {
   }
 
   if (user && !isAdmin) {
-    toast.error("Accès refusé : ce compte n'a pas les droits administrateur.");
     return <Navigate to="/" replace />;
   }
 
