@@ -15,8 +15,8 @@
     --popover: 0 0% 10%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 12 90% 52%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 43 74% 49%;
+    --primary-foreground: 0 0% 7%;
 
     --secondary: 0 0% 15%;
     --secondary-foreground: 0 0% 90%;
@@ -24,32 +24,32 @@
     --muted: 0 0% 14%;
     --muted-foreground: 0 0% 55%;
 
-    --accent: 12 90% 52%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 43 74% 49%;
+    --accent-foreground: 0 0% 7%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 0 0% 18%;
     --input: 0 0% 18%;
-    --ring: 12 90% 52%;
+    --ring: 43 74% 49%;
 
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 8%;
     --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 12 90% 52%;
-    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-primary: 43 74% 49%;
+    --sidebar-primary-foreground: 0 0% 7%;
     --sidebar-accent: 0 0% 14%;
     --sidebar-accent-foreground: 0 0% 90%;
     --sidebar-border: 0 0% 18%;
-    --sidebar-ring: 12 90% 52%;
+    --sidebar-ring: 43 74% 49%;
 
     /* Custom tokens */
     --surface: 0 0% 12%;
     --surface-hover: 0 0% 16%;
-    --glow: 12 90% 52%;
-    --glow-soft: 12 90% 52% / 0.15;
+    --glow: 43 74% 49%;
+    --glow-soft: 43 74% 49% / 0.15;
     --gradient-hero: linear-gradient(180deg, transparent 0%, hsl(0 0% 7%) 100%);
     --font-display: 'Bebas Neue', sans-serif;
     --font-body: 'DM Sans', sans-serif;
@@ -81,7 +81,7 @@
 @layer utilities {
   .text-gradient {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(20 95% 60%) 100%);
+    background-image: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(43 74% 62%) 100%);
   }
 
   .glow-border {
