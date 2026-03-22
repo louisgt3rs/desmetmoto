@@ -1,14 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import frontFrame from "@/assets/helmets/arai-rx7v-white-hero.png";
-import rearFrame from "@/assets/helmets/rx7v-evo-diamond-black-rear.jpeg";
 
 const LABELS = ["3/4 AVANT", "CÔTÉ GAUCHE", "3/4 ARRIÈRE", "DERRIÈRE"];
 
 const FRAMES = [
-  { src: frontFrame, alt: LABELS[0], transform: "scale(1)" },
-  { src: frontFrame, alt: LABELS[1], transform: "scaleX(-1)" },
-  { src: rearFrame, alt: LABELS[2], transform: "scale(1)" },
-  { src: rearFrame, alt: LABELS[3], transform: "scaleX(-1)" },
+  "https://qatsudgpieczmodjbynh.supabase.co/storage/v1/object/public/Helmets/IMG_1101.jpeg",
+  "https://qatsudgpieczmodjbynh.supabase.co/storage/v1/object/public/Helmets/IMG_1103.jpeg",
+  "https://qatsudgpieczmodjbynh.supabase.co/storage/v1/object/public/Helmets/IMG_1102.jpeg",
+  "https://qatsudgpieczmodjbynh.supabase.co/storage/v1/object/public/Helmets/IMG_1104.jpeg",
 ] as const;
 
 const SPECS_LEFT = [
@@ -232,13 +230,13 @@ export default function AraiViewer() {
 
         {FRAMES.map((frame, index) => (
           <img
-            key={frame.alt}
-            src={frame.src}
-            alt={`Arai SZ-R EVO - ${frame.alt}`}
+            key={frame}
+            src={frame}
+            alt={`Arai SZ-R EVO - ${LABELS[index]}`}
             className="pointer-events-none absolute inset-0 h-full w-full object-contain transition-opacity duration-300"
             style={{
               opacity: index === current ? 1 : 0,
-              transform: frame.transform,
+              transform: index === 1 || index === 3 ? "scaleX(-1)" : "scale(1)",
               filter:
                 "drop-shadow(0 0 30px hsl(var(--primary) / 0.15)) drop-shadow(0 15px 40px hsl(var(--background) / 0.75))",
             }}
