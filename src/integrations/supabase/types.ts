@@ -61,6 +61,7 @@ export type Database = {
       }
       events: {
         Row: {
+          capacity: number
           created_at: string
           date: string | null
           description: string | null
@@ -70,12 +71,14 @@ export type Database = {
           is_published: boolean | null
           is_upcoming: boolean
           location: string | null
+          registered_count: number
           sort_order: number | null
           time: string | null
           title: string
           updated_at: string
         }
         Insert: {
+          capacity?: number
           created_at?: string
           date?: string | null
           description?: string | null
@@ -85,12 +88,14 @@ export type Database = {
           is_published?: boolean | null
           is_upcoming?: boolean
           location?: string | null
+          registered_count?: number
           sort_order?: number | null
           time?: string | null
           title: string
           updated_at?: string
         }
         Update: {
+          capacity?: number
           created_at?: string
           date?: string | null
           description?: string | null
@@ -100,6 +105,7 @@ export type Database = {
           is_published?: boolean | null
           is_upcoming?: boolean
           location?: string | null
+          registered_count?: number
           sort_order?: number | null
           time?: string | null
           title?: string
@@ -249,8 +255,10 @@ export type Database = {
           name: string
           price: number | null
           price_range: string | null
+          reference_code: string | null
           sizes: string[] | null
           sort_order: number | null
+          stock_quantity: number
           updated_at: string
         }
         Insert: {
@@ -267,8 +275,10 @@ export type Database = {
           name: string
           price?: number | null
           price_range?: string | null
+          reference_code?: string | null
           sizes?: string[] | null
           sort_order?: number | null
+          stock_quantity?: number
           updated_at?: string
         }
         Update: {
@@ -285,8 +295,10 @@ export type Database = {
           name?: string
           price?: number | null
           price_range?: string | null
+          reference_code?: string | null
           sizes?: string[] | null
           sort_order?: number | null
+          stock_quantity?: number
           updated_at?: string
         }
         Relationships: [
