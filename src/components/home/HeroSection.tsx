@@ -89,7 +89,7 @@ export default function HeroSection() {
         transition={{ duration: 0.8 }}
         className="relative z-10 text-center"
       >
-        <h1 className="font-display text-5xl md:text-7xl lg:text-9xl text-white leading-none tracking-wide">
+        <h1 className="font-display text-5xl md:text-7xl lg:text-9xl text-white leading-none tracking-tight">
           DESMET ÉQUIPEMENT
         </h1>
         <div className="mx-auto mt-2 h-1 w-32 md:w-48 rounded-full bg-primary" />
@@ -122,13 +122,14 @@ export default function HeroSection() {
         transition={{ duration: 0.8, delay: 0.5 }}
         className="relative z-10 flex flex-col items-center gap-5"
       >
-        <p className="font-body text-lg md:text-xl tracking-wide text-muted-foreground text-center px-4">
-          Votre spécialiste moto à Wavre
+        <p className="font-body text-xs md:text-sm uppercase tracking-[0.42em] text-muted-foreground text-center px-4">
+          ÉQUIPEMENT · EXPERTISE · PASSION
         </p>
         <Link to="/contact">
           <Button
             size="lg"
-            className="text-lg px-8 py-6 shadow-[0_0_30px_hsl(var(--primary)/0.4)] hover:shadow-[0_0_50px_hsl(var(--primary)/0.6)] transition-shadow duration-300"
+            variant="outline"
+            className="border-primary bg-transparent px-8 py-6 text-lg text-primary shadow-[0_0_30px_hsl(var(--primary)/0.18)] transition-all duration-300 hover:bg-primary hover:text-primary-foreground hover:shadow-[0_0_50px_hsl(var(--primary)/0.35)]"
           >
             Nous contacter
           </Button>
