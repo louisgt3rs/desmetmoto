@@ -9,6 +9,12 @@
     --background: 0 0% 7%;
     --foreground: 0 0% 95%;
 
+    --admin-background: 0 0% 5%;
+    --admin-card: 0 0% 9%;
+    --admin-foreground: 40 20% 92%;
+    --admin-muted-foreground: 0 0% 67%;
+    --admin-accent: 44 54% 54%;
+
     --card: 0 0% 10%;
     --card-foreground: 0 0% 95%;
 
@@ -53,6 +59,8 @@
     --gradient-hero: linear-gradient(180deg, transparent 0%, hsl(0 0% 7%) 100%);
     --font-display: 'Bebas Neue', sans-serif;
     --font-body: 'DM Sans', sans-serif;
+    --font-admin-display: 'Arial Black', Arial, sans-serif;
+    --font-admin-body: Arial, Helvetica, sans-serif;
   }
 }
 
@@ -90,5 +98,68 @@
 
   .hero-overlay {
     background: var(--gradient-hero);
+  }
+
+  .admin-shell {
+    background-color: hsl(var(--admin-background));
+    color: hsl(var(--admin-foreground));
+  }
+
+  .admin-card {
+    background-color: hsl(var(--admin-card));
+    color: hsl(var(--admin-foreground));
+    border: 1px solid hsl(var(--admin-accent) / 0.18);
+  }
+
+  .admin-kicker {
+    font-family: var(--font-admin-display);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .font-adminDisplay {
+    font-family: var(--font-admin-display);
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .font-adminBody {
+    font-family: var(--font-admin-body);
+  }
+
+  .admin-input {
+    border-radius: 0;
+    border-color: hsl(var(--admin-accent) / 0.18);
+    background-color: hsl(var(--admin-background));
+    color: hsl(var(--admin-foreground));
+    font-family: var(--font-admin-body);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .admin-input::placeholder {
+    color: hsl(var(--admin-muted-foreground));
+  }
+
+  .admin-button {
+    background-color: hsl(var(--admin-accent));
+    color: hsl(var(--admin-background));
+    border: 1px solid hsl(var(--admin-accent));
+  }
+
+  .admin-button:hover {
+    background-color: hsl(var(--admin-accent) / 0.88);
+  }
+
+  .admin-button-secondary {
+    background-color: transparent;
+    color: hsl(var(--admin-foreground));
+    border: 1px solid hsl(var(--admin-accent) / 0.2);
+  }
+
+  .admin-button-secondary:hover {
+    background-color: hsl(var(--admin-accent) / 0.08);
+    color: hsl(var(--admin-accent));
   }
 }
