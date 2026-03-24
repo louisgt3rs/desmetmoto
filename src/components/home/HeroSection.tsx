@@ -52,18 +52,6 @@ function Particles({ count = 30 }: { count?: number }) {
 }
 
 export default function HeroSection() {
-  const imgRef = useRef<HTMLImageElement>(null);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!imgRef.current) return;
-      const scrollY = window.scrollY;
-      const rotation = scrollY * 0.12;
-      imgRef.current.style.transform = `perspective(1200px) rotateY(${rotation}deg) rotate(-3deg)`;
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   return (
     <section
