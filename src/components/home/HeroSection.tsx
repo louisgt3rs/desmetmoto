@@ -1,6 +1,6 @@
 import { useEffect, useRef, useMemo } from "react";
 import { motion } from "framer-motion";
-import heroMoto from "@/assets/hero-motorcycle.png";
+import desmetLogo from "@/assets/desmet-logo-diamond.png";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
