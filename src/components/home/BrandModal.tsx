@@ -133,7 +133,7 @@ export default function BrandModal({ brand, onClose }: BrandModalProps) {
 
             <div className="relative z-[1]">
               <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center overflow-hidden rounded-[20px] border border-primary/30 bg-background shadow-[0_0_30px_hsl(var(--primary)/0.2)]">
-                <BrandLogo brand={brand} size={96} />
+                <BrandLogo brand={brand} size={96} darkFallback />
               </div>
 
               <h3 className="mb-1 font-display text-[32px] tracking-[0.02em] text-foreground">
