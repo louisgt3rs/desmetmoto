@@ -258,6 +258,7 @@ export type Database = {
           reference_code: string | null
           sizes: string[] | null
           sort_order: number | null
+          stock_by_size: Json | null
           stock_quantity: number
           updated_at: string
         }
@@ -278,6 +279,7 @@ export type Database = {
           reference_code?: string | null
           sizes?: string[] | null
           sort_order?: number | null
+          stock_by_size?: Json | null
           stock_quantity?: number
           updated_at?: string
         }
@@ -298,6 +300,7 @@ export type Database = {
           reference_code?: string | null
           sizes?: string[] | null
           sort_order?: number | null
+          stock_by_size?: Json | null
           stock_quantity?: number
           updated_at?: string
         }
