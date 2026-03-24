@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from "react";
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import desmetLogo from "@/assets/desmet-logo-diamond.png";
 import { Button } from "@/components/ui/button";
