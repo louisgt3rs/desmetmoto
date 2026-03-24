@@ -74,16 +74,20 @@ export default function BrandsSection() {
             </p>
           </motion.div>
 
-          <div className="mx-auto flex max-w-4xl flex-wrap justify-center gap-3 select-none">
+          <div className="mx-auto flex max-w-4xl flex-wrap justify-center gap-3">
             {brands.map((brand) => (
-              <button
+              <motion.button
                 key={brand.id}
                 type="button"
-                onClick={() => setSelectedBrand(brand)}
-                className="inline-flex cursor-pointer select-none items-center rounded-full border border-primary/20 bg-secondary px-4 py-2 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary hover:bg-primary/10 hover:shadow-[0_0_15px_hsl(var(--primary)/0.4)] active:scale-95"
+                whileTap={{ scale: 0.95 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedBrand(brand);
+                }}
+                className="relative z-10 inline-flex cursor-pointer items-center rounded-full border border-primary/20 bg-secondary px-4 py-2 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary hover:bg-primary/10 hover:shadow-[0_0_15px_hsl(var(--primary)/0.4)]"
               >
                 {brand.name}
-              </button>
+              </motion.button>
             ))}
           </div>
         </div>
