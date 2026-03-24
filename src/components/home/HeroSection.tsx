@@ -51,8 +51,8 @@ function Particles({ count = 30 }: { count?: number }) {
   );
 }
 
+// Hero with logo
 export default function HeroSection() {
-
   return (
     <section
       className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
