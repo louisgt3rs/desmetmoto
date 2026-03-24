@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { X, MapPin, ExternalLink, ShoppingBag, Globe } from "lucide-react";
 
+export { BrandLogo };
+
 interface BrandModalProps {
   brand: BrandModalBrand;
   onClose: () => void;
