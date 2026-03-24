@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "sonner";
 import { AlertTriangle, Pencil, Plus, Save, Search, Trash2 } from "lucide-react";
 import { ImageUploadSingle } from "./ImageUpload";
+import SizeStockGrid, { calcTotalFromSizes } from "./SizeStockGrid";
 import type { AdminBrand, AdminProduct } from "./types";
 
 interface AdminProductsProps {
@@ -18,14 +19,23 @@ interface AdminProductsProps {
   products: AdminProduct[];
 }
 
-const CATEGORY_OPTIONS = ["Casques", "Blousons", "Gants", "Bottes", "Combinaisons"] as const;
+const CATEGORY_OPTIONS = ["Casques", "Blousons", "Gants", "Bottes", "Combinaisons", "Accessoires"] as const;
 
 const formatPrice = (price?: number | null) =>
   typeof price === "number"
     ? new Intl.NumberFormat("fr-BE", { style: "currency", currency: "EUR" }).format(price)
     : "Prix non défini";
 
-const formatStock = (stock?: number | null) => `${stock || 0} PCS`;
+const formatStock = (p: AdminProduct) => {
+  const sbs = parseSbs(p.stock_by_size);
+  const total = Object.keys(sbs).length > 0 ? calcTotalFromSizes(sbs) : (p.stock_quantity || 0);
+  return `${total} PCS`;
+};
+
+function parseSbs(v: unknown): Record<string, number> {
+  if (v && typeof v === "object" && !Array.isArray(v)) return v as Record<string, number>;
+  return {};
+}
 
 export default function AdminProducts({ products, brands, onRefresh }: AdminProductsProps) {
   const [editing, setEditing] = useState<AdminProduct | null>(null);
@@ -40,13 +50,13 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
     category: "Casques",
     price: "",
     stock_quantity: "0",
+    stock_by_size: {} as Record<string, number>,
     image_url: "",
   });
 
   const filteredProducts = useMemo(() => {
     const query = search.trim().toLowerCase();
     if (!query) return products;
-
     return products.filter((product) =>
       [product.reference_code, product.name, product.brand, product.category]
         .filter(Boolean)
@@ -59,6 +69,9 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
 
     setSaving(true);
     const selectedBrand = brands.find((brand) => brand.id === form.brand_id);
+    const sizeTotal = calcTotalFromSizes(form.stock_by_size);
+    const totalStock = Object.keys(form.stock_by_size).length > 0 ? sizeTotal : (Number(form.stock_quantity) || 0);
+
     const payload: any = {
       reference_code: form.reference_code.trim() || null,
       name: form.name,
@@ -67,8 +80,9 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
       brand: selectedBrand?.name || null,
       category: form.category,
       price: form.price ? Number(form.price) : null,
-      stock_quantity: Number(form.stock_quantity) || 0,
-      in_stock: (Number(form.stock_quantity) || 0) > 0,
+      stock_quantity: totalStock,
+      stock_by_size: form.stock_by_size,
+      in_stock: totalStock > 0,
       image_url: form.image_url || null,
       images: form.image_url ? [form.image_url] : [],
     };
@@ -107,6 +121,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
       category: p.category || "Casques",
       price: typeof p.price === "number" ? String(p.price) : "",
       stock_quantity: String(p.stock_quantity || 0),
+      stock_by_size: parseSbs((p as any).stock_by_size),
       image_url: p.image_url || "",
     });
   };
@@ -114,7 +129,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
   const startAdd = () => {
     setEditing(null);
     setOpen(true);
-    setForm({ reference_code: "", name: "", description: "", brand_id: "", category: "Casques", price: "", stock_quantity: "0", image_url: "" });
+    setForm({ reference_code: "", name: "", description: "", brand_id: "", category: "Casques", price: "", stock_quantity: "0", stock_by_size: {}, image_url: "" });
   };
 
   const cancel = () => {
@@ -158,7 +173,9 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
             </TableHeader>
             <TableBody>
               {filteredProducts.map((p) => {
-                const lowStock = (p.stock_quantity || 0) > 0 && (p.stock_quantity || 0) <= 3;
+                const sbs = parseSbs((p as any).stock_by_size);
+                const total = Object.keys(sbs).length > 0 ? calcTotalFromSizes(sbs) : (p.stock_quantity || 0);
+                const lowStock = total > 0 && total <= 3;
 
                 return (
                   <TableRow key={p.id} className="border-[hsl(var(--admin-accent)/0.12)] bg-transparent hover:bg-[hsl(var(--admin-accent)/0.04)]">
@@ -178,7 +195,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <span className={`text-sm uppercase tracking-[0.16em] ${lowStock ? "text-destructive" : "text-[hsl(var(--admin-foreground))]"}`}>
-                          {formatStock(p.stock_quantity)}
+                          {formatStock(p)}
                         </span>
                         {lowStock ? <AlertTriangle className="h-4 w-4 text-destructive" /> : null}
                       </div>
@@ -202,7 +219,9 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
 
         <div className="grid gap-4 lg:hidden">
           {filteredProducts.map((p) => {
-            const lowStock = (p.stock_quantity || 0) > 0 && (p.stock_quantity || 0) <= 3;
+            const sbs = parseSbs((p as any).stock_by_size);
+            const total = Object.keys(sbs).length > 0 ? calcTotalFromSizes(sbs) : (p.stock_quantity || 0);
+            const lowStock = total > 0 && total <= 3;
 
             return (
               <article key={p.id} className="border border-[hsl(var(--admin-accent)/0.16)] bg-[hsl(var(--admin-background))] p-4">
@@ -214,7 +233,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
                     <p className="mt-2 text-xs uppercase tracking-[0.14em] text-[hsl(var(--admin-muted-foreground))]">{getBrandName(p.brand_id, p.brand)} • {p.category || "—"}</p>
                     <div className="mt-3 flex items-center justify-between gap-3">
                       <span className="text-sm uppercase tracking-[0.14em] text-[hsl(var(--admin-foreground))]">{formatPrice(p.price)}</span>
-                      <span className={`text-sm uppercase tracking-[0.14em] ${lowStock ? "text-destructive" : "text-[hsl(var(--admin-foreground))]"}`}>{formatStock(p.stock_quantity)}</span>
+                      <span className={`text-sm uppercase tracking-[0.14em] ${lowStock ? "text-destructive" : "text-[hsl(var(--admin-foreground))]"}`}>{formatStock(p)}</span>
                     </div>
                   </div>
                 </div>
@@ -231,7 +250,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
       </div>
 
       <Dialog open={open} onOpenChange={(next) => !next ? cancel() : setOpen(true)}>
-        <DialogContent className="admin-card max-w-3xl rounded-none border-[hsl(var(--admin-accent)/0.25)] bg-[hsl(var(--admin-card))] p-0 text-[hsl(var(--admin-foreground))]">
+        <DialogContent className="admin-card max-h-[90vh] max-w-3xl overflow-y-auto rounded-none border-[hsl(var(--admin-accent)/0.25)] bg-[hsl(var(--admin-card))] p-0 text-[hsl(var(--admin-foreground))]">
           <div className="border-b border-[hsl(var(--admin-accent)/0.18)] p-6">
             <DialogHeader>
               <DialogTitle className="font-adminDisplay text-3xl text-[hsl(var(--admin-foreground))]">{editing ? "MODIFIER PRODUIT" : "AJOUTER PRODUIT"}</DialogTitle>
@@ -265,7 +284,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
             </div>
             <div className="space-y-2">
               <Label className="admin-kicker text-xs text-[hsl(var(--admin-muted-foreground))]">CATÉGORIE</Label>
-              <Select value={form.category} onValueChange={(value) => setForm({ ...form, category: value })}>
+              <Select value={form.category} onValueChange={(value) => setForm({ ...form, category: value, stock_by_size: {} })}>
                 <SelectTrigger className="admin-input rounded-none"><SelectValue placeholder="SÉLECTIONNER" /></SelectTrigger>
                 <SelectContent className="border-[hsl(var(--admin-accent)/0.2)] bg-[hsl(var(--admin-card))] text-[hsl(var(--admin-foreground))]">
                   {CATEGORY_OPTIONS.map((category) => <SelectItem key={category} value={category}>{category.toUpperCase()}</SelectItem>)}
@@ -276,10 +295,28 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
               <Label className="admin-kicker text-xs text-[hsl(var(--admin-muted-foreground))]">PRIX €</Label>
               <Input type="number" min="0" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="0.00" className="admin-input" />
             </div>
-            <div className="space-y-2">
-              <Label className="admin-kicker text-xs text-[hsl(var(--admin-muted-foreground))]">STOCK</Label>
-              <Input type="number" min="0" step="1" value={form.stock_quantity} onChange={(e) => setForm({ ...form, stock_quantity: e.target.value })} placeholder="0" className="admin-input" />
-            </div>
+            {form.category === "Accessoires" ? (
+              <div className="space-y-2">
+                <Label className="admin-kicker text-xs text-[hsl(var(--admin-muted-foreground))]">STOCK (SANS TAILLE)</Label>
+                <Input type="number" min="0" step="1" value={form.stock_quantity} onChange={(e) => setForm({ ...form, stock_quantity: e.target.value })} placeholder="0" className="admin-input" />
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label className="admin-kicker text-xs text-[hsl(var(--admin-muted-foreground))]">
+                  STOCK TOTAL : {calcTotalFromSizes(form.stock_by_size)} PCS
+                </Label>
+              </div>
+            )}
+            {form.category !== "Accessoires" && (
+              <div className="space-y-2 md:col-span-2">
+                <Label className="admin-kicker text-xs text-[hsl(var(--admin-muted-foreground))]">STOCK PAR TAILLE</Label>
+                <SizeStockGrid
+                  category={form.category}
+                  value={form.stock_by_size}
+                  onChange={(v) => setForm({ ...form, stock_by_size: v })}
+                />
+              </div>
+            )}
             <div className="space-y-2 md:col-span-2">
               <Label className="admin-kicker text-xs text-[hsl(var(--admin-muted-foreground))]">URL IMAGE</Label>
               <Input value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://..." className="admin-input" />
