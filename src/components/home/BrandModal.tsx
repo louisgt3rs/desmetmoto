@@ -32,39 +32,37 @@ function extractDomain(url?: string | null): string | null {
   }
 }
 
-function BrandLogo({ brand, size = 64 }: { brand: BrandModalBrand; size?: number }) {
-  const [src, setSrc] = useState<string | null>(null);
+function BrandLogo({ brand, size = 64, darkFallback = false }: { brand: BrandModalBrand; size?: number; darkFallback?: boolean }) {
   const [failed, setFailed] = useState(false);
 
-  useEffect(() => {
-    setFailed(false);
-    if (brand.logo_url) {
-      setSrc(brand.logo_url);
-    } else {
-      const domain = extractDomain(brand.website_url);
-      if (domain) {
-        setSrc(`https://logo.clearbit.com/${domain}`);
-      } else {
-        setSrc(null);
-      }
-    }
-  }, [brand.logo_url, brand.website_url]);
-
-  if (!src || failed) {
+  if (brand.logo_url && !failed) {
     return (
-      <span className="font-display font-bold text-primary" style={{ fontSize: size * 0.45 }}>
-        {brand.name.charAt(0)}
-      </span>
+      <img
+        src={brand.logo_url}
+        alt={brand.name}
+        className="h-full w-full object-contain p-3"
+        onError={() => setFailed(true)}
+      />
+    );
+  }
+
+  // Premium text fallback — white on dark or primary colored
+  if (darkFallback) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-foreground/90 rounded-[inherit]">
+        <span className="font-display font-bold tracking-wider text-background" style={{ fontSize: Math.max(10, size * 0.18) }}>
+          {brand.name.toUpperCase()}
+        </span>
+      </div>
     );
   }
 
   return (
-    <img
-      src={src}
-      alt={brand.name}
-      className="h-full w-full object-contain p-3"
-      onError={() => setFailed(true)}
-    />
+    <div className="flex h-full w-full items-center justify-center bg-primary/10 rounded-[inherit]">
+      <span className="font-display font-bold tracking-wider text-primary" style={{ fontSize: Math.max(10, size * 0.18) }}>
+        {brand.name.toUpperCase()}
+      </span>
+    </div>
   );
 }
 
