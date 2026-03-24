@@ -1,6 +1,6 @@
-import { useEffect, useRef, useMemo } from "react";
+import { useMemo } from "react";
 import { motion } from "framer-motion";
-import heroMoto from "@/assets/hero-motorcycle.png";
+import desmetLogo from "@/assets/desmet-logo-diamond.png";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -52,18 +52,6 @@ function Particles({ count = 30 }: { count?: number }) {
 }
 
 export default function HeroSection() {
-  const imgRef = useRef<HTMLImageElement>(null);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!imgRef.current) return;
-      const scrollY = window.scrollY;
-      const rotation = scrollY * 0.12;
-      imgRef.current.style.transform = `perspective(1200px) rotateY(${rotation}deg) rotate(-3deg)`;
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   return (
     <section
@@ -103,15 +91,9 @@ export default function HeroSection() {
         className="relative z-10 my-4 md:my-8"
       >
         <img
-          ref={imgRef}
-          src={heroMoto}
-          alt="Moto sportive"
-          className="w-[85vw] max-w-[550px] md:max-w-[650px] lg:max-w-[750px] h-auto drop-shadow-[0_0_80px_rgba(192,57,43,0.5)]"
-          style={{
-            transformStyle: "preserve-3d",
-            willChange: "transform",
-            transform: "perspective(1200px) rotateY(0deg) rotate(-3deg)",
-          }}
+          src={desmetLogo}
+          alt="Desmet Équipement Wavre"
+          className="w-[280px] max-w-[320px] md:max-w-[400px] lg:max-w-[450px] h-auto drop-shadow-[0_0_60px_hsl(var(--primary)/0.4)]"
         />
       </motion.div>
 
