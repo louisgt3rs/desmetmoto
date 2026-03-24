@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { X, MapPin, ExternalLink, ShoppingBag, Globe } from "lucide-react";
 
+export { BrandLogo };
+
 interface BrandModalProps {
   brand: BrandModalBrand;
   onClose: () => void;
@@ -32,39 +34,37 @@ function extractDomain(url?: string | null): string | null {
   }
 }
 
-function BrandLogo({ brand, size = 64 }: { brand: BrandModalBrand; size?: number }) {
-  const [src, setSrc] = useState<string | null>(null);
+function BrandLogo({ brand, size = 64, darkFallback = false }: { brand: BrandModalBrand; size?: number; darkFallback?: boolean }) {
   const [failed, setFailed] = useState(false);
 
-  useEffect(() => {
-    setFailed(false);
-    if (brand.logo_url) {
-      setSrc(brand.logo_url);
-    } else {
-      const domain = extractDomain(brand.website_url);
-      if (domain) {
-        setSrc(`https://logo.clearbit.com/${domain}`);
-      } else {
-        setSrc(null);
-      }
-    }
-  }, [brand.logo_url, brand.website_url]);
-
-  if (!src || failed) {
+  if (brand.logo_url && !failed) {
     return (
-      <span className="font-display font-bold text-primary" style={{ fontSize: size * 0.45 }}>
-        {brand.name.charAt(0)}
-      </span>
+      <img
+        src={brand.logo_url}
+        alt={brand.name}
+        className="h-full w-full object-contain p-3"
+        onError={() => setFailed(true)}
+      />
+    );
+  }
+
+  // Premium text fallback — white on dark or primary colored
+  if (darkFallback) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-foreground/90 rounded-[inherit]">
+        <span className="font-display font-bold tracking-wider text-background" style={{ fontSize: Math.max(10, size * 0.18) }}>
+          {brand.name.toUpperCase()}
+        </span>
+      </div>
     );
   }
 
   return (
-    <img
-      src={src}
-      alt={brand.name}
-      className="h-full w-full object-contain p-3"
-      onError={() => setFailed(true)}
-    />
+    <div className="flex h-full w-full items-center justify-center bg-primary/10 rounded-[inherit]">
+      <span className="font-display font-bold tracking-wider text-primary" style={{ fontSize: Math.max(10, size * 0.18) }}>
+        {brand.name.toUpperCase()}
+      </span>
+    </div>
   );
 }
 
@@ -133,7 +133,7 @@ export default function BrandModal({ brand, onClose }: BrandModalProps) {
 
             <div className="relative z-[1]">
               <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center overflow-hidden rounded-[20px] border border-primary/30 bg-background shadow-[0_0_30px_hsl(var(--primary)/0.2)]">
-                <BrandLogo brand={brand} size={96} />
+                <BrandLogo brand={brand} size={96} darkFallback />
               </div>
 
               <h3 className="mb-1 font-display text-[32px] tracking-[0.02em] text-foreground">
