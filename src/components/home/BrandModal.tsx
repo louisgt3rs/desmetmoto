@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { X, MapPin, ExternalLink, ShoppingBag, Globe } from "lucide-react";
 
 interface BrandModalProps {
@@ -23,7 +23,54 @@ export interface BrandModalBrand {
   products?: BrandModalProduct[];
 }
 
+function extractDomain(url?: string | null): string | null {
+  if (!url) return null;
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+}
+
+function BrandLogo({ brand, size = 64 }: { brand: BrandModalBrand; size?: number }) {
+  const [src, setSrc] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setFailed(false);
+    if (brand.logo_url) {
+      setSrc(brand.logo_url);
+    } else {
+      const domain = extractDomain(brand.website_url);
+      if (domain) {
+        setSrc(`https://logo.clearbit.com/${domain}`);
+      } else {
+        setSrc(null);
+      }
+    }
+  }, [brand.logo_url, brand.website_url]);
+
+  if (!src || failed) {
+    return (
+      <span className="font-display font-bold text-primary" style={{ fontSize: size * 0.45 }}>
+        {brand.name.charAt(0)}
+      </span>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={brand.name}
+      className="h-full w-full object-contain p-3"
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
 export default function BrandModal({ brand, onClose }: BrandModalProps) {
+  const [heroBgFailed, setHeroBgFailed] = useState(false);
+
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -42,6 +89,10 @@ export default function BrandModal({ brand, onClose }: BrandModalProps) {
   const meta = [brand.country, brand.founded_year ? `Depuis ${brand.founded_year}` : null]
     .filter(Boolean)
     .join(" · ");
+
+  // Use first product image or clearbit logo as a subtle hero background
+  const heroImage =
+    brand.products?.find((p) => p.image_url)?.image_url ?? null;
 
   return (
     <div
@@ -65,28 +116,33 @@ export default function BrandModal({ brand, onClose }: BrandModalProps) {
         </button>
 
         <div className="flex-1 overflow-y-auto">
-          {/* Header with logo */}
-          <div className="border-b border-border bg-secondary/40 px-6 pb-6 pt-14 text-center">
-            <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center overflow-hidden rounded-[20px] border border-primary/30 bg-background shadow-[0_0_30px_hsl(var(--primary)/0.2)]">
-              {brand.logo_url ? (
-                <img
-                  src={brand.logo_url}
-                  alt={brand.name}
-                  className="h-full w-full object-contain p-3"
-                />
-              ) : (
-                <span className="font-display text-[36px] font-bold text-primary">
-                  {brand.name.charAt(0)}
-                </span>
-              )}
-            </div>
+          {/* Header with hero background */}
+          <div className="relative border-b border-border px-6 pb-6 pt-14 text-center overflow-hidden">
+            {/* Subtle hero background */}
+            {heroImage && !heroBgFailed ? (
+              <img
+                src={heroImage}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 h-full w-full object-cover opacity-[0.08] blur-sm"
+                onError={() => setHeroBgFailed(true)}
+              />
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-secondary/40" />
+            )}
 
-            <h3 className="mb-1 font-display text-[32px] tracking-[0.02em] text-foreground">
-              {brand.name}
-            </h3>
-            <p className="text-[13px] text-muted-foreground">
-              {meta || "Disponible en magasin à Wavre"}
-            </p>
+            <div className="relative z-[1]">
+              <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center overflow-hidden rounded-[20px] border border-primary/30 bg-background shadow-[0_0_30px_hsl(var(--primary)/0.2)]">
+                <BrandLogo brand={brand} size={96} />
+              </div>
+
+              <h3 className="mb-1 font-display text-[32px] tracking-[0.02em] text-foreground">
+                {brand.name}
+              </h3>
+              <p className="text-[13px] text-muted-foreground">
+                {meta || "Disponible en magasin à Wavre"}
+              </p>
+            </div>
           </div>
 
           <div className="space-y-5 px-6 py-6">
