@@ -259,11 +259,11 @@ export default function AraiPage() {
         </div>
       </section>
 
-      {/* Helmets */}
+      {/* Helmets + Products unified */}
       <section className="py-24">
         <div className="container mx-auto px-4">
           <SectionHeading title="MODÈLES DISPONIBLES" subtitle="Essayez-les en magasin et trouvez votre taille idéale" />
-          {models.length === 0 && (
+          {models.length === 0 && araiProducts.length === 0 && (
             <p className="text-center text-muted-foreground py-12">Les modèles seront bientôt disponibles.</p>
           )}
           <div className="grid md:grid-cols-2 gap-8">
@@ -275,17 +275,9 @@ export default function AraiPage() {
                 onReserve={setReserveModel}
               />
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Arai products from catalogue */}
-      {araiProducts.length > 0 && (
-        <section className="py-24">
-          <div className="container mx-auto px-4">
-            <SectionHeading title="CATALOGUE ARAI" subtitle="Tous nos produits Arai disponibles en magasin" />
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {araiProducts.map((product, i) => {
+            {araiProducts
+              .filter(p => !models.some(m => m.name.toLowerCase() === p.name.toLowerCase()))
+              .map((product, i) => {
                 const sizeStock = (product.stock_by_size && typeof product.stock_by_size === "object" && !Array.isArray(product.stock_by_size))
                   ? product.stock_by_size as Record<string, number> : {};
                 const hasSizeData = Object.keys(sizeStock).length > 0;
@@ -336,10 +328,9 @@ export default function AraiPage() {
                   </motion.article>
                 );
               })}
-            </div>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       <ReservationModal
         open={!!reserveModel}
