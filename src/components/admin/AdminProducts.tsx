@@ -209,6 +209,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
       const { error } = await supabase.from("product_colorways").update({
         name: cwForm.name.trim(),
         image_url: cwForm.image_url || null,
+        gallery_images: cwForm.gallery_images,
         stock_by_size: cwForm.stock_by_size,
       }).eq("id", editingCwId);
       if (error) { toast.error(error.message); return; }
