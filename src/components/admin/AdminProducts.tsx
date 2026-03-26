@@ -18,6 +18,7 @@ interface ProductColorway {
   product_id: string;
   name: string;
   image_url: string | null;
+  gallery_images: string[];
   stock_by_size: Record<string, number>;
   sort_order: number;
 }
