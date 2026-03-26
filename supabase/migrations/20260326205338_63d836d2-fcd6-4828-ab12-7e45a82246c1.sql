@@ -1,0 +1,1 @@
+ALTER TABLE public.product_colorways ADD COLUMN gallery_images text[] DEFAULT '{}'::text[];
