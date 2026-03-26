@@ -132,7 +132,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
   const startAdd = () => {
     setEditing(null);
     setOpen(true);
-    setForm({ reference_code: "", name: "", description: "", brand_id: "", category: "Casques", price: "", stock_quantity: "0", stock_by_size: {}, image_url: "" });
+    setForm({ reference_code: "", name: "", colorway: "", description: "", brand_id: "", category: "Casques", price: "", stock_quantity: "0", stock_by_size: {}, image_url: "" });
   };
 
   const cancel = () => {
