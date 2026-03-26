@@ -182,18 +182,19 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
         product_id: editing.id,
         name: cwForm.name.trim(),
         image_url: cwForm.image_url || null,
+        gallery_images: cwForm.gallery_images,
         stock_by_size: cwForm.stock_by_size,
         sort_order: colorways.length,
       }).select("*").single();
       if (error) { toast.error(error.message); return; }
-      setColorways(prev => [...prev, { ...data, stock_by_size: parseSbs(data.stock_by_size) } as ProductColorway]);
+      setColorways(prev => [...prev, { ...data, gallery_images: Array.isArray(data.gallery_images) ? (data.gallery_images as string[]) : [], stock_by_size: parseSbs(data.stock_by_size) } as ProductColorway]);
     } else {
-      // For new product, store temporarily
       setColorways(prev => [...prev, {
         id: `temp-${Date.now()}`,
         product_id: "",
         name: cwForm.name.trim(),
         image_url: cwForm.image_url || null,
+        gallery_images: cwForm.gallery_images,
         stock_by_size: cwForm.stock_by_size,
         sort_order: colorways.length,
       }]);
