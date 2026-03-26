@@ -240,12 +240,49 @@ export type Database = {
         }
         Relationships: []
       }
+      product_colorways: {
+        Row: {
+          created_at: string | null
+          id: string
+          image_url: string | null
+          name: string
+          product_id: string
+          sort_order: number | null
+          stock_by_size: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          product_id: string
+          sort_order?: number | null
+          stock_by_size?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          product_id?: string
+          sort_order?: number | null
+          stock_by_size?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_colorways_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           brand: string | null
           brand_id: string | null
           category: string | null
-          colorway: string | null
           created_at: string
           description: string | null
           id: string
@@ -256,7 +293,6 @@ export type Database = {
           name: string
           price: number | null
           price_range: string | null
-          reference_code: string | null
           sizes: string[] | null
           sort_order: number | null
           stock_by_size: Json | null
@@ -267,7 +303,6 @@ export type Database = {
           brand?: string | null
           brand_id?: string | null
           category?: string | null
-          colorway?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -278,7 +313,6 @@ export type Database = {
           name: string
           price?: number | null
           price_range?: string | null
-          reference_code?: string | null
           sizes?: string[] | null
           sort_order?: number | null
           stock_by_size?: Json | null
@@ -289,7 +323,6 @@ export type Database = {
           brand?: string | null
           brand_id?: string | null
           category?: string | null
-          colorway?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -300,7 +333,6 @@ export type Database = {
           name?: string
           price?: number | null
           price_range?: string | null
-          reference_code?: string | null
           sizes?: string[] | null
           sort_order?: number | null
           stock_by_size?: Json | null

@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import ImageGallery from "@/components/ImageGallery";
 import araiStoreWall from "@/assets/arai-store-wall.jpg";
 import AraiViewer from "@/components/AraiViewer";
+import ProductColorwaySelector from "@/components/ProductColorwaySelector";
 
 /* ───── types ───── */
 interface HelmetModel {
@@ -34,7 +35,7 @@ interface Colorway {
   stock_by_size: Record<string, number> | null;
 }
 
-/* ───── Helmet Card ───── */
+/* ───── Helmet Card (for helmet_models table) ───── */
 function HelmetCard({ model, colorways, onReserve }: { model: HelmetModel; colorways: Colorway[]; onReserve: (name: string) => void }) {
   const [selectedCw, setSelectedCw] = useState<Colorway | null>(colorways[0] || null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
@@ -72,7 +73,6 @@ function HelmetCard({ model, colorways, onReserve }: { model: HelmetModel; color
       transition={{ duration: 0.5 }}
       className="bg-card border border-border rounded-xl overflow-hidden hover:border-primary/40 transition-all duration-300 hover:shadow-[0_0_30px_hsl(var(--glow-soft))]"
     >
-      {/* Image gallery */}
       <div className="p-4 md:p-6">
         {allImages.length > 0 ? (
           <ImageGallery images={allImages} altPrefix={`${model.name}${selectedCw ? ` - ${selectedCw.name}` : ""}`} />
@@ -83,12 +83,10 @@ function HelmetCard({ model, colorways, onReserve }: { model: HelmetModel; color
         )}
       </div>
 
-      {/* Content */}
       <div className="p-6 md:p-8 pt-0">
         <h3 className="font-display text-3xl md:text-4xl text-foreground mb-2">{model.name}</h3>
         {model.description && <p className="text-muted-foreground text-sm mb-4 leading-relaxed">{model.description}</p>}
 
-        {/* Colorway swatches */}
         {colorways.length > 0 && (
           <div className="mb-5">
             <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Coloris disponibles</p>
@@ -132,7 +130,6 @@ function HelmetCard({ model, colorways, onReserve }: { model: HelmetModel; color
           </div>
         )}
 
-        {/* Sizes with stock indication */}
         <div className="mb-6">
           <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Tailles</p>
           <div className="flex flex-wrap gap-2">
@@ -181,8 +178,6 @@ export default function AraiPage() {
   const [colorways, setColorways] = useState<Record<string, Colorway[]>>({});
   const [araiProducts, setAraiProducts] = useState<any[]>([]);
   const [reserveModel, setReserveModel] = useState<string | null>(null);
-
-  const SIZES_ORDER = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL"];
 
   const load = useCallback(async () => {
     const [{ data: m }, { data: cw }, { data: prods }] = await Promise.all([
@@ -235,21 +230,11 @@ export default function AraiPage() {
             transition={{ duration: 0.7 }}
             className="relative overflow-hidden rounded-xl border border-primary/20 bg-card shadow-[0_0_40px_hsl(var(--glow-soft))]"
           >
-            {[
-              "top-4 left-4 border-t border-l",
-              "top-4 right-4 border-t border-r",
-              "bottom-4 left-4 border-b border-l",
-              "bottom-4 right-4 border-b border-r",
-            ].map((position) => (
-              <div
-                key={position}
-                className={`pointer-events-none absolute z-20 h-4 w-4 border-primary/40 ${position}`}
-              />
+            {["top-4 left-4 border-t border-l", "top-4 right-4 border-t border-r", "bottom-4 left-4 border-b border-l", "bottom-4 right-4 border-b border-r"].map((position) => (
+              <div key={position} className={`pointer-events-none absolute z-20 h-4 w-4 border-primary/40 ${position}`} />
             ))}
-
             <div className="absolute inset-0 z-10 bg-background/50" />
             <div className="absolute inset-x-0 bottom-0 z-10 h-32 bg-gradient-to-t from-background via-background/50 to-transparent" />
-
             <img
               src={araiStoreWall}
               alt="Espace Arai en magasin — mur de casques"
@@ -277,60 +262,24 @@ export default function AraiPage() {
             ))}
             {araiProducts
               .filter(p => !models.some(m => m.name.toLowerCase() === p.name.toLowerCase()))
-              .map((product, i) => {
-                const sizeStock = (product.stock_by_size && typeof product.stock_by_size === "object" && !Array.isArray(product.stock_by_size))
-                  ? product.stock_by_size as Record<string, number> : {};
-                const hasSizeData = Object.keys(sizeStock).length > 0;
-                const sizeTotal = Object.values(sizeStock).reduce((sum: number, v: any) => sum + (v || 0), 0);
-                const totalStock = sizeTotal > 0 ? sizeTotal : product.stock_quantity;
-                const price = typeof product.price === "number"
-                  ? new Intl.NumberFormat("fr-BE", { style: "currency", currency: "EUR" }).format(product.price)
-                  : null;
-
-                return (
-                  <motion.article
-                    key={product.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.05 }}
-                    className="overflow-hidden rounded-xl border border-border bg-card hover:border-primary/40 transition-all"
-                  >
-                    <div className="relative aspect-[4/3] bg-secondary">
-                      {product.image_url ? (
-                        <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" />
-                      ) : (
-                        <div className="flex h-full items-center justify-center">
-                          <p className="text-muted-foreground text-sm">Image à venir</p>
-                        </div>
-                      )}
-                      <div className={`absolute right-3 top-3 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider ${
-                        totalStock > 0 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-                      }`}>
-                        {totalStock > 0 ? "EN STOCK" : "RUPTURE"}
-                      </div>
-                    </div>
-                    <div className="p-5">
-                      <h3 className="font-display text-xl text-foreground">{product.name}</h3>
-                      {(product as any).colorway && (
-                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{(product as any).colorway}</p>
-                      )}
-                      {price && <p className="text-primary font-display text-lg mb-4">{price}</p>}
-                      {hasSizeData ? (
-                        <div className="flex flex-wrap gap-x-3 gap-y-1.5">
-                          {SIZES_ORDER.filter(s => s in sizeStock).map(size => (
-                            <span key={size} className={`text-xs font-medium tracking-wide ${(sizeStock[size] || 0) > 0 ? "text-primary" : "text-muted-foreground/50"}`}>
-                              {size}:&nbsp;{sizeStock[size] || 0}
-                            </span>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-xs text-muted-foreground">Stock total : {totalStock} PCS</p>
-                      )}
-                    </div>
-                  </motion.article>
-                );
-              })}
+              .map((product, i) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.05 }}
+                >
+                  <ProductColorwaySelector
+                    productId={product.id}
+                    productName={product.name}
+                    productImageUrl={product.image_url}
+                    productPrice={product.price}
+                    productStockBySize={product.stock_by_size}
+                    productStockQuantity={product.stock_quantity}
+                  />
+                </motion.div>
+              ))}
           </div>
         </div>
       </section>
