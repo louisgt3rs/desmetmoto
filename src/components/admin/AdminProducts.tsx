@@ -76,6 +76,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
     const payload: any = {
       reference_code: form.reference_code.trim() || null,
       name: form.name,
+      colorway: form.colorway.trim() || null,
       description: form.description || null,
       brand_id: form.brand_id || null,
       brand: selectedBrand?.name || null,
