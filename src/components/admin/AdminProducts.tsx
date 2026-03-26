@@ -126,7 +126,6 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
           gallery_images: cw.gallery_images,
           stock_by_size: cw.stock_by_size,
           sort_order: i,
-          sort_order: i,
         }));
         await supabase.from("product_colorways").insert(cwPayloads);
       }
