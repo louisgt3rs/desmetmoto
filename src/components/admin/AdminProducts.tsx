@@ -57,7 +57,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
 
   // Colorways state
   const [colorways, setColorways] = useState<ProductColorway[]>([]);
-  const [cwForm, setCwForm] = useState({ name: "", image_url: "", stock_by_size: {} as Record<string, number> });
+  const [cwForm, setCwForm] = useState({ name: "", image_url: "", gallery_images: [] as string[], stock_by_size: {} as Record<string, number> });
   const [editingCwId, setEditingCwId] = useState<string | null>(null);
 
   const filteredProducts = useMemo(() => {
