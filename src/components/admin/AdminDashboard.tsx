@@ -23,7 +23,7 @@ export default function AdminDashboard({ events, products }: AdminDashboardProps
       id: product.id,
       type: "PRODUIT",
       title: product.name,
-      meta: `${product.reference_code || "SANS RÉF."} • ${product.brand || "MARQUE"}`,
+      meta: `${product.brand || "MARQUE"} • ${product.category || "—"}`,
       date: product.created_at,
     })),
     ...events.map((event) => ({
