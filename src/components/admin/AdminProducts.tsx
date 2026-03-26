@@ -234,6 +234,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
                   <div className="min-w-0 flex-1">
                     <p className="admin-kicker text-[11px] text-[hsl(var(--admin-accent))]">{p.reference_code || "SANS RÉFÉRENCE"}</p>
                     <h3 className="font-adminDisplay text-xl leading-tight text-[hsl(var(--admin-foreground))]">{p.name}</h3>
+                    {(p as any).colorway && <p className="text-xs uppercase tracking-[0.14em] text-[hsl(var(--admin-accent))]">{(p as any).colorway}</p>}
                     <p className="mt-2 text-xs uppercase tracking-[0.14em] text-[hsl(var(--admin-muted-foreground))]">{getBrandName(p.brand_id, p.brand)} • {p.category || "—"}</p>
                     <div className="mt-3 flex items-center justify-between gap-3">
                       <span className="text-sm uppercase tracking-[0.14em] text-[hsl(var(--admin-foreground))]">{formatPrice(p.price)}</span>

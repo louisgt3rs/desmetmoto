@@ -109,9 +109,12 @@ export default function PopularProducts() {
                 {(product.brands?.name || product.brand) && (
                   <span className="text-xs font-medium text-primary tracking-wider uppercase">{product.brands?.name || product.brand}</span>
                 )}
-                <h3 className="font-display text-xl text-foreground mt-1 mb-1 group-hover:text-primary transition-colors">
+                <h3 className="font-display text-xl text-foreground mt-1 group-hover:text-primary transition-colors">
                   {product.name}
                 </h3>
+                {(product as any).colorway && (
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{(product as any).colorway}</p>
+                )}
                 {typeof product.price === "number" ? (
                   <p className="text-sm text-muted-foreground mb-3">{priceFormatter.format(product.price)}</p>
                 ) : product.price_range ? (
