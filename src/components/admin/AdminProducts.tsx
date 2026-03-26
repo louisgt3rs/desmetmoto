@@ -451,7 +451,10 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
                   </div>
                 </div>
                 <div>
-                  <ImageUploadSingle value={cwForm.image_url} onChange={(v) => setCwForm({ ...cwForm, image_url: v })} folder="products" label="IMPORTER IMAGE COLORIS" previewClass="h-20 w-20" />
+                  <ImageUploadSingle value={cwForm.image_url} onChange={(v) => setCwForm({ ...cwForm, image_url: v })} folder="products" label="IMAGE PRINCIPALE DU COLORIS" previewClass="h-20 w-20" />
+                </div>
+                <div>
+                  <ImageUploadMulti value={cwForm.gallery_images} onChange={(v) => setCwForm({ ...cwForm, gallery_images: v })} folder="products" label="PHOTOS SUPPLÉMENTAIRES (GALERIE)" />
                 </div>
                 {form.category !== "Accessoires" && (
                   <div>
