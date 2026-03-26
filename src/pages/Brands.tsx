@@ -1,24 +1,8 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Layout from "@/components/Layout";
-import { supabase } from "@/integrations/supabase/client";
-import type { Tables } from "@/integrations/supabase/types";
-
-type BrandRow = Tables<"brands">;
+import BrandsCarousel from "@/components/home/BrandsCarousel";
 
 export default function BrandsPage() {
-  const [brands, setBrands] = useState<BrandRow[]>([]);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    supabase.from("brands").select("*").order("name").then(({ data }) => {
-      setBrands(data ?? []);
-    });
-  }, []);
-
-  const toSlug = (name: string) => name.toLowerCase().replace(/\s+/g, "-");
-
   return (
     <Layout>
       <section className="py-24 min-h-[80vh] flex flex-col justify-center bg-background">
@@ -38,29 +22,7 @@ export default function BrandsPage() {
             </p>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="flex flex-wrap justify-center gap-3 md:gap-4 max-w-5xl mx-auto"
-          >
-            {brands.map((brand, i) => (
-              <motion.button
-                key={brand.id}
-                type="button"
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                whileTap={{ scale: 0.95 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.3, delay: i * 0.02 }}
-                onClick={() => navigate(`/marques/${toSlug(brand.name)}`)}
-                className="relative z-10 inline-flex cursor-pointer items-center px-5 py-2.5 rounded-full bg-secondary text-foreground text-sm md:text-base font-medium border border-primary/20 transition-all duration-300 hover:border-primary hover:shadow-[0_0_20px_hsl(var(--primary)/0.4)] hover:bg-primary/10"
-              >
-                {brand.name}
-              </motion.button>
-            ))}
-          </motion.div>
+          <BrandsCarousel />
 
           <motion.p
             initial={{ opacity: 0, y: 10 }}
