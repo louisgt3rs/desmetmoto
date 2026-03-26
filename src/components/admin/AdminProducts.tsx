@@ -45,6 +45,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
   const [form, setForm] = useState({
     reference_code: "",
     name: "",
+    colorway: "",
     description: "",
     brand_id: "",
     category: "Casques",
