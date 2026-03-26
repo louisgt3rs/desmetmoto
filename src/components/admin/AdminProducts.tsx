@@ -268,8 +268,12 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
               <Input value={form.reference_code} onChange={(e) => setForm({ ...form, reference_code: e.target.value })} placeholder="EX: ARAI-RX7-01" className="admin-input" />
             </div>
             <div className="space-y-2">
-              <Label className="admin-kicker text-xs text-[hsl(var(--admin-muted-foreground))]">NOM</Label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="NOM DU PRODUIT" className="admin-input" />
+              <Label className="admin-kicker text-xs text-[hsl(var(--admin-muted-foreground))]">MODÈLE</Label>
+              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="EX: RX-7V EVO, QUANTIC" className="admin-input" />
+            </div>
+            <div className="space-y-2">
+              <Label className="admin-kicker text-xs text-[hsl(var(--admin-muted-foreground))]">COLORIS</Label>
+              <Input value={form.colorway} onChange={(e) => setForm({ ...form, colorway: e.target.value })} placeholder="EX: DIAMOND WHITE, MATT BLACK" className="admin-input" />
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label className="admin-kicker text-xs text-[hsl(var(--admin-muted-foreground))]">DESCRIPTION</Label>
