@@ -231,7 +231,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
 
   const startEditCw = (cw: ProductColorway) => {
     setEditingCwId(cw.id);
-    setCwForm({ name: cw.name, image_url: cw.image_url || "", stock_by_size: cw.stock_by_size });
+    setCwForm({ name: cw.name, image_url: cw.image_url || "", gallery_images: cw.gallery_images || [], stock_by_size: cw.stock_by_size });
   };
 
   const getBrandName = (id: string | null, fallback?: string | null) => brands.find(b => b.id === id)?.name || fallback || "—";
