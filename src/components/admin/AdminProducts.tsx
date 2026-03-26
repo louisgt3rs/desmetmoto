@@ -164,7 +164,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
     setOpen(true);
     setForm({ name: "", description: "", brand_id: "", category: "Casques", price: "", image_url: "" });
     setColorways([]);
-    setCwForm({ name: "", image_url: "", stock_by_size: {} });
+    setCwForm({ name: "", image_url: "", gallery_images: [], stock_by_size: {} });
     setEditingCwId(null);
   };
 
