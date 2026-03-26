@@ -118,6 +118,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
     setForm({
       reference_code: p.reference_code || "",
       name: p.name,
+      colorway: (p as any).colorway || "",
       description: p.description || "",
       brand_id: p.brand_id || "",
       category: p.category || "Casques",
