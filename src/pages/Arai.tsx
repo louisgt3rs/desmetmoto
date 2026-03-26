@@ -179,12 +179,18 @@ function HelmetCard({ model, colorways, onReserve }: { model: HelmetModel; color
 export default function AraiPage() {
   const [models, setModels] = useState<HelmetModel[]>([]);
   const [colorways, setColorways] = useState<Record<string, Colorway[]>>({});
+  const [araiProducts, setAraiProducts] = useState<any[]>([]);
   const [reserveModel, setReserveModel] = useState<string | null>(null);
 
+  const SIZES_ORDER = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL"];
+
   const load = useCallback(async () => {
-    const { data: m } = await supabase.from("helmet_models").select("*").eq("is_published", true).order("sort_order");
+    const [{ data: m }, { data: cw }, { data: prods }] = await Promise.all([
+      supabase.from("helmet_models").select("*").eq("is_published", true).order("sort_order"),
+      supabase.from("helmet_colorways").select("*").order("sort_order"),
+      supabase.from("products").select("*").ilike("brand", "%arai%").order("name"),
+    ]);
     if (m) setModels(m as HelmetModel[]);
-    const { data: cw } = await supabase.from("helmet_colorways").select("*").order("sort_order");
     if (cw) {
       const grouped: Record<string, Colorway[]> = {};
       (cw as Colorway[]).forEach(c => {
@@ -193,6 +199,7 @@ export default function AraiPage() {
       });
       setColorways(grouped);
     }
+    setAraiProducts(prods || []);
   }, []);
 
   useEffect(() => { load(); }, [load]);
