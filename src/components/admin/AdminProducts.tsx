@@ -155,7 +155,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
       price: typeof p.price === "number" ? String(p.price) : "",
       image_url: p.image_url || "",
     });
-    setCwForm({ name: "", image_url: "", stock_by_size: {} });
+    setCwForm({ name: "", image_url: "", gallery_images: [], stock_by_size: {} });
     setEditingCwId(null);
   };
 
