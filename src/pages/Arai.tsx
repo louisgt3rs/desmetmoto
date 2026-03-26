@@ -311,7 +311,10 @@ export default function AraiPage() {
                       </div>
                     </div>
                     <div className="p-5">
-                      <h3 className="font-display text-xl text-foreground mb-1">{product.name}</h3>
+                      <h3 className="font-display text-xl text-foreground">{product.name}</h3>
+                      {(product as any).colorway && (
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{(product as any).colorway}</p>
+                      )}
                       {price && <p className="text-primary font-display text-lg mb-4">{price}</p>}
                       {hasSizeData ? (
                         <div className="flex flex-wrap gap-x-3 gap-y-1.5">

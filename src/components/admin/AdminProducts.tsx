@@ -45,6 +45,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
   const [form, setForm] = useState({
     reference_code: "",
     name: "",
+    colorway: "",
     description: "",
     brand_id: "",
     category: "Casques",
@@ -75,6 +76,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
     const payload: any = {
       reference_code: form.reference_code.trim() || null,
       name: form.name,
+      colorway: form.colorway.trim() || null,
       description: form.description || null,
       brand_id: form.brand_id || null,
       brand: selectedBrand?.name || null,
@@ -116,6 +118,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
     setForm({
       reference_code: p.reference_code || "",
       name: p.name,
+      colorway: (p as any).colorway || "",
       description: p.description || "",
       brand_id: p.brand_id || "",
       category: p.category || "Casques",
@@ -129,7 +132,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
   const startAdd = () => {
     setEditing(null);
     setOpen(true);
-    setForm({ reference_code: "", name: "", description: "", brand_id: "", category: "Casques", price: "", stock_quantity: "0", stock_by_size: {}, image_url: "" });
+    setForm({ reference_code: "", name: "", colorway: "", description: "", brand_id: "", category: "Casques", price: "", stock_quantity: "0", stock_by_size: {}, image_url: "" });
   };
 
   const cancel = () => {
@@ -185,6 +188,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
                         {p.image_url ? <img src={p.image_url} alt={p.name} className="h-12 w-12 object-cover" /> : null}
                         <div>
                           <p className="font-adminDisplay text-lg text-[hsl(var(--admin-foreground))]">{p.name}</p>
+                          {(p as any).colorway ? <p className="text-xs uppercase tracking-[0.14em] text-[hsl(var(--admin-accent))]">{(p as any).colorway}</p> : null}
                           {p.description ? <p className="line-clamp-1 text-xs uppercase tracking-[0.12em] text-[hsl(var(--admin-muted-foreground))]">{p.description}</p> : null}
                         </div>
                       </div>
@@ -230,6 +234,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
                   <div className="min-w-0 flex-1">
                     <p className="admin-kicker text-[11px] text-[hsl(var(--admin-accent))]">{p.reference_code || "SANS RÉFÉRENCE"}</p>
                     <h3 className="font-adminDisplay text-xl leading-tight text-[hsl(var(--admin-foreground))]">{p.name}</h3>
+                    {(p as any).colorway && <p className="text-xs uppercase tracking-[0.14em] text-[hsl(var(--admin-accent))]">{(p as any).colorway}</p>}
                     <p className="mt-2 text-xs uppercase tracking-[0.14em] text-[hsl(var(--admin-muted-foreground))]">{getBrandName(p.brand_id, p.brand)} • {p.category || "—"}</p>
                     <div className="mt-3 flex items-center justify-between gap-3">
                       <span className="text-sm uppercase tracking-[0.14em] text-[hsl(var(--admin-foreground))]">{formatPrice(p.price)}</span>
@@ -265,8 +270,12 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
               <Input value={form.reference_code} onChange={(e) => setForm({ ...form, reference_code: e.target.value })} placeholder="EX: ARAI-RX7-01" className="admin-input" />
             </div>
             <div className="space-y-2">
-              <Label className="admin-kicker text-xs text-[hsl(var(--admin-muted-foreground))]">NOM</Label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="NOM DU PRODUIT" className="admin-input" />
+              <Label className="admin-kicker text-xs text-[hsl(var(--admin-muted-foreground))]">MODÈLE</Label>
+              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="EX: RX-7V EVO, QUANTIC" className="admin-input" />
+            </div>
+            <div className="space-y-2">
+              <Label className="admin-kicker text-xs text-[hsl(var(--admin-muted-foreground))]">COLORIS</Label>
+              <Input value={form.colorway} onChange={(e) => setForm({ ...form, colorway: e.target.value })} placeholder="EX: DIAMOND WHITE, MATT BLACK" className="admin-input" />
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label className="admin-kicker text-xs text-[hsl(var(--admin-muted-foreground))]">DESCRIPTION</Label>
