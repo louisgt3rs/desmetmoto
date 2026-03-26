@@ -7,28 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { BrandLogo } from "@/components/home/BrandModal";
 import type { BrandModalBrand } from "@/components/home/BrandModal";
+import ProductColorwaySelector from "@/components/ProductColorwaySelector";
 
 type BrandRow = Tables<"brands">;
 type ProductRow = Tables<"products">;
-
-const SIZES_ORDER = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL"];
-
-function parseSizeStock(stockBySize: unknown): Record<string, number> {
-  if (stockBySize && typeof stockBySize === "object" && !Array.isArray(stockBySize)) {
-    return stockBySize as Record<string, number>;
-  }
-  return {};
-}
-
-function getTotalStock(sizeStock: Record<string, number>, stockQty: number): number {
-  const sizeTotal = Object.values(sizeStock).reduce((sum, v) => sum + (v || 0), 0);
-  return sizeTotal > 0 ? sizeTotal : stockQty;
-}
-
-const formatPrice = (price?: number | null) =>
-  typeof price === "number"
-    ? new Intl.NumberFormat("fr-BE", { style: "currency", currency: "EUR" }).format(price)
-    : null;
 
 export default function BrandDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -41,8 +23,6 @@ export default function BrandDetailPage() {
 
     const load = async () => {
       setLoading(true);
-
-      // Find brand by matching slug to name (lowercased, hyphenated)
       const { data: allBrands } = await supabase.from("brands").select("*");
       const found = (allBrands ?? []).find(
         (b) => b.name.toLowerCase().replace(/\s+/g, "-") === slug.toLowerCase()
@@ -70,19 +50,13 @@ export default function BrandDetailPage() {
   }, [slug]);
 
   const brandForLogo: BrandModalBrand | null = brand
-    ? {
-        id: brand.id,
-        name: brand.name,
-        logo_url: brand.logo_url,
-        description: brand.description,
-      }
+    ? { id: brand.id, name: brand.name, logo_url: brand.logo_url, description: brand.description }
     : null;
 
   return (
     <Layout>
       <section className="min-h-[80vh] py-20 bg-background">
         <div className="container mx-auto px-4">
-          {/* Back link */}
           <Link
             to="/brands"
             className="mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
@@ -101,7 +75,6 @@ export default function BrandDetailPage() {
             </div>
           ) : (
             <>
-              {/* Brand header */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -118,7 +91,6 @@ export default function BrandDetailPage() {
                 </div>
               </motion.div>
 
-              {/* Products grid */}
               {products.length === 0 ? (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -127,87 +99,27 @@ export default function BrandDetailPage() {
                 >
                   <Package className="mx-auto mb-4 h-10 w-10 text-muted-foreground" />
                   <p className="font-display text-xl text-foreground">AUCUN ARTICLE DISPONIBLE ACTUELLEMENT</p>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Contactez-nous pour toute demande spécifique.
-                  </p>
+                  <p className="mt-2 text-sm text-muted-foreground">Contactez-nous pour toute demande spécifique.</p>
                 </motion.div>
               ) : (
                 <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                  {products.map((product, i) => {
-                    const sizeStock = parseSizeStock(product.stock_by_size);
-                    const hasSizeData = Object.keys(sizeStock).length > 0;
-                    const totalStock = getTotalStock(sizeStock, product.stock_quantity);
-
-                    return (
-                      <motion.article
-                        key={product.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.05 }}
-                        className="overflow-hidden rounded-xl border border-border bg-card"
-                      >
-                        {/* Product image */}
-                        <div className="relative aspect-[4/3] bg-secondary">
-                          {product.image_url ? (
-                            <img
-                              src={product.image_url}
-                              alt={product.name}
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <div className="flex h-full items-center justify-center">
-                              <Package className="h-10 w-10 text-muted-foreground" />
-                            </div>
-                          )}
-                          {/* Stock badge */}
-                          <div
-                            className={`absolute right-3 top-3 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider ${
-                              totalStock > 0
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-muted text-muted-foreground"
-                            }`}
-                          >
-                            {totalStock > 0 ? "EN STOCK" : "RUPTURE"}
-                          </div>
-                        </div>
-
-                        <div className="p-5">
-                          <h3 className="font-display text-xl text-foreground">{product.name}</h3>
-                          {(product as any).colorway && (
-                            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{(product as any).colorway}</p>
-                          )}
-                          {formatPrice(product.price) && (
-                            <p className="text-primary font-display text-lg mb-4">
-                              {formatPrice(product.price)}
-                            </p>
-                          )}
-
-                          {/* Size-by-size stock */}
-                          {hasSizeData ? (
-                            <div className="flex flex-wrap gap-x-3 gap-y-1.5">
-                              {SIZES_ORDER.filter((s) => s in sizeStock).map((size) => {
-                                const qty = sizeStock[size] || 0;
-                                return (
-                                  <span
-                                    key={size}
-                                    className={`text-xs font-medium tracking-wide ${
-                                      qty > 0 ? "text-primary" : "text-muted-foreground/50"
-                                    }`}
-                                  >
-                                    {size}:&nbsp;{qty}
-                                  </span>
-                                );
-                              })}
-                            </div>
-                          ) : (
-                            <p className="text-xs text-muted-foreground">
-                              Stock total : {totalStock} PCS
-                            </p>
-                          )}
-                        </div>
-                      </motion.article>
-                    );
-                  })}
+                  {products.map((product, i) => (
+                    <motion.div
+                      key={product.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                    >
+                      <ProductColorwaySelector
+                        productId={product.id}
+                        productName={product.name}
+                        productImageUrl={product.image_url}
+                        productPrice={product.price}
+                        productStockBySize={product.stock_by_size}
+                        productStockQuantity={product.stock_quantity}
+                      />
+                    </motion.div>
+                  ))}
                 </div>
               )}
             </>
