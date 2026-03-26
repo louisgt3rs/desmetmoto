@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 import { AlertTriangle, Pencil, Plus, Save, Search, Trash2, Palette } from "lucide-react";
-import { ImageUploadSingle } from "./ImageUpload";
+import { ImageUploadSingle, ImageUploadMulti } from "./ImageUpload";
 import SizeStockGrid, { calcTotalFromSizes } from "./SizeStockGrid";
 import type { AdminBrand, AdminProduct } from "./types";
 
@@ -18,6 +18,7 @@ interface ProductColorway {
   product_id: string;
   name: string;
   image_url: string | null;
+  gallery_images: string[];
   stock_by_size: Record<string, number>;
   sort_order: number;
 }
@@ -56,7 +57,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
 
   // Colorways state
   const [colorways, setColorways] = useState<ProductColorway[]>([]);
-  const [cwForm, setCwForm] = useState({ name: "", image_url: "", stock_by_size: {} as Record<string, number> });
+  const [cwForm, setCwForm] = useState({ name: "", image_url: "", gallery_images: [] as string[], stock_by_size: {} as Record<string, number> });
   const [editingCwId, setEditingCwId] = useState<string | null>(null);
 
   const filteredProducts = useMemo(() => {
@@ -73,7 +74,11 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
   useEffect(() => {
     if (editing) {
       supabase.from("product_colorways").select("*").eq("product_id", editing.id).order("sort_order").then(({ data }) => {
-        setColorways((data || []).map(d => ({ ...d, stock_by_size: parseSbs(d.stock_by_size) })) as ProductColorway[]);
+        setColorways((data || []).map(d => ({
+          ...d,
+          gallery_images: Array.isArray(d.gallery_images) ? (d.gallery_images as string[]) : [],
+          stock_by_size: parseSbs(d.stock_by_size),
+        })) as ProductColorway[]);
       });
     } else {
       setColorways([]);
@@ -118,6 +123,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
           product_id: data.id,
           name: cw.name,
           image_url: cw.image_url,
+          gallery_images: cw.gallery_images,
           stock_by_size: cw.stock_by_size,
           sort_order: i,
         }));
@@ -150,7 +156,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
       price: typeof p.price === "number" ? String(p.price) : "",
       image_url: p.image_url || "",
     });
-    setCwForm({ name: "", image_url: "", stock_by_size: {} });
+    setCwForm({ name: "", image_url: "", gallery_images: [], stock_by_size: {} });
     setEditingCwId(null);
   };
 
@@ -159,7 +165,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
     setOpen(true);
     setForm({ name: "", description: "", brand_id: "", category: "Casques", price: "", image_url: "" });
     setColorways([]);
-    setCwForm({ name: "", image_url: "", stock_by_size: {} });
+    setCwForm({ name: "", image_url: "", gallery_images: [], stock_by_size: {} });
     setEditingCwId(null);
   };
 
@@ -177,23 +183,24 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
         product_id: editing.id,
         name: cwForm.name.trim(),
         image_url: cwForm.image_url || null,
+        gallery_images: cwForm.gallery_images,
         stock_by_size: cwForm.stock_by_size,
         sort_order: colorways.length,
       }).select("*").single();
       if (error) { toast.error(error.message); return; }
-      setColorways(prev => [...prev, { ...data, stock_by_size: parseSbs(data.stock_by_size) } as ProductColorway]);
+      setColorways(prev => [...prev, { ...data, gallery_images: Array.isArray(data.gallery_images) ? (data.gallery_images as string[]) : [], stock_by_size: parseSbs(data.stock_by_size) } as ProductColorway]);
     } else {
-      // For new product, store temporarily
       setColorways(prev => [...prev, {
         id: `temp-${Date.now()}`,
         product_id: "",
         name: cwForm.name.trim(),
         image_url: cwForm.image_url || null,
+        gallery_images: cwForm.gallery_images,
         stock_by_size: cwForm.stock_by_size,
         sort_order: colorways.length,
       }]);
     }
-    setCwForm({ name: "", image_url: "", stock_by_size: {} });
+    setCwForm({ name: "", image_url: "", gallery_images: [], stock_by_size: {} });
     toast.success("COLORIS AJOUTÉ");
   };
 
@@ -203,13 +210,14 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
       const { error } = await supabase.from("product_colorways").update({
         name: cwForm.name.trim(),
         image_url: cwForm.image_url || null,
+        gallery_images: cwForm.gallery_images,
         stock_by_size: cwForm.stock_by_size,
       }).eq("id", editingCwId);
       if (error) { toast.error(error.message); return; }
     }
-    setColorways(prev => prev.map(cw => cw.id === editingCwId ? { ...cw, name: cwForm.name.trim(), image_url: cwForm.image_url || null, stock_by_size: cwForm.stock_by_size } : cw));
+    setColorways(prev => prev.map(cw => cw.id === editingCwId ? { ...cw, name: cwForm.name.trim(), image_url: cwForm.image_url || null, gallery_images: cwForm.gallery_images, stock_by_size: cwForm.stock_by_size } : cw));
     setEditingCwId(null);
-    setCwForm({ name: "", image_url: "", stock_by_size: {} });
+    setCwForm({ name: "", image_url: "", gallery_images: [], stock_by_size: {} });
     toast.success("COLORIS MODIFIÉ");
   };
 
@@ -224,7 +232,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
 
   const startEditCw = (cw: ProductColorway) => {
     setEditingCwId(cw.id);
-    setCwForm({ name: cw.name, image_url: cw.image_url || "", stock_by_size: cw.stock_by_size });
+    setCwForm({ name: cw.name, image_url: cw.image_url || "", gallery_images: cw.gallery_images || [], stock_by_size: cw.stock_by_size });
   };
 
   const getBrandName = (id: string | null, fallback?: string | null) => brands.find(b => b.id === id)?.name || fallback || "—";
@@ -444,7 +452,10 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
                   </div>
                 </div>
                 <div>
-                  <ImageUploadSingle value={cwForm.image_url} onChange={(v) => setCwForm({ ...cwForm, image_url: v })} folder="products" label="IMPORTER IMAGE COLORIS" previewClass="h-20 w-20" />
+                  <ImageUploadSingle value={cwForm.image_url} onChange={(v) => setCwForm({ ...cwForm, image_url: v })} folder="products" label="IMAGE PRINCIPALE DU COLORIS" previewClass="h-20 w-20" />
+                </div>
+                <div>
+                  <ImageUploadMulti value={cwForm.gallery_images} onChange={(v) => setCwForm({ ...cwForm, gallery_images: v })} folder="products" label="PHOTOS SUPPLÉMENTAIRES (GALERIE)" />
                 </div>
                 {form.category !== "Accessoires" && (
                   <div>
@@ -473,7 +484,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
                       <Button onClick={updateColorway} className="admin-button h-9 rounded-none px-4 text-xs font-adminDisplay tracking-[0.16em]">
                         <Save className="h-3 w-3" /> ENREGISTRER COLORIS
                       </Button>
-                      <Button variant="outline" onClick={() => { setEditingCwId(null); setCwForm({ name: "", image_url: "", stock_by_size: {} }); }} className="admin-button-secondary h-9 rounded-none px-4 text-xs font-adminDisplay tracking-[0.16em]">
+                      <Button variant="outline" onClick={() => { setEditingCwId(null); setCwForm({ name: "", image_url: "", gallery_images: [], stock_by_size: {} }); }} className="admin-button-secondary h-9 rounded-none px-4 text-xs font-adminDisplay tracking-[0.16em]">
                         ANNULER
                       </Button>
                     </>

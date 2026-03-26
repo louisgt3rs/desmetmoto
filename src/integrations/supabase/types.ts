@@ -243,6 +243,7 @@ export type Database = {
       product_colorways: {
         Row: {
           created_at: string | null
+          gallery_images: string[] | null
           id: string
           image_url: string | null
           name: string
@@ -252,6 +253,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          gallery_images?: string[] | null
           id?: string
           image_url?: string | null
           name: string
@@ -261,6 +263,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          gallery_images?: string[] | null
           id?: string
           image_url?: string | null
           name?: string
