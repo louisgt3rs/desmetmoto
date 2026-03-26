@@ -74,7 +74,11 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
   useEffect(() => {
     if (editing) {
       supabase.from("product_colorways").select("*").eq("product_id", editing.id).order("sort_order").then(({ data }) => {
-        setColorways((data || []).map(d => ({ ...d, stock_by_size: parseSbs(d.stock_by_size) })) as ProductColorway[]);
+        setColorways((data || []).map(d => ({
+          ...d,
+          gallery_images: Array.isArray(d.gallery_images) ? (d.gallery_images as string[]) : [],
+          stock_by_size: parseSbs(d.stock_by_size),
+        })) as ProductColorway[]);
       });
     } else {
       setColorways([]);
