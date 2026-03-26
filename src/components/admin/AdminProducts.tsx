@@ -188,6 +188,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
                         {p.image_url ? <img src={p.image_url} alt={p.name} className="h-12 w-12 object-cover" /> : null}
                         <div>
                           <p className="font-adminDisplay text-lg text-[hsl(var(--admin-foreground))]">{p.name}</p>
+                          {(p as any).colorway ? <p className="text-xs uppercase tracking-[0.14em] text-[hsl(var(--admin-accent))]">{(p as any).colorway}</p> : null}
                           {p.description ? <p className="line-clamp-1 text-xs uppercase tracking-[0.12em] text-[hsl(var(--admin-muted-foreground))]">{p.description}</p> : null}
                         </div>
                       </div>
