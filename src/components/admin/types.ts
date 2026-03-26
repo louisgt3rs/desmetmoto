@@ -6,7 +6,6 @@ export type AdminProduct = Tables<"products"> & {
   price?: number | null;
   brand?: string | null;
   in_stock?: boolean | null;
-  reference_code?: string | null;
   stock_quantity?: number | null;
 };
 
