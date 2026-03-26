@@ -9,7 +9,10 @@ export function useAuth() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+
     const resolveAdminState = async (nextSession: Session | null) => {
+      if (!isMounted) return;
       setSession(nextSession);
       setUser(nextSession?.user ?? null);
 
@@ -18,26 +21,31 @@ export function useAuth() {
           _user_id: nextSession.user.id,
           _role: "admin",
         });
-
-        setIsAdmin(!!data);
+        if (isMounted) setIsAdmin(!!data);
       } else {
         setIsAdmin(false);
       }
 
-      setLoading(false);
+      if (isMounted) setLoading(false);
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        await resolveAdminState(session);
-      }
-    );
-
+    // Restore session from storage FIRST
     supabase.auth.getSession().then(({ data: { session } }) => {
       void resolveAdminState(session);
     });
 
-    return () => subscription.unsubscribe();
+    // Then listen for subsequent changes, skipping the initial event
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === "INITIAL_SESSION") return; // already handled above
+        void resolveAdminState(session);
+      }
+    );
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
