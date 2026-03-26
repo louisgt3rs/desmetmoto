@@ -199,7 +199,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
         sort_order: colorways.length,
       }]);
     }
-    setCwForm({ name: "", image_url: "", stock_by_size: {} });
+    setCwForm({ name: "", image_url: "", gallery_images: [], stock_by_size: {} });
     toast.success("COLORIS AJOUTÉ");
   };
 
