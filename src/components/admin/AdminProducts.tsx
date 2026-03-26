@@ -214,9 +214,9 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
       }).eq("id", editingCwId);
       if (error) { toast.error(error.message); return; }
     }
-    setColorways(prev => prev.map(cw => cw.id === editingCwId ? { ...cw, name: cwForm.name.trim(), image_url: cwForm.image_url || null, stock_by_size: cwForm.stock_by_size } : cw));
+    setColorways(prev => prev.map(cw => cw.id === editingCwId ? { ...cw, name: cwForm.name.trim(), image_url: cwForm.image_url || null, gallery_images: cwForm.gallery_images, stock_by_size: cwForm.stock_by_size } : cw));
     setEditingCwId(null);
-    setCwForm({ name: "", image_url: "", stock_by_size: {} });
+    setCwForm({ name: "", image_url: "", gallery_images: [], stock_by_size: {} });
     toast.success("COLORIS MODIFIÉ");
   };
 
