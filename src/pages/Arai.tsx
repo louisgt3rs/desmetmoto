@@ -179,12 +179,18 @@ function HelmetCard({ model, colorways, onReserve }: { model: HelmetModel; color
 export default function AraiPage() {
   const [models, setModels] = useState<HelmetModel[]>([]);
   const [colorways, setColorways] = useState<Record<string, Colorway[]>>({});
+  const [araiProducts, setAraiProducts] = useState<any[]>([]);
   const [reserveModel, setReserveModel] = useState<string | null>(null);
 
+  const SIZES_ORDER = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL"];
+
   const load = useCallback(async () => {
-    const { data: m } = await supabase.from("helmet_models").select("*").eq("is_published", true).order("sort_order");
+    const [{ data: m }, { data: cw }, { data: prods }] = await Promise.all([
+      supabase.from("helmet_models").select("*").eq("is_published", true).order("sort_order"),
+      supabase.from("helmet_colorways").select("*").order("sort_order"),
+      supabase.from("products").select("*").ilike("brand", "%arai%").order("name"),
+    ]);
     if (m) setModels(m as HelmetModel[]);
-    const { data: cw } = await supabase.from("helmet_colorways").select("*").order("sort_order");
     if (cw) {
       const grouped: Record<string, Colorway[]> = {};
       (cw as Colorway[]).forEach(c => {
@@ -193,6 +199,7 @@ export default function AraiPage() {
       });
       setColorways(grouped);
     }
+    setAraiProducts(prods || []);
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -271,6 +278,68 @@ export default function AraiPage() {
           </div>
         </div>
       </section>
+
+      {/* Arai products from catalogue */}
+      {araiProducts.length > 0 && (
+        <section className="py-24">
+          <div className="container mx-auto px-4">
+            <SectionHeading title="CATALOGUE ARAI" subtitle="Tous nos produits Arai disponibles en magasin" />
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {araiProducts.map((product, i) => {
+                const sizeStock = (product.stock_by_size && typeof product.stock_by_size === "object" && !Array.isArray(product.stock_by_size))
+                  ? product.stock_by_size as Record<string, number> : {};
+                const hasSizeData = Object.keys(sizeStock).length > 0;
+                const sizeTotal = Object.values(sizeStock).reduce((sum: number, v: any) => sum + (v || 0), 0);
+                const totalStock = sizeTotal > 0 ? sizeTotal : product.stock_quantity;
+                const price = typeof product.price === "number"
+                  ? new Intl.NumberFormat("fr-BE", { style: "currency", currency: "EUR" }).format(product.price)
+                  : null;
+
+                return (
+                  <motion.article
+                    key={product.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.05 }}
+                    className="overflow-hidden rounded-xl border border-border bg-card hover:border-primary/40 transition-all"
+                  >
+                    <div className="relative aspect-[4/3] bg-secondary">
+                      {product.image_url ? (
+                        <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="flex h-full items-center justify-center">
+                          <p className="text-muted-foreground text-sm">Image à venir</p>
+                        </div>
+                      )}
+                      <div className={`absolute right-3 top-3 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider ${
+                        totalStock > 0 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                      }`}>
+                        {totalStock > 0 ? "EN STOCK" : "RUPTURE"}
+                      </div>
+                    </div>
+                    <div className="p-5">
+                      <h3 className="font-display text-xl text-foreground mb-1">{product.name}</h3>
+                      {price && <p className="text-primary font-display text-lg mb-4">{price}</p>}
+                      {hasSizeData ? (
+                        <div className="flex flex-wrap gap-x-3 gap-y-1.5">
+                          {SIZES_ORDER.filter(s => s in sizeStock).map(size => (
+                            <span key={size} className={`text-xs font-medium tracking-wide ${(sizeStock[size] || 0) > 0 ? "text-primary" : "text-muted-foreground/50"}`}>
+                              {size}:&nbsp;{sizeStock[size] || 0}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-muted-foreground">Stock total : {totalStock} PCS</p>
+                      )}
+                    </div>
+                  </motion.article>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       <ReservationModal
         open={!!reserveModel}
