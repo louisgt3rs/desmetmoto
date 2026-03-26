@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 import { AlertTriangle, Pencil, Plus, Save, Search, Trash2, Palette } from "lucide-react";
-import { ImageUploadSingle } from "./ImageUpload";
+import { ImageUploadSingle, ImageUploadMulti } from "./ImageUpload";
 import SizeStockGrid, { calcTotalFromSizes } from "./SizeStockGrid";
 import type { AdminBrand, AdminProduct } from "./types";
 
