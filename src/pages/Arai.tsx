@@ -44,13 +44,19 @@ function HelmetCard({ model, colorways, onReserve }: { model: HelmetModel; color
     setSelectedSize(null);
   }, [model.id]);
 
+  const FALLBACK_IMAGES: Record<string, string> = {
+    "rx-7v-evo": "https://www.arai.eu/media/catalog/product/r/x/rx-7v-evo-race.png",
+  };
+
+  const fallbackImg = FALLBACK_IMAGES[model.slug] || null;
+
   const allImages = selectedCw
     ? (selectedCw.gallery_images && selectedCw.gallery_images.length > 0)
       ? selectedCw.gallery_images
       : selectedCw.main_image_url
         ? [selectedCw.main_image_url]
-        : []
-    : [];
+        : fallbackImg ? [fallbackImg] : []
+    : fallbackImg ? [fallbackImg] : [];
 
   const stockMap = (selectedCw?.stock_by_size as Record<string, number>) || {};
   const totalStock = Object.values(stockMap).reduce((a, b) => a + (b || 0), 0);
