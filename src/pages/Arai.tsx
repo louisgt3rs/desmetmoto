@@ -240,7 +240,7 @@ export default function AraiPage() {
             <img
               src={araiStoreWall}
               alt="Espace Arai en magasin — mur de casques"
-              className="h-auto w-full object-cover"
+              className="w-full max-h-[500px] object-cover rounded-xl"
             />
           </motion.div>
         </div>
