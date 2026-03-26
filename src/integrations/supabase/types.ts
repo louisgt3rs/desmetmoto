@@ -245,6 +245,7 @@ export type Database = {
           brand: string | null
           brand_id: string | null
           category: string | null
+          colorway: string | null
           created_at: string
           description: string | null
           id: string
@@ -266,6 +267,7 @@ export type Database = {
           brand?: string | null
           brand_id?: string | null
           category?: string | null
+          colorway?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -287,6 +289,7 @@ export type Database = {
           brand?: string | null
           brand_id?: string | null
           category?: string | null
+          colorway?: string | null
           created_at?: string
           description?: string | null
           id?: string
