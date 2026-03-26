@@ -13,6 +13,7 @@ export function useAuth() {
 
     const resolveAdminState = async (nextSession: Session | null) => {
       if (!isMounted) return;
+      setLoading(true);
       setSession(nextSession);
       setUser(nextSession?.user ?? null);
 
