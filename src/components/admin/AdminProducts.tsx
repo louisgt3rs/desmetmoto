@@ -480,7 +480,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
                       <Button onClick={updateColorway} className="admin-button h-9 rounded-none px-4 text-xs font-adminDisplay tracking-[0.16em]">
                         <Save className="h-3 w-3" /> ENREGISTRER COLORIS
                       </Button>
-                      <Button variant="outline" onClick={() => { setEditingCwId(null); setCwForm({ name: "", image_url: "", stock_by_size: {} }); }} className="admin-button-secondary h-9 rounded-none px-4 text-xs font-adminDisplay tracking-[0.16em]">
+                      <Button variant="outline" onClick={() => { setEditingCwId(null); setCwForm({ name: "", image_url: "", gallery_images: [], stock_by_size: {} }); }} className="admin-button-secondary h-9 rounded-none px-4 text-xs font-adminDisplay tracking-[0.16em]">
                         ANNULER
                       </Button>
                     </>
