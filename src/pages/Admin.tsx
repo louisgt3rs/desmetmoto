@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import AdminProducts from "@/components/admin/AdminProducts";
 import AdminEvents from "@/components/admin/AdminEvents";
+import AdminBrands from "@/components/admin/AdminBrands";
 import type { AdminBrand, AdminEvent, AdminProduct } from "@/components/admin/types";
 
 const tabs = [
