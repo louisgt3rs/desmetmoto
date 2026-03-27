@@ -1,59 +1,22 @@
 import { useNavigate } from "react-router-dom";
-import { useRef, useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface BrandEntry {
   name: string;
   slug: string;
-  logo?: string;
+  logo?: string | null;
 }
-
-const BRANDS: BrandEntry[] = [
-  { name: "Arai", slug: "arai", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Arai_Helmet_company_logo.svg/320px-Arai_Helmet_company_logo.svg.png" },
-  { name: "Shoei", slug: "shoei", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Shoei_logo.svg/320px-Shoei_logo.svg.png" },
-  { name: "Alpinestars", slug: "alpinestars", logo: "https://seeklogo.com/images/A/alpinestars-logo-A5B6A8F8B4-seeklogo.com.png" },
-  { name: "Shark", slug: "shark", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Shark_helmets_logo.svg/320px-Shark_helmets_logo.svg.png" },
-  { name: "Bell", slug: "bell", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Bell_helmets_logo.svg/320px-Bell_helmets_logo.svg.png" },
-  { name: "Scorpion EXO", slug: "scorpion-exo", logo: "https://logo.clearbit.com/scorpionexo.com" },
-  { name: "Dainese", slug: "dainese", logo: "https://logo.clearbit.com/dainese.com" },
-  { name: "Rev'It", slug: "rev-it", logo: "https://logo.clearbit.com/revitsport.com" },
-  { name: "Held", slug: "held", logo: "https://logo.clearbit.com/held.de" },
-  { name: "RST", slug: "rst", logo: "https://logo.clearbit.com/rst-moto.com" },
-  { name: "Bering", slug: "bering", logo: "https://logo.clearbit.com/bfrbrands.com" },
-  { name: "Segura", slug: "segura", logo: "https://logo.clearbit.com/segura-racing.com" },
-  { name: "TCX", slug: "tcx", logo: "https://logo.clearbit.com/tcxboots.com" },
-  { name: "Sidi", slug: "sidi", logo: "https://logo.clearbit.com/sidi.com" },
-  { name: "Oxford", slug: "oxford", logo: "https://logo.clearbit.com/oxfordproducts.com" },
-  { name: "Nolan", slug: "nolan", logo: "https://logo.clearbit.com/nolan.it" },
-  { name: "LS2", slug: "ls2", logo: "https://logo.clearbit.com/ls2helmets.com" },
-  { name: "Cardo", slug: "cardo", logo: "https://logo.clearbit.com/cardosystems.com" },
-  { name: "Helite", slug: "helite", logo: "https://logo.clearbit.com/helite.com" },
-  { name: "Motul", slug: "motul", logo: "https://logo.clearbit.com/motul.com" },
-  { name: "Muc-Off", slug: "muc-off", logo: "https://logo.clearbit.com/muc-off.com" },
-  { name: "SW-Motech", slug: "sw-motech", logo: "https://logo.clearbit.com/sw-motech.com" },
-  { name: "Ogio", slug: "ogio", logo: "https://logo.clearbit.com/ogio.com" },
-  { name: "Bowtex", slug: "bowtex", logo: "https://logo.clearbit.com/bowtex.eu" },
-  { name: "Fly Racing", slug: "fly-racing", logo: "https://logo.clearbit.com/flyracing.com" },
-  { name: "Richa", slug: "richa", logo: "https://logo.clearbit.com/richa.eu" },
-  { name: "Bihr", slug: "bihr", logo: "https://logo.clearbit.com/bihr.eu" },
-  { name: "Premier", slug: "premier", logo: "https://logo.clearbit.com/premier.it" },
-  { name: "Kappa", slug: "kappa", logo: "https://logo.clearbit.com/kappa.com" },
-  { name: "Ermax", slug: "ermax", logo: "https://logo.clearbit.com/ermax.com" },
-  { name: "Abus", slug: "abus", logo: "https://logo.clearbit.com/abus.com" },
-  { name: "TomTom", slug: "tomtom", logo: "https://logo.clearbit.com/tomtom.com" },
-  { name: "Midland", slug: "midland", logo: "https://logo.clearbit.com/midlandeurope.com" },
-  { name: "Tech-Air", slug: "tech-air", logo: "https://logo.clearbit.com/alpinestars.com" },
-  { name: "Auvray", slug: "auvray", logo: "https://logo.clearbit.com/auvray.fr" },
-  { name: "Zandonà", slug: "zandona", logo: "https://logo.clearbit.com/zandona.net" },
-  { name: "Garmin", slug: "garmin", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Garmin_logo.svg/320px-Garmin_logo.svg.png" },
-  { name: "D30", slug: "d30", logo: "https://logo.clearbit.com/d3o.com" },
-  { name: "Optimate", slug: "optimate", logo: "https://logo.clearbit.com/tecmate.com" },
-];
 
 function chunk<T>(arr: T[], size: number): T[][] {
   const res: T[][] = [];
   for (let i = 0; i < arr.length; i += size) res.push(arr.slice(i, i + size));
   return res;
+}
+
+function nameToSlug(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
 function BrandLogo({ brand, onClick }: { brand: BrandEntry; onClick: () => void }) {
@@ -85,11 +48,33 @@ function BrandLogo({ brand, onClick }: { brand: BrandEntry; onClick: () => void 
 export default function BrandsCarousel() {
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
-  const slides = chunk(BRANDS, 3);
+  const [brands, setBrands] = useState<BrandEntry[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from("brands")
+      .select("name, logo_url")
+      .order("sort_order")
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setBrands(data.map((b) => ({ name: b.name, slug: nameToSlug(b.name), logo: b.logo_url })));
+        }
+      });
+  }, []);
+
+  const slides = chunk(brands, 3);
   const total = slides.length;
 
   const prev = useCallback(() => setCurrentSlide((s) => (s - 1 + total) % total), [total]);
   const next = useCallback(() => setCurrentSlide((s) => (s + 1) % total), [total]);
+
+  if (brands.length === 0) {
+    return (
+      <div className="flex justify-center py-12">
+        <span className="text-muted-foreground text-sm">Chargement des marques…</span>
+      </div>
+    );
+  }
 
   return (
     <div className="relative max-w-3xl mx-auto px-14">
