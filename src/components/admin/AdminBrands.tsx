@@ -63,6 +63,20 @@ export default function AdminBrands() {
     load();
   };
 
+  const handleMove = async (index: number, direction: "up" | "down") => {
+    const swapIdx = direction === "up" ? index - 1 : index + 1;
+    if (swapIdx < 0 || swapIdx >= brands.length) return;
+    const a = brands[index];
+    const b = brands[swapIdx];
+    const aOrder = a.sort_order ?? index;
+    const bOrder = b.sort_order ?? swapIdx;
+    await Promise.all([
+      supabase.from("brands").update({ sort_order: bOrder }).eq("id", a.id),
+      supabase.from("brands").update({ sort_order: aOrder }).eq("id", b.id),
+    ]);
+    load();
+  };
+
   const startEdit = (b: Brand) => {
     setEditing(b); setAdding(false);
     setForm({
