@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Link, Navigate } from "react-router-dom";
-import { CalendarDays, ChevronLeft, LayoutDashboard, Loader2, LogOut, Package, ShieldCheck } from "lucide-react";
+import { CalendarDays, ChevronLeft, LayoutDashboard, Loader2, LogOut, Package, ShieldCheck, Tag } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import AdminProducts from "@/components/admin/AdminProducts";
