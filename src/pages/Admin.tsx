@@ -17,6 +17,7 @@ const tabs = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "products", label: "Produits", icon: Package },
   { id: "events", label: "Événements", icon: CalendarDays },
+  { id: "brands", label: "Marques", icon: Tag },
 ] as const;
 
 type TabId = typeof tabs[number]["id"];
