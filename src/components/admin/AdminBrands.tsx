@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, X, Save } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Save, ArrowUp, ArrowDown } from "lucide-react";
 import { ImageUploadSingle } from "./ImageUpload";
 import type { Tables } from "@/integrations/supabase/types";
 
