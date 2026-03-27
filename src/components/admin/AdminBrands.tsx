@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, X, Save } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Save, ArrowUp, ArrowDown } from "lucide-react";
 import { ImageUploadSingle } from "./ImageUpload";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -60,6 +60,20 @@ export default function AdminBrands() {
     const { error } = await supabase.from("brands").delete().eq("id", id);
     if (error) { toast.error("Erreur: " + error.message); return; }
     toast.success("Marque supprimée");
+    load();
+  };
+
+  const handleMove = async (index: number, direction: "up" | "down") => {
+    const swapIdx = direction === "up" ? index - 1 : index + 1;
+    if (swapIdx < 0 || swapIdx >= brands.length) return;
+    const a = brands[index];
+    const b = brands[swapIdx];
+    const aOrder = a.sort_order ?? index;
+    const bOrder = b.sort_order ?? swapIdx;
+    await Promise.all([
+      supabase.from("brands").update({ sort_order: bOrder }).eq("id", a.id),
+      supabase.from("brands").update({ sort_order: aOrder }).eq("id", b.id),
+    ]);
     load();
   };
 
@@ -120,6 +134,8 @@ export default function AdminBrands() {
               </div>
             </div>
             <div className="flex gap-1 shrink-0">
+              <Button variant="ghost" size="sm" onClick={() => handleMove(brands.indexOf(b), "up")} disabled={brands.indexOf(b) === 0}><ArrowUp className="w-4 h-4" /></Button>
+              <Button variant="ghost" size="sm" onClick={() => handleMove(brands.indexOf(b), "down")} disabled={brands.indexOf(b) === brands.length - 1}><ArrowDown className="w-4 h-4" /></Button>
               <Button variant="ghost" size="sm" onClick={() => startEdit(b)}><Pencil className="w-4 h-4" /></Button>
               <Button variant="ghost" size="sm" onClick={() => handleDelete(b.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
             </div>
