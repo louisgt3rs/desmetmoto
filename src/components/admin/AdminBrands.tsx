@@ -134,6 +134,8 @@ export default function AdminBrands() {
               </div>
             </div>
             <div className="flex gap-1 shrink-0">
+              <Button variant="ghost" size="sm" onClick={() => handleMove(brands.indexOf(b), "up")} disabled={brands.indexOf(b) === 0}><ArrowUp className="w-4 h-4" /></Button>
+              <Button variant="ghost" size="sm" onClick={() => handleMove(brands.indexOf(b), "down")} disabled={brands.indexOf(b) === brands.length - 1}><ArrowDown className="w-4 h-4" /></Button>
               <Button variant="ghost" size="sm" onClick={() => startEdit(b)}><Pencil className="w-4 h-4" /></Button>
               <Button variant="ghost" size="sm" onClick={() => handleDelete(b.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
             </div>
