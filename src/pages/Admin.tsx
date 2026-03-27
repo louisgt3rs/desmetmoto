@@ -5,17 +5,19 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Link, Navigate } from "react-router-dom";
-import { CalendarDays, ChevronLeft, LayoutDashboard, Loader2, LogOut, Package, ShieldCheck } from "lucide-react";
+import { CalendarDays, ChevronLeft, LayoutDashboard, Loader2, LogOut, Package, ShieldCheck, Tag } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import AdminProducts from "@/components/admin/AdminProducts";
 import AdminEvents from "@/components/admin/AdminEvents";
+import AdminBrands from "@/components/admin/AdminBrands";
 import type { AdminBrand, AdminEvent, AdminProduct } from "@/components/admin/types";
 
 const tabs = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "products", label: "Produits", icon: Package },
   { id: "events", label: "Événements", icon: CalendarDays },
+  { id: "brands", label: "Marques", icon: Tag },
 ] as const;
 
 type TabId = typeof tabs[number]["id"];
@@ -232,6 +234,7 @@ export default function AdminPage() {
               {tab === "dashboard" && <AdminDashboard products={products} events={events} />}
               {tab === "products" && <AdminProducts products={products} brands={brands} onRefresh={loadAdminData} />}
               {tab === "events" && <AdminEvents events={events} onRefresh={loadAdminData} />}
+              {tab === "brands" && <AdminBrands />}
             </>
           )}
         </main>
