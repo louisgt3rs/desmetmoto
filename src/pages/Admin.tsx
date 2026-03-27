@@ -234,6 +234,7 @@ export default function AdminPage() {
               {tab === "dashboard" && <AdminDashboard products={products} events={events} />}
               {tab === "products" && <AdminProducts products={products} brands={brands} onRefresh={loadAdminData} />}
               {tab === "events" && <AdminEvents events={events} onRefresh={loadAdminData} />}
+              {tab === "brands" && <AdminBrands />}
             </>
           )}
         </main>
