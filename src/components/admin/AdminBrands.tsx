@@ -115,7 +115,7 @@ export default function AdminBrands() {
           <Textarea placeholder="Description" value={form.description} onChange={e => setForm({...form, description: e.target.value})} className="bg-secondary border-border" />
           <Input placeholder="Catégories (séparées par des virgules)" value={form.categories} onChange={e => setForm({...form, categories: e.target.value})} className="bg-secondary border-border" />
           <Input placeholder="Site officiel" value={form.website_url} onChange={e => setForm({...form, website_url: e.target.value})} className="bg-secondary border-border" />
-          <ImageUploadSingle value={form.logo_url} onChange={v => setForm({...form, logo_url: v})} folder="brands" label="Logo de la marque" />
+          <ImageUploadSingle value={form.logo_url} onChange={v => setForm({...form, logo_url: v})} folder="brands" label="Logo de la marque" crop cropAspect={1} />
           <div className="flex gap-2">
             <Button onClick={handleSave}><Save className="w-4 h-4 mr-2" /> Enregistrer</Button>
             <Button variant="outline" onClick={cancel}><X className="w-4 h-4 mr-2" /> Annuler</Button>
