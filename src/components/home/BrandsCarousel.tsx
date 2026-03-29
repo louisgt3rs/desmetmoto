@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -9,47 +9,17 @@ interface BrandEntry {
   logo?: string | null;
 }
 
-function chunk<T>(arr: T[], size: number): T[][] {
-  const res: T[][] = [];
-  for (let i = 0; i < arr.length; i += size) res.push(arr.slice(i, i + size));
-  return res;
-}
-
 function nameToSlug(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
-function BrandLogo({ brand, onClick }: { brand: BrandEntry; onClick: () => void }) {
-  const [imgError, setImgError] = useState(false);
-
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex items-center justify-center rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] p-4 transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_20px_hsl(var(--primary)/0.2)]"
-      style={{ width: 150, height: 150 }}
-    >
-      {brand.logo && !imgError ? (
-        <img
-          src={brand.logo}
-          alt={brand.name}
-          className="h-full w-full object-contain"
-          style={{ mixBlendMode: "screen" }}
-          onError={() => setImgError(true)}
-          loading="lazy"
-        />
-      ) : (
-        <span className="text-xs font-bold uppercase tracking-[0.15em] text-primary text-center leading-tight">
-          {brand.name}
-        </span>
-      )}
-    </button>
-  );
-}
+const CARD_SIZE = 100;
+const GAP = 8;
+const VISIBLE = 3;
 
 export default function BrandsCarousel() {
   const navigate = useNavigate();
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [offset, setOffset] = useState(0);
   const [brands, setBrands] = useState<BrandEntry[]>([]);
 
   useEffect(() => {
@@ -64,11 +34,9 @@ export default function BrandsCarousel() {
       });
   }, []);
 
-  const slides = chunk(brands, 3);
-  const total = slides.length;
-
-  const prev = useCallback(() => setCurrentSlide((s) => (s - 1 + total) % total), [total]);
-  const next = useCallback(() => setCurrentSlide((s) => (s + 1) % total), [total]);
+  const maxOffset = Math.max(0, brands.length - VISIBLE);
+  const prev = () => setOffset((o) => Math.max(0, o - 1));
+  const next = () => setOffset((o) => Math.min(maxOffset, o + 1));
 
   if (brands.length === 0) {
     return (
@@ -78,60 +46,70 @@ export default function BrandsCarousel() {
     );
   }
 
+  const trackWidth = VISIBLE * CARD_SIZE + (VISIBLE - 1) * GAP;
+  const tx = offset * (CARD_SIZE + GAP);
+
   return (
-    <div className="relative max-w-3xl mx-auto px-14">
-      <button
-        type="button"
-        onClick={prev}
-        className="absolute left-0 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-primary/30 bg-secondary text-primary transition-all hover:bg-primary/10 hover:border-primary"
-        aria-label="Précédent"
-      >
-        <ChevronLeft className="h-5 w-5" />
-      </button>
-
-      <div className="overflow-hidden">
-        <div
-          className="flex transition-transform duration-500 ease-in-out"
-          style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+    <div className="flex flex-col items-center gap-4">
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={prev}
+          disabled={offset === 0}
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-primary/30 bg-secondary text-primary transition-all hover:bg-primary/10 hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed"
+          aria-label="Précédent"
         >
-          {slides.map((group, idx) => (
-            <div key={idx} className="grid min-w-full grid-cols-3 gap-5 px-1 py-2 place-items-center">
-              {group.map((brand) => (
-                <BrandLogo
-                  key={brand.slug}
-                  brand={brand}
-                  onClick={() => navigate(`/marques/${brand.slug}`)}
-                />
-              ))}
-            </div>
-          ))}
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+
+        <div style={{ width: trackWidth, overflow: "hidden" }}>
+          <div
+            className="flex transition-transform duration-300 ease-in-out"
+            style={{ gap: GAP, transform: `translateX(-${tx}px)` }}
+          >
+            {brands.map((brand) => (
+              <BrandCard key={brand.slug} brand={brand} onClick={() => navigate(`/marques/${brand.slug}`)} />
+            ))}
+          </div>
         </div>
-      </div>
 
-      <button
-        type="button"
-        onClick={next}
-        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-primary/30 bg-secondary text-primary transition-all hover:bg-primary/10 hover:border-primary"
-        aria-label="Suivant"
-      >
-        <ChevronRight className="h-5 w-5" />
-      </button>
-
-      <div className="flex justify-center gap-2 mt-6">
-        {slides.map((_, i) => (
-          <button
-            key={i}
-            type="button"
-            onClick={() => setCurrentSlide(i)}
-            className={`h-1.5 rounded-full transition-all duration-300 ${
-              i === currentSlide
-                ? "w-6 bg-primary"
-                : "w-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/50"
-            }`}
-            aria-label={`Slide ${i + 1}`}
-          />
-        ))}
+        <button
+          type="button"
+          onClick={next}
+          disabled={offset >= maxOffset}
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-primary/30 bg-secondary text-primary transition-all hover:bg-primary/10 hover:border-primary disabled:opacity-30 disabled:cursor-not-allowed"
+          aria-label="Suivant"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
       </div>
     </div>
+  );
+}
+
+function BrandCard({ brand, onClick }: { brand: BrandEntry; onClick: () => void }) {
+  const [imgError, setImgError] = useState(false);
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{ width: CARD_SIZE, height: CARD_SIZE, flexShrink: 0, padding: 10, boxSizing: "border-box" }}
+      className="flex items-center justify-center rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a] transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_16px_hsl(var(--primary)/0.15)]"
+    >
+      {brand.logo && !imgError ? (
+        <img
+          src={brand.logo}
+          alt={brand.name}
+          className="w-full h-full object-contain"
+          onError={() => setImgError(true)}
+          loading="lazy"
+        />
+      ) : (
+        <span className="text-[10px] font-bold uppercase tracking-wider text-primary text-center leading-tight">
+          {brand.name}
+        </span>
+      )}
+    </button>
   );
 }
