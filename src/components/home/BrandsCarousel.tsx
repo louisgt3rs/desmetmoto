@@ -95,7 +95,7 @@ export default function BrandsCarousel() {
           style={{ transform: `translateX(-${currentSlide * 100}%)` }}
         >
           {slides.map((group, idx) => (
-            <div key={idx} className="grid min-w-full grid-cols-3 gap-3 px-1 py-2">
+            <div key={idx} className="grid min-w-full grid-cols-3 gap-5 px-1 py-2 place-items-center">
               {group.map((brand) => (
                 <BrandLogo
                   key={brand.slug}
