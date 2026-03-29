@@ -26,8 +26,8 @@ function BrandLogo({ brand, onClick }: { brand: BrandEntry; onClick: () => void 
     <button
       type="button"
       onClick={onClick}
-      className="flex items-center justify-center rounded-lg border border-[#2a2a2a] bg-[#1a1a1a] p-4 transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_20px_hsl(var(--primary)/0.2)]"
-      style={{ width: 110, height: 110 }}
+      className="flex items-center justify-center rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] p-4 transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_20px_hsl(var(--primary)/0.2)]"
+      style={{ width: 150, height: 150 }}
     >
       {brand.logo && !imgError ? (
         <img
@@ -95,7 +95,7 @@ export default function BrandsCarousel() {
           style={{ transform: `translateX(-${currentSlide * 100}%)` }}
         >
           {slides.map((group, idx) => (
-            <div key={idx} className="grid min-w-full grid-cols-3 gap-3 px-1 py-2">
+            <div key={idx} className="grid min-w-full grid-cols-3 gap-5 px-1 py-2 place-items-center">
               {group.map((brand) => (
                 <BrandLogo
                   key={brand.slug}
