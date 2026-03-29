@@ -3,9 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Upload, X, Loader2, Image as ImageIcon } from "lucide-react";
+import ImageCropModal from "./ImageCropModal";
 
-async function uploadFile(file: File, folder: string): Promise<string | null> {
-  const ext = file.name.split(".").pop();
+async function uploadFile(file: File | Blob, folder: string): Promise<string | null> {
+  const ext = file instanceof File ? file.name.split(".").pop() : "png";
   const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
   const { error } = await supabase.storage.from("images").upload(path, file, { cacheControl: "3600", upsert: false });
   if (error) { toast.error("Erreur upload: " + error.message); return null; }
@@ -20,15 +21,32 @@ interface SingleProps {
   folder?: string;
   label?: string;
   previewClass?: string;
+  crop?: boolean;
+  cropAspect?: number;
 }
 
-export function ImageUploadSingle({ value, onChange, folder = "uploads", label, previewClass = "w-20 h-20" }: SingleProps) {
+export function ImageUploadSingle({ value, onChange, folder = "uploads", label, previewClass = "w-20 h-20", crop = false, cropAspect = 1 }: SingleProps) {
   const [uploading, setUploading] = useState(false);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
   const ref = useRef<HTMLInputElement>(null);
 
   const handleFile = async (file: File) => {
+    if (crop) {
+      const reader = new FileReader();
+      reader.onload = () => setCropSrc(reader.result as string);
+      reader.readAsDataURL(file);
+    } else {
+      setUploading(true);
+      const url = await uploadFile(file, folder);
+      setUploading(false);
+      if (url) onChange(url);
+    }
+  };
+
+  const handleCropConfirm = async (blob: Blob) => {
+    setCropSrc(null);
     setUploading(true);
-    const url = await uploadFile(file, folder);
+    const url = await uploadFile(blob, folder);
     setUploading(false);
     if (url) onChange(url);
   };
@@ -54,17 +72,24 @@ export function ImageUploadSingle({ value, onChange, folder = "uploads", label, 
           </div>
         )}
         <div className="flex flex-col gap-1">
-          <input ref={ref} type="file" accept="image/*" className="hidden" onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
+          <input ref={ref} type="file" accept="image/*" className="hidden" onChange={e => { e.target.files?.[0] && handleFile(e.target.files[0]); e.target.value = ""; }} />
           <Button type="button" variant="outline" size="sm" onClick={() => ref.current?.click()} disabled={uploading}>
             {uploading ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Upload className="w-3 h-3 mr-1" />}
             {value ? "Remplacer" : "Choisir image"}
           </Button>
         </div>
       </div>
+      {cropSrc && (
+        <ImageCropModal
+          imageSrc={cropSrc}
+          aspect={cropAspect}
+          onConfirm={handleCropConfirm}
+          onCancel={() => setCropSrc(null)}
+        />
+      )}
     </div>
   );
 }
-
 /* ── Multi image upload ── */
 interface MultiProps {
   value: string[];
