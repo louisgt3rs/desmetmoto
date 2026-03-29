@@ -26,18 +26,20 @@ function BrandLogo({ brand, onClick }: { brand: BrandEntry; onClick: () => void 
     <button
       type="button"
       onClick={onClick}
-      className="flex h-[120px] w-[120px] mx-auto items-center justify-center rounded-lg border border-primary/15 bg-[#1a1a1a] p-4 transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_20px_hsl(var(--primary)/0.2)]"
+      className="flex items-center justify-center rounded-lg border border-[#2a2a2a] bg-[#1a1a1a] p-4 transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_20px_hsl(var(--primary)/0.2)]"
+      style={{ width: 110, height: 110 }}
     >
       {brand.logo && !imgError ? (
         <img
           src={brand.logo}
           alt={brand.name}
           className="h-full w-full object-contain"
+          style={{ mixBlendMode: "screen" }}
           onError={() => setImgError(true)}
           loading="lazy"
         />
       ) : (
-        <span className="text-sm font-bold uppercase tracking-[0.15em] text-primary">
+        <span className="text-xs font-bold uppercase tracking-[0.15em] text-primary text-center leading-tight">
           {brand.name}
         </span>
       )}
