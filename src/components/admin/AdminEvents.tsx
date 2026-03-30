@@ -54,6 +54,9 @@ type SlotBooking = {
 };
 
 
+const MONTHS_FR = ["JANVIER","FÉVRIER","MARS","AVRIL","MAI","JUIN","JUILLET","AOÛT","SEPTEMBRE","OCTOBRE","NOVEMBRE","DÉCEMBRE"];
+const DAYS_FR = ["LUN","MAR","MER","JEU","VEN","SAM","DIM"];
+
 const normalizeTime = (t: string) => t.slice(0, 5);
 
 const formatDate = (date?: string | null) => {
@@ -87,6 +90,8 @@ export default function AdminEvents({ events, onRefresh }: AdminEventsProps) {
   const [selectedSlot, setSelectedSlot] = useState<SlotConfig | null>(null);
   const [slotEditForm, setSlotEditForm] = useState({ is_active: true, capacity: "", note: "" });
   const [savingSlot, setSavingSlot] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState<{ year: number; month: number }>(() => { const n = new Date(); return { year: n.getFullYear(), month: n.getMonth() }; });
+  const [selectedCalDay, setSelectedCalDay] = useState<string>("");
 
   // Slot items state
   const [items, setItems] = useState<SlotItem[]>([]);
@@ -114,7 +119,14 @@ export default function AdminEvents({ events, onRefresh }: AdminEventsProps) {
       supabase.from("event_slots_config").select("*").eq("event_id", eventId).order("date").order("start_time"),
       supabase.from("event_slot_items").select("*").eq("event_id", eventId).order("created_at"),
     ]);
-    if (configsRes.data) setConfigs(configsRes.data as SlotConfig[]);
+    if (configsRes.data) {
+      const loaded = configsRes.data as SlotConfig[];
+      setConfigs(loaded);
+      if (loaded.length > 0) {
+        const d = new Date(loaded[0].date + "T00:00:00");
+        setCalendarMonth({ year: d.getFullYear(), month: d.getMonth() });
+      }
+    }
     if (itemsRes.data) setItems(itemsRes.data as SlotItem[]);
   };
 
@@ -209,6 +221,8 @@ export default function AdminEvents({ events, onRefresh }: AdminEventsProps) {
     setGeneratingSlots(false);
     setSelectedSlot(null);
     setSlotEditForm({ is_active: true, capacity: "", note: "" });
+    setSelectedCalDay("");
+    const n = new Date(); setCalendarMonth({ year: n.getFullYear(), month: n.getMonth() });
     setItems([]);
     setItemForm({ name: "", description: "", image_url: "" });
     setBookings([]);
@@ -252,6 +266,9 @@ export default function AdminEvents({ events, onRefresh }: AdminEventsProps) {
     setGeneratingSlots(false);
     if (error) { toast.error("ERREUR : " + error.message.toUpperCase()); return; }
     toast.success(`${rows.length} CRÉNEAUX GÉNÉRÉS`);
+    const d = new Date(rows[0].date + "T00:00:00");
+    setCalendarMonth({ year: d.getFullYear(), month: d.getMonth() });
+    setSelectedCalDay(rows[0].date);
     await loadSlotsData(editing.id);
   };
 
@@ -343,12 +360,34 @@ export default function AdminEvents({ events, onRefresh }: AdminEventsProps) {
     return activeConfigCount * activeItemCount;
   }, [configs, items]);
 
-  const calendarData = useMemo(() => {
-    const dates = [...new Set(configs.map(c => c.date))].sort();
-    const times = [...new Set(configs.map(c => normalizeTime(c.start_time)))].sort();
-    const map = new Map(configs.map(c => [`${c.date}|${normalizeTime(c.start_time)}`, c]));
-    return { dates, times, map };
+  const configsByDate = useMemo(() => {
+    const map = new Map<string, SlotConfig[]>();
+    for (const c of configs) {
+      if (!map.has(c.date)) map.set(c.date, []);
+      map.get(c.date)!.push(c);
+    }
+    return map;
   }, [configs]);
+
+  const adminCalDays = useMemo(() => {
+    const { year, month } = calendarMonth;
+    const firstDow = (new Date(year, month, 1).getDay() + 6) % 7;
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const cells: (string | null)[] = Array(firstDow).fill(null);
+    for (let d = 1; d <= daysInMonth; d++) {
+      cells.push(`${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`);
+    }
+    while (cells.length % 7 !== 0) cells.push(null);
+    return cells;
+  }, [calendarMonth]);
+
+  const daySlots = useMemo(() => {
+    if (!selectedCalDay) return [];
+    return (configsByDate.get(selectedCalDay) || []).slice().sort((a, b) => a.start_time.localeCompare(b.start_time));
+  }, [selectedCalDay, configsByDate]);
+
+  const prevMonth = () => setCalendarMonth(m => m.month === 0 ? { year: m.year - 1, month: 11 } : { year: m.year, month: m.month - 1 });
+  const nextMonth = () => setCalendarMonth(m => m.month === 11 ? { year: m.year + 1, month: 0 } : { year: m.year, month: m.month + 1 });
 
   const uniqueBookingDates = useMemo(() => {
     return [...new Set(bookings.map(b => b.date))].sort();
@@ -587,94 +626,92 @@ export default function AdminEvents({ events, onRefresh }: AdminEventsProps) {
                     </div>
                   </div>
 
-                  {/* Section B: Calendar grid */}
+                  {/* Section B: Monthly Calendar */}
                   {configs.length > 0 ? (
                     <div className="p-6">
-                      <div className="overflow-x-auto">
-                        <table className="border-collapse" style={{ minWidth: "max-content" }}>
-                          <thead>
-                            <tr>
-                              <th className="sticky left-0 z-10 bg-[hsl(var(--admin-card))] w-32 min-w-[128px] pr-4 pb-3 text-left font-adminDisplay text-[10px] uppercase tracking-[0.15em] text-[hsl(var(--admin-muted-foreground))]">JOUR</th>
-                              {calendarData.times.map(t => (
-                                <th key={t} className="pb-3 px-1 font-adminDisplay text-[11px] uppercase tracking-[0.1em] text-[hsl(var(--admin-muted-foreground))] text-center w-16 min-w-[64px]">{t}</th>
-                              ))}
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {calendarData.dates.map(date => {
-                              const d = new Date(date + "T00:00:00");
-                              const weekday = d.toLocaleDateString("fr-BE", { weekday: "short" }).toUpperCase();
-                              const dayNum = d.toLocaleDateString("fr-BE", { day: "2-digit", month: "2-digit" });
-                              return (
-                                <tr key={date}>
-                                  <td className="sticky left-0 z-10 bg-[hsl(var(--admin-card))] pr-4 py-1 whitespace-nowrap">
-                                    <div className="leading-none">
-                                      <p className="font-adminDisplay text-[11px] tracking-[0.12em] text-[hsl(var(--admin-foreground))]">{weekday}</p>
-                                      <p className="mt-0.5 text-[10px] tracking-[0.08em] text-[hsl(var(--admin-muted-foreground))]">{dayNum}</p>
-                                    </div>
-                                  </td>
-                                  {calendarData.times.map(time => {
-                                    const slot = calendarData.map.get(`${date}|${time}`);
-                                    if (!slot) return (
-                                      <td key={time} className="px-1 py-1">
-                                        <div className="h-12 w-14 border border-dashed border-[hsl(var(--admin-accent)/0.08)]" />
-                                      </td>
-                                    );
-                                    const isSelected = selectedSlot?.id === slot.id;
-                                    const isActive = slot.is_active;
-                                    const hasNote = Boolean(slot.note);
-                                    return (
-                                      <td key={time} className="px-1 py-1">
-                                        <button
-                                          onClick={() => {
-                                            if (isSelected) { setSelectedSlot(null); }
-                                            else { setSelectedSlot(slot); setSlotEditForm({ is_active: slot.is_active, capacity: String(slot.capacity ?? ""), note: slot.note ?? "" }); }
-                                          }}
-                                          title={`${date} ${time}${slot.note ? ` — ${slot.note}` : ""}${slot.capacity ? ` (cap. ${slot.capacity})` : ""}`}
-                                          className={`relative flex h-12 w-14 cursor-pointer flex-col items-center justify-center gap-0.5 border font-adminDisplay text-[10px] tracking-[0.06em] transition-all duration-150 ${
-                                            isSelected
-                                              ? "border-white bg-white text-[#0e0e0e] shadow-[0_0_12px_rgba(255,255,255,0.12)]"
-                                              : isActive
-                                              ? "border-[#c9973a] bg-[#c9973a]/10 text-[#c9973a] hover:bg-[#c9973a]/20 hover:shadow-[0_0_8px_rgba(201,151,58,0.18)]"
-                                              : "border-[hsl(var(--admin-accent)/0.18)] bg-transparent text-[hsl(var(--admin-muted-foreground))] opacity-35 hover:opacity-60"
-                                          }`}
-                                        >
-                                          <span className="text-[13px]">{isActive ? "●" : "○"}</span>
-                                          {hasNote && (
-                                            <span className="absolute right-1 top-1 h-1 w-1 rounded-full bg-current opacity-70" />
-                                          )}
-                                        </button>
-                                      </td>
-                                    );
-                                  })}
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
+                      {/* Month navigation */}
+                      <div className="mb-4 flex items-center justify-between">
+                        <button onClick={prevMonth} className="flex h-8 w-8 items-center justify-center border border-[hsl(var(--admin-accent)/0.25)] font-adminDisplay text-sm text-[hsl(var(--admin-muted-foreground))] transition-colors hover:border-[#c9973a] hover:text-[#c9973a]">‹</button>
+                        <p className="font-adminDisplay text-sm tracking-[0.2em] text-[hsl(var(--admin-foreground))]">{MONTHS_FR[calendarMonth.month]} {calendarMonth.year}</p>
+                        <button onClick={nextMonth} className="flex h-8 w-8 items-center justify-center border border-[hsl(var(--admin-accent)/0.25)] font-adminDisplay text-sm text-[hsl(var(--admin-muted-foreground))] transition-colors hover:border-[#c9973a] hover:text-[#c9973a]">›</button>
+                      </div>
+                      {/* Day-of-week headers */}
+                      <div className="mb-1 grid grid-cols-7 gap-1">
+                        {DAYS_FR.map(d => (
+                          <div key={d} className="py-1 text-center font-adminDisplay text-[10px] tracking-[0.14em] text-[hsl(var(--admin-muted-foreground))]">{d}</div>
+                        ))}
+                      </div>
+                      {/* Calendar cells */}
+                      <div className="grid grid-cols-7 gap-1">
+                        {adminCalDays.map((date, i) => {
+                          if (!date) return <div key={`pad-${i}`} className="aspect-square" />;
+                          const dayNum = +date.split("-")[2];
+                          const slots = configsByDate.get(date);
+                          const hasSlots = !!slots;
+                          const isSelected = selectedCalDay === date;
+                          const activeCount = slots ? slots.filter(c => c.is_active).length : 0;
+                          return (
+                            <button
+                              key={date}
+                              disabled={!hasSlots}
+                              onClick={() => { setSelectedCalDay(isSelected ? "" : date); setSelectedSlot(null); }}
+                              className={`aspect-square flex flex-col items-center justify-center gap-0.5 border transition-all duration-150 ${
+                                !hasSlots
+                                  ? "cursor-default border-transparent text-[hsl(var(--admin-muted-foreground))] opacity-20"
+                                  : isSelected
+                                  ? "cursor-pointer border-[#c9973a] bg-[#c9973a] text-[#0e0e0e]"
+                                  : "cursor-pointer border-[#c9973a]/35 bg-[#c9973a]/5 text-[hsl(var(--admin-foreground))] hover:border-[#c9973a] hover:bg-[#c9973a]/15"
+                              }`}
+                            >
+                              <span className="font-adminDisplay text-sm leading-none">{dayNum}</span>
+                              {hasSlots && (
+                                <span className={`text-[9px] leading-none ${isSelected ? "text-[#0e0e0e]/70" : "text-[#c9973a]"}`}>
+                                  {activeCount}/{slots!.length}
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
                       </div>
 
-                      {/* Legend */}
-                      <div className="mt-3 flex items-center gap-5 text-[10px] uppercase tracking-[0.12em] text-[hsl(var(--admin-muted-foreground))]">
-                        <span className="flex items-center gap-1.5">
-                          <span className="inline-block h-3 w-3 border border-[#c9973a] bg-[#c9973a]/10" />
-                          ACTIF
-                        </span>
-                        <span className="flex items-center gap-1.5">
-                          <span className="inline-block h-3 w-3 border border-[hsl(var(--admin-accent)/0.18)] opacity-35" />
-                          INACTIF
-                        </span>
-                        <span className="flex items-center gap-1.5">
-                          <span className="inline-block h-3 w-3 border border-white bg-white" />
-                          SÉLECTIONNÉ
-                        </span>
-                        <span className="flex items-center gap-1.5">
-                          <span className="relative inline-block h-3 w-3 border border-[hsl(var(--admin-accent)/0.3)]">
-                            <span className="absolute right-0 top-0 h-1 w-1 rounded-full bg-current opacity-70" />
-                          </span>
-                          NOTE
-                        </span>
-                      </div>
+                      {/* Slot pills for selected day */}
+                      {selectedCalDay && daySlots.length > 0 && (
+                        <div className="mt-6">
+                          <div className="mb-3 flex items-center gap-2">
+                            <span className="h-3 w-0.5 bg-[#c9973a]" />
+                            <p className="font-adminDisplay text-xs tracking-[0.16em] text-[hsl(var(--admin-foreground))]">
+                              {new Date(selectedCalDay + "T00:00:00").toLocaleDateString("fr-BE", { weekday: "long", day: "numeric", month: "long" }).toUpperCase()} — {daySlots.length} CRÉNEAU{daySlots.length > 1 ? "X" : ""}
+                            </p>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {daySlots.map(slot => {
+                              const isSlotSelected = selectedSlot?.id === slot.id;
+                              return (
+                                <button
+                                  key={slot.id}
+                                  onClick={() => {
+                                    if (isSlotSelected) { setSelectedSlot(null); }
+                                    else { setSelectedSlot(slot); setSlotEditForm({ is_active: slot.is_active, capacity: String(slot.capacity ?? ""), note: slot.note ?? "" }); }
+                                  }}
+                                  className={`flex items-center gap-2 border px-4 py-2 font-adminDisplay text-xs tracking-[0.1em] transition-all duration-150 ${
+                                    isSlotSelected
+                                      ? "border-white bg-white text-[#0e0e0e]"
+                                      : slot.is_active
+                                      ? "border-[#c9973a] bg-[#c9973a]/10 text-[#c9973a] hover:bg-[#c9973a]/20"
+                                      : "border-[hsl(var(--admin-accent)/0.2)] bg-transparent text-[hsl(var(--admin-muted-foreground))] opacity-40 hover:opacity-70"
+                                  }`}
+                                >
+                                  {normalizeTime(slot.start_time)}
+                                  <span className="text-[10px]">{slot.is_active ? "●" : "○"}</span>
+                                  <span className="text-[9px] tracking-[0.06em] opacity-80">{slot.is_active ? "ACTIF" : "INACTIF"}</span>
+                                  {slot.note && <span title={slot.note} className="text-[9px] opacity-50">⚑</span>}
+                                  {slot.capacity != null && <span className="text-[9px] opacity-50">×{slot.capacity}</span>}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
 
                       {/* Inline slot edit panel */}
                       {selectedSlot && (
@@ -686,10 +723,7 @@ export default function AdminEvents({ events, onRefresh }: AdminEventsProps) {
                                 CRÉNEAU — {new Date(selectedSlot.date + "T00:00:00").toLocaleDateString("fr-BE", { weekday: "long", day: "numeric", month: "long" }).toUpperCase()} · {normalizeTime(selectedSlot.start_time)} → {normalizeTime(selectedSlot.end_time)}
                               </p>
                             </div>
-                            <button
-                              onClick={() => setSelectedSlot(null)}
-                              className="text-[10px] uppercase tracking-[0.14em] text-[hsl(var(--admin-muted-foreground))] transition-colors hover:text-[hsl(var(--admin-foreground))]"
-                            >
+                            <button onClick={() => setSelectedSlot(null)} className="text-[10px] uppercase tracking-[0.14em] text-[hsl(var(--admin-muted-foreground))] transition-colors hover:text-[hsl(var(--admin-foreground))]">
                               ✕ FERMER
                             </button>
                           </div>
