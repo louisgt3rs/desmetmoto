@@ -205,6 +205,15 @@ export default function EventBookingPage() {
       phone: form.phone,
       newsletter_consent: form.newsletter_consent,
     });
+    if (!error) {
+      // Also subscribe to newsletter (ignore conflict if already subscribed)
+      await supabase.from("newsletter_subscribers").insert({
+        email: form.email,
+        first_name: form.first_name,
+        last_name: form.last_name,
+        source: "event_booking",
+      }).maybeSingle();
+    }
     setSubmitting(false);
     if (error) {
       if (error.code === "23505") {
@@ -510,7 +519,7 @@ export default function EventBookingPage() {
                         className="mt-0.5 h-4 w-4 accent-[#c9973a]"
                       />
                       <span className="text-sm leading-relaxed">
-                        J'accepte de recevoir les actualités et offres de Desmet Équipement par email. *
+                        J'accepte de recevoir la newsletter Desmet Équipement et la confirmation de réservation par email. *
                         {newsError && <span className="ml-2 text-xs uppercase tracking-widest text-red-400">(REQUIS)</span>}
                       </span>
                     </label>

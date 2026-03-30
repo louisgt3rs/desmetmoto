@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Calendar, Clock, Coffee, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import Layout from "@/components/Layout";
 import SectionHeading from "@/components/SectionHeading";
@@ -16,20 +15,13 @@ export default function CommunityPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
   const [lightbox, setLightbox] = useState<string | null>(null);
-  const [configEventIds, setConfigEventIds] = useState<Set<string>>(new Set());
-  const [itemEventIds, setItemEventIds] = useState<Set<string>>(new Set());
-
   useEffect(() => {
     Promise.all([
       supabase.from("events").select("*").order("date", { ascending: false }),
       supabase.from("gallery_photos").select("*").order("sort_order"),
-      supabase.from("event_slots_config").select("event_id"),
-      supabase.from("event_slot_items").select("event_id").eq("is_active", true),
-    ]).then(([eventsRes, photosRes, configsRes, itemsRes]) => {
+    ]).then(([eventsRes, photosRes]) => {
       if (eventsRes.data) setEvents(eventsRes.data);
       if (photosRes.data) setPhotos(photosRes.data);
-      setConfigEventIds(new Set((configsRes.data || []).map(r => r.event_id)));
-      setItemEventIds(new Set((itemsRes.data || []).map(r => r.event_id)));
     });
   }, []);
 
@@ -47,43 +39,41 @@ export default function CommunityPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="bg-card border border-border rounded-xl overflow-hidden hover:border-primary/50 hover:shadow-[0_0_30px_hsl(var(--glow-soft))] transition-all duration-500"
               >
-                <div className="grid lg:grid-cols-2">
-                  {event.image_url ? (
-                    <img src={event.image_url} alt={event.title} className="w-full h-64 lg:h-full object-cover" />
-                  ) : (
-                    <div className="h-64 lg:h-auto bg-secondary flex items-center justify-center">
-                      <Coffee className="w-16 h-16 text-muted-foreground/30" />
-                    </div>
-                  )}
-                  <div className="p-8">
-                    <h3 className="font-display text-3xl text-foreground mb-3">{event.title}</h3>
-                    <p className="text-muted-foreground text-sm mb-6">{event.description}</p>
-                    <div className="space-y-2 mb-6">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <MapPin className="w-4 h-4 text-primary" /> {event.location}
+                <Link
+                  to={`/evenements/${event.id}`}
+                  className="group block bg-card border border-border rounded-xl overflow-hidden hover:border-primary/50 hover:shadow-[0_0_30px_hsl(var(--glow-soft))] transition-all duration-500"
+                >
+                  <div className="grid lg:grid-cols-2">
+                    {event.image_url ? (
+                      <img src={event.image_url} alt={event.title} className="w-full h-64 lg:h-full object-cover group-hover:scale-[1.02] transition-transform duration-500" />
+                    ) : (
+                      <div className="h-64 lg:h-auto bg-secondary flex items-center justify-center">
+                        <Coffee className="w-16 h-16 text-muted-foreground/30" />
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Calendar className="w-4 h-4 text-primary" />
-                        {event.date ? new Date(event.date).toLocaleDateString("fr-BE", { weekday: "long", day: "numeric", month: "long" }) : "À venir"}
+                    )}
+                    <div className="p-8">
+                      <h3 className="font-display text-3xl text-foreground mb-3 group-hover:text-primary transition-colors duration-300">{event.title}</h3>
+                      <p className="text-muted-foreground text-sm mb-6 line-clamp-3">{event.description}</p>
+                      <div className="space-y-2 mb-6">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <MapPin className="w-4 h-4 text-primary" /> {event.location}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Calendar className="w-4 h-4 text-primary" />
+                          {event.date ? new Date(event.date).toLocaleDateString("fr-BE", { weekday: "long", day: "numeric", month: "long" }) : "À venir"}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Clock className="w-4 h-4 text-primary" /> {event.time || "TBD"}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Clock className="w-4 h-4 text-primary" /> {event.time || "TBD"}
+                      <div className="flex items-center gap-2 text-sm font-display uppercase tracking-widest text-primary">
+                        VOIR L'ÉVÉNEMENT
+                        <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
                       </div>
-                    </div>
-                    <div className="flex flex-wrap gap-3">
-                      {event.date && new Date(event.date) >= new Date() && (
-                        <Button size="lg">Je participe</Button>
-                      )}
-                      {configEventIds.has(event.id) && itemEventIds.has(event.id) && (
-                        <Button asChild size="lg">
-                          <Link to={`/evenements/${event.id}/reserver`}>RÉSERVER UN CRÉNEAU</Link>
-                        </Button>
-                      )}
                     </div>
                   </div>
-                </div>
+                </Link>
               </motion.div>
             ))}
           </div>
