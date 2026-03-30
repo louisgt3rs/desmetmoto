@@ -48,7 +48,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-display text-lg text-foreground">Adresse</h3>
-                    <p className="text-muted-foreground text-sm">Chaussée de Wavre 491<br />1300 Wavre, Belgique</p>
+                    <p className="text-muted-foreground text-sm">Chaussée de Louvain 491<br />1300 Wavre, Belgique</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -92,7 +92,7 @@ export default function ContactPage() {
                   <a href="tel:010842139"><Phone className="w-4 h-4" /> Appeler</a>
                 </Button>
                 <Button asChild variant="outline" size="lg">
-                  <a href="https://www.google.com/maps/dir/?api=1&destination=Chauss%C3%A9e+de+Wavre+491+1300+Wavre+Belgique" target="_blank" rel="noopener noreferrer">
+                  <a href="https://www.google.com/maps/dir/?api=1&destination=Chauss%C3%A9e+de+Louvain+491%2C+1300+Wavre%2C+Belgique" target="_blank" rel="noopener noreferrer">
                     <Navigation className="w-4 h-4" /> Itinéraire
                   </a>
                 </Button>
@@ -101,7 +101,7 @@ export default function ContactPage() {
               {/* Map */}
               <div className="rounded-xl overflow-hidden border border-border aspect-video">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2527.5!2d4.6167!3d50.7167!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47c3d1e1e1e1e1e1%3A0x0!2sChauss%C3%A9e+de+Wavre+491%2C+1300+Wavre!5e0!3m2!1sfr!2sbe!4v1234567890"
+                  src="https://maps.google.com/maps?q=Chauss%C3%A9e+de+Louvain+491%2C+1300+Wavre%2C+Belgique&output=embed"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}

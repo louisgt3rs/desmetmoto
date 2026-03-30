@@ -113,6 +113,148 @@ export type Database = {
         }
         Relationships: []
       }
+      event_slot_bookings: {
+        Row: {
+          created_at: string
+          date: string
+          email: string
+          event_id: string
+          first_name: string
+          id: string
+          last_name: string
+          newsletter_consent: boolean
+          phone: string
+          slot_item_id: string
+          slot_time: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          email: string
+          event_id: string
+          first_name: string
+          id?: string
+          last_name: string
+          newsletter_consent: boolean
+          phone: string
+          slot_item_id: string
+          slot_time: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          email?: string
+          event_id?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          newsletter_consent?: boolean
+          phone?: string
+          slot_item_id?: string
+          slot_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_slot_bookings_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_slot_bookings_slot_item_id_fkey"
+            columns: ["slot_item_id"]
+            isOneToOne: false
+            referencedRelation: "event_slot_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_slot_items: {
+        Row: {
+          created_at: string
+          description: string | null
+          event_id: string
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          event_id: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          event_id?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_slot_items_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_slots_config: {
+        Row: {
+          capacity: number | null
+          created_at: string
+          date: string
+          end_time: string
+          event_id: string
+          id: string
+          is_active: boolean
+          note: string | null
+          slot_duration_minutes: number
+          start_time: string
+        }
+        Insert: {
+          capacity?: number | null
+          created_at?: string
+          date: string
+          end_time: string
+          event_id: string
+          id?: string
+          is_active?: boolean
+          note?: string | null
+          slot_duration_minutes?: number
+          start_time: string
+        }
+        Update: {
+          capacity?: number | null
+          created_at?: string
+          date?: string
+          end_time?: string
+          event_id?: string
+          id?: string
+          is_active?: boolean
+          note?: string | null
+          slot_duration_minutes?: number
+          start_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_slots_config_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gallery_photos: {
         Row: {
           caption: string | null

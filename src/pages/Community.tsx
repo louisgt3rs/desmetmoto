@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Calendar, Clock, Coffee, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import Layout from "@/components/Layout";
 import SectionHeading from "@/components/SectionHeading";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,13 +16,20 @@ export default function CommunityPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
   const [lightbox, setLightbox] = useState<string | null>(null);
+  const [configEventIds, setConfigEventIds] = useState<Set<string>>(new Set());
+  const [itemEventIds, setItemEventIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    supabase.from("events").select("*").order("date", { ascending: false }).then(({ data }) => {
-      if (data) setEvents(data);
-    });
-    supabase.from("gallery_photos").select("*").order("sort_order").then(({ data }) => {
-      if (data) setPhotos(data);
+    Promise.all([
+      supabase.from("events").select("*").order("date", { ascending: false }),
+      supabase.from("gallery_photos").select("*").order("sort_order"),
+      supabase.from("event_slots_config").select("event_id"),
+      supabase.from("event_slot_items").select("event_id").eq("is_active", true),
+    ]).then(([eventsRes, photosRes, configsRes, itemsRes]) => {
+      if (eventsRes.data) setEvents(eventsRes.data);
+      if (photosRes.data) setPhotos(photosRes.data);
+      setConfigEventIds(new Set((configsRes.data || []).map(r => r.event_id)));
+      setItemEventIds(new Set((itemsRes.data || []).map(r => r.event_id)));
     });
   }, []);
 
@@ -64,9 +72,16 @@ export default function CommunityPage() {
                         <Clock className="w-4 h-4 text-primary" /> {event.time || "TBD"}
                       </div>
                     </div>
-                    {event.date && new Date(event.date) >= new Date() && (
-                      <Button size="lg">Je participe</Button>
-                    )}
+                    <div className="flex flex-wrap gap-3">
+                      {event.date && new Date(event.date) >= new Date() && (
+                        <Button size="lg">Je participe</Button>
+                      )}
+                      {configEventIds.has(event.id) && itemEventIds.has(event.id) && (
+                        <Button asChild size="lg">
+                          <Link to={`/evenements/${event.id}/reserver`}>RÉSERVER UN CRÉNEAU</Link>
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </motion.div>
