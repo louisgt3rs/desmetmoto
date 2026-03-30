@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Link, Navigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { CalendarDays, ChevronLeft, LayoutDashboard, Loader2, LogOut, Package, ShieldCheck, Tag } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import AdminDashboard from "@/components/admin/AdminDashboard";
@@ -28,6 +28,7 @@ export default function AdminPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
+  const [loginError, setLoginError] = useState("");
   const [panelLoading, setPanelLoading] = useState(true);
   const [products, setProducts] = useState<AdminProduct[]>([]);
   const [events, setEvents] = useState<AdminEvent[]>([]);
@@ -57,7 +58,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (!loading && user && !isAdmin) {
-      toast.error("ACCÈS REFUSÉ : COMPTE NON ADMINISTRATEUR");
+      setLoginError("CE COMPTE N'EST PAS ADMINISTRATEUR.");
     }
   }, [loading, user, isAdmin]);
 
@@ -67,15 +68,14 @@ export default function AdminPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoginError("");
     setLoginLoading(true);
     const { error } = await signIn(email, password);
     setLoginLoading(false);
     if (error) {
-      toast.error("CONNEXION ÉCHOUÉE : " + error.message.toUpperCase());
+      setLoginError("IDENTIFIANTS INCORRECTS.");
       return;
     }
-
-    toast.success("CONNEXION ADMIN VALIDÉE");
   };
 
   if (loading) {
@@ -86,11 +86,7 @@ export default function AdminPage() {
     );
   }
 
-  if (user && !isAdmin) {
-    return <Navigate to="/" replace />;
-  }
-
-  if (!user) {
+  if (!isAdmin) {
     return (
       <div className="relative min-h-screen overflow-hidden bg-background">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,hsl(var(--primary)/0.18),transparent_32%),linear-gradient(180deg,hsl(var(--admin-background)),hsl(var(--background))_55%,hsl(var(--admin-background)))]" />
@@ -144,6 +140,16 @@ export default function AdminPage() {
               </div>
             </CardHeader>
             <CardContent>
+              {loginError && (
+                <div className="mb-4 border border-destructive/40 bg-destructive/10 px-4 py-3 text-xs uppercase tracking-[0.14em] text-destructive">
+                  {loginError}
+                  {user && (
+                    <button type="button" onClick={() => { signOut(); setLoginError(""); }} className="ml-3 underline opacity-70 hover:opacity-100">
+                      SE DÉCONNECTER
+                    </button>
+                  )}
+                </div>
+              )}
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
                   <label className="admin-kicker text-sm text-[hsl(var(--admin-muted-foreground))]" htmlFor="admin-email">EMAIL</label>
