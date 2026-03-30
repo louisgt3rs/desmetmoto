@@ -115,9 +115,10 @@ export default function AdminEvents({ events, onRefresh }: AdminEventsProps) {
   }, [events, search]);
 
   const loadSlotsData = async (eventId: string) => {
-    const [configsRes, itemsRes] = await Promise.all([
+    const [configsRes, itemsRes, bookingsRes] = await Promise.all([
       supabase.from("event_slots_config").select("*").eq("event_id", eventId).order("date").order("start_time"),
       supabase.from("event_slot_items").select("*").eq("event_id", eventId).order("created_at"),
+      supabase.from("event_slot_bookings").select("*").eq("event_id", eventId).order("date").order("slot_time"),
     ]);
     if (configsRes.data) {
       const loaded = configsRes.data as SlotConfig[];
@@ -128,6 +129,7 @@ export default function AdminEvents({ events, onRefresh }: AdminEventsProps) {
       }
     }
     if (itemsRes.data) setItems(itemsRes.data as SlotItem[]);
+    if (bookingsRes.data) setBookings(bookingsRes.data as SlotBooking[]);
   };
 
   const loadBookings = async (eventId: string) => {
@@ -339,6 +341,16 @@ export default function AdminEvents({ events, onRefresh }: AdminEventsProps) {
     await loadSlotsData(editing.id);
   };
 
+  const handleCancelBooking = async (bookingId: string) => {
+    if (!editing) return;
+    if (!confirm("ANNULER CETTE RÉSERVATION ?")) return;
+    const { error } = await supabase.from("event_slot_bookings").delete().eq("id", bookingId);
+    if (error) { toast.error("ERREUR : " + error.message.toUpperCase()); return; }
+    toast.success("RÉSERVATION ANNULÉE");
+    setSelectedSlot(null);
+    await loadSlotsData(editing.id);
+  };
+
   const handleTabChange = (tab: string) => {
     setActiveTab(tab as "info" | "slots" | "bookings");
     if (tab === "bookings" && editing?.id && bookings.length === 0) {
@@ -368,6 +380,16 @@ export default function AdminEvents({ events, onRefresh }: AdminEventsProps) {
     }
     return map;
   }, [configs]);
+
+  const bookingsByDatetime = useMemo(() => {
+    const map = new Map<string, SlotBooking[]>();
+    for (const b of bookings) {
+      const key = `${b.date}|${normalizeTime(b.slot_time)}`;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(b);
+    }
+    return map;
+  }, [bookings]);
 
   const adminCalDays = useMemo(() => {
     const { year, month } = calendarMonth;
@@ -686,6 +708,8 @@ export default function AdminEvents({ events, onRefresh }: AdminEventsProps) {
                           <div className="flex flex-wrap gap-2">
                             {daySlots.map(slot => {
                               const isSlotSelected = selectedSlot?.id === slot.id;
+                              const slotBookings = bookingsByDatetime.get(`${slot.date}|${normalizeTime(slot.start_time)}`) || [];
+                              const isBooked = slotBookings.length > 0;
                               return (
                                 <button
                                   key={slot.id}
@@ -696,14 +720,29 @@ export default function AdminEvents({ events, onRefresh }: AdminEventsProps) {
                                   className={`flex items-center gap-2 border px-4 py-2 font-adminDisplay text-xs tracking-[0.1em] transition-all duration-150 ${
                                     isSlotSelected
                                       ? "border-white bg-white text-[#0e0e0e]"
+                                      : isBooked
+                                      ? "border-orange-500/60 bg-orange-500/10 text-orange-400 hover:bg-orange-500/20"
                                       : slot.is_active
                                       ? "border-[#c9973a] bg-[#c9973a]/10 text-[#c9973a] hover:bg-[#c9973a]/20"
                                       : "border-[hsl(var(--admin-accent)/0.2)] bg-transparent text-[hsl(var(--admin-muted-foreground))] opacity-40 hover:opacity-70"
                                   }`}
                                 >
                                   {normalizeTime(slot.start_time)}
-                                  <span className="text-[10px]">{slot.is_active ? "●" : "○"}</span>
-                                  <span className="text-[9px] tracking-[0.06em] opacity-80">{slot.is_active ? "ACTIF" : "INACTIF"}</span>
+                                  {isBooked ? (
+                                    <>
+                                      <span className="text-[10px]">●</span>
+                                      <span className="text-[9px] tracking-[0.06em]">
+                                        {slotBookings.length === 1
+                                          ? slotBookings[0].first_name.toUpperCase()
+                                          : `${slotBookings.length} RÉSERVÉS`}
+                                      </span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span className="text-[10px]">{slot.is_active ? "●" : "○"}</span>
+                                      <span className="text-[9px] tracking-[0.06em] opacity-80">{slot.is_active ? "ACTIF" : "INACTIF"}</span>
+                                    </>
+                                  )}
                                   {slot.note && <span title={slot.note} className="text-[9px] opacity-50">⚑</span>}
                                   {slot.capacity != null && <span className="text-[9px] opacity-50">×{slot.capacity}</span>}
                                 </button>
@@ -714,54 +753,91 @@ export default function AdminEvents({ events, onRefresh }: AdminEventsProps) {
                       )}
 
                       {/* Inline slot edit panel */}
-                      {selectedSlot && (
-                        <div className="mt-5 border border-[#c9973a]/30 bg-[#0e0e0e]">
-                          <div className="flex items-center justify-between border-b border-[#c9973a]/20 px-5 py-3">
-                            <div className="flex items-center gap-3">
-                              <span className="h-4 w-0.5 bg-[#c9973a]" />
-                              <p className="font-adminDisplay text-sm tracking-[0.14em] text-[#c9973a]">
-                                CRÉNEAU — {new Date(selectedSlot.date + "T00:00:00").toLocaleDateString("fr-BE", { weekday: "long", day: "numeric", month: "long" }).toUpperCase()} · {normalizeTime(selectedSlot.start_time)} → {normalizeTime(selectedSlot.end_time)}
-                              </p>
+                      {selectedSlot && (() => {
+                        const panelBookings = bookingsByDatetime.get(`${selectedSlot.date}|${normalizeTime(selectedSlot.start_time)}`) || [];
+                        const isPanelBooked = panelBookings.length > 0;
+                        return (
+                          <div className={`mt-5 border bg-[#0e0e0e] ${isPanelBooked ? "border-orange-500/40" : "border-[#c9973a]/30"}`}>
+                            <div className={`flex items-center justify-between border-b px-5 py-3 ${isPanelBooked ? "border-orange-500/25" : "border-[#c9973a]/20"}`}>
+                              <div className="flex items-center gap-3">
+                                <span className={`h-4 w-0.5 ${isPanelBooked ? "bg-orange-400" : "bg-[#c9973a]"}`} />
+                                <p className={`font-adminDisplay text-sm tracking-[0.14em] ${isPanelBooked ? "text-orange-400" : "text-[#c9973a]"}`}>
+                                  CRÉNEAU — {new Date(selectedSlot.date + "T00:00:00").toLocaleDateString("fr-BE", { weekday: "long", day: "numeric", month: "long" }).toUpperCase()} · {normalizeTime(selectedSlot.start_time)} → {normalizeTime(selectedSlot.end_time)}
+                                </p>
+                              </div>
+                              <button onClick={() => setSelectedSlot(null)} className="text-[10px] uppercase tracking-[0.14em] text-[hsl(var(--admin-muted-foreground))] transition-colors hover:text-[hsl(var(--admin-foreground))]">
+                                ✕ FERMER
+                              </button>
                             </div>
-                            <button onClick={() => setSelectedSlot(null)} className="text-[10px] uppercase tracking-[0.14em] text-[hsl(var(--admin-muted-foreground))] transition-colors hover:text-[hsl(var(--admin-foreground))]">
-                              ✕ FERMER
-                            </button>
+
+                            {/* Booking details (shown when slot is booked) */}
+                            {isPanelBooked && (
+                              <div className="border-b border-orange-500/15 p-5">
+                                <p className="mb-3 font-adminDisplay text-[10px] tracking-[0.18em] text-orange-400">
+                                  {panelBookings.length === 1 ? "RÉSERVATION" : `${panelBookings.length} RÉSERVATIONS`}
+                                </p>
+                                <div className="space-y-3">
+                                  {panelBookings.map(b => (
+                                    <div key={b.id} className="flex items-center justify-between border border-orange-500/20 bg-orange-500/5 px-4 py-3">
+                                      <div className="space-y-0.5">
+                                        <p className="font-adminDisplay text-sm tracking-[0.1em] text-[hsl(var(--admin-foreground))]">
+                                          {b.first_name.toUpperCase()} {b.last_name.toUpperCase()}
+                                        </p>
+                                        <p className="text-xs tracking-[0.08em] text-[hsl(var(--admin-muted-foreground))]">{b.email}</p>
+                                        <p className="text-xs tracking-[0.08em] text-[hsl(var(--admin-muted-foreground))]">{b.phone}</p>
+                                        <p className="text-[10px] uppercase tracking-[0.1em] text-[hsl(var(--admin-muted-foreground))]">
+                                          Ressource : {items.find(i => i.id === b.slot_item_id)?.name || "—"}
+                                        </p>
+                                      </div>
+                                      <Button
+                                        onClick={() => handleCancelBooking(b.id)}
+                                        className="h-9 rounded-none border border-destructive/50 bg-transparent px-4 font-adminDisplay text-[10px] tracking-[0.14em] text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                                      >
+                                        ANNULER LA RÉSERVATION
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Slot config edit */}
+                            <div className="p-5">
+                              <div className="grid gap-4 sm:grid-cols-3">
+                                <div className="space-y-2">
+                                  <Label className="admin-kicker text-[10px] tracking-[0.18em] text-[hsl(var(--admin-muted-foreground))]">STATUT</Label>
+                                  <button
+                                    onClick={() => setSlotEditForm(f => ({ ...f, is_active: !f.is_active }))}
+                                    className={`h-11 w-full border font-adminDisplay text-xs tracking-[0.16em] transition-all duration-150 ${
+                                      slotEditForm.is_active
+                                        ? "border-[#c9973a] bg-[#c9973a]/10 text-[#c9973a] hover:bg-[#c9973a]/20"
+                                        : "border-[hsl(var(--admin-accent)/0.2)] bg-transparent text-[hsl(var(--admin-muted-foreground))] hover:border-[hsl(var(--admin-accent)/0.4)]"
+                                    }`}
+                                  >
+                                    {slotEditForm.is_active ? "● ACTIF" : "○ INACTIF"}
+                                  </button>
+                                </div>
+                                <div className="space-y-2">
+                                  <Label className="admin-kicker text-[10px] tracking-[0.18em] text-[hsl(var(--admin-muted-foreground))]">CAPACITÉ</Label>
+                                  <Input type="number" min="1" step="1" value={slotEditForm.capacity} onChange={(e) => setSlotEditForm(f => ({ ...f, capacity: e.target.value }))} placeholder="PAR DÉFAUT" className="admin-input h-11" />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label className="admin-kicker text-[10px] tracking-[0.18em] text-[hsl(var(--admin-muted-foreground))]">NOTE INTERNE</Label>
+                                  <Input value={slotEditForm.note} onChange={(e) => setSlotEditForm(f => ({ ...f, note: e.target.value }))} placeholder="EX : RÉSERVÉ STAFF" className="admin-input h-11" />
+                                </div>
+                              </div>
+                              <div className="mt-4 flex items-center gap-3">
+                                <Button onClick={handleSaveSlot} disabled={savingSlot} className="admin-button h-10 rounded-none px-5 font-adminDisplay text-xs tracking-[0.16em]">
+                                  <Save className="h-3 w-3" /> {savingSlot ? "ENREGISTREMENT..." : "ENREGISTRER"}
+                                </Button>
+                                <Button onClick={handleDeleteSelectedSlot} className="h-10 rounded-none border border-destructive/40 bg-transparent px-4 font-adminDisplay text-xs tracking-[0.14em] text-destructive hover:bg-destructive hover:text-destructive-foreground">
+                                  <Trash2 className="h-3 w-3" /> SUPPRIMER CE CRÉNEAU
+                                </Button>
+                              </div>
+                            </div>
                           </div>
-                          <div className="p-5">
-                            <div className="grid gap-4 sm:grid-cols-3">
-                              <div className="space-y-2">
-                                <Label className="admin-kicker text-[10px] tracking-[0.18em] text-[hsl(var(--admin-muted-foreground))]">STATUT</Label>
-                                <button
-                                  onClick={() => setSlotEditForm(f => ({ ...f, is_active: !f.is_active }))}
-                                  className={`h-11 w-full border font-adminDisplay text-xs tracking-[0.16em] transition-all duration-150 ${
-                                    slotEditForm.is_active
-                                      ? "border-[#c9973a] bg-[#c9973a]/10 text-[#c9973a] hover:bg-[#c9973a]/20"
-                                      : "border-[hsl(var(--admin-accent)/0.2)] bg-transparent text-[hsl(var(--admin-muted-foreground))] hover:border-[hsl(var(--admin-accent)/0.4)]"
-                                  }`}
-                                >
-                                  {slotEditForm.is_active ? "● ACTIF" : "○ INACTIF"}
-                                </button>
-                              </div>
-                              <div className="space-y-2">
-                                <Label className="admin-kicker text-[10px] tracking-[0.18em] text-[hsl(var(--admin-muted-foreground))]">CAPACITÉ</Label>
-                                <Input type="number" min="1" step="1" value={slotEditForm.capacity} onChange={(e) => setSlotEditForm(f => ({ ...f, capacity: e.target.value }))} placeholder="PAR DÉFAUT" className="admin-input h-11" />
-                              </div>
-                              <div className="space-y-2">
-                                <Label className="admin-kicker text-[10px] tracking-[0.18em] text-[hsl(var(--admin-muted-foreground))]">NOTE INTERNE</Label>
-                                <Input value={slotEditForm.note} onChange={(e) => setSlotEditForm(f => ({ ...f, note: e.target.value }))} placeholder="EX : RÉSERVÉ STAFF" className="admin-input h-11" />
-                              </div>
-                            </div>
-                            <div className="mt-4 flex items-center gap-3">
-                              <Button onClick={handleSaveSlot} disabled={savingSlot} className="admin-button h-10 rounded-none px-5 font-adminDisplay text-xs tracking-[0.16em]">
-                                <Save className="h-3 w-3" /> {savingSlot ? "ENREGISTREMENT..." : "ENREGISTRER"}
-                              </Button>
-                              <Button onClick={handleDeleteSelectedSlot} className="h-10 rounded-none border border-destructive/40 bg-transparent px-4 font-adminDisplay text-xs tracking-[0.14em] text-destructive hover:bg-destructive hover:text-destructive-foreground">
-                                <Trash2 className="h-3 w-3" /> SUPPRIMER CE CRÉNEAU
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
+                        );
+                      })()}
                     </div>
                   ) : (
                     <div className="px-6 py-8">
