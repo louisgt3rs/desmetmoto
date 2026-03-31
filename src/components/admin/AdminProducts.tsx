@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,8 +8,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
-import { AlertTriangle, Pencil, Plus, Save, Search, Trash2, Palette } from "lucide-react";
-import { ImageUploadSingle, ImageUploadMulti } from "./ImageUpload";
+import { AlertTriangle, ArrowDown, ArrowUp, Images, Loader2, Pencil, Plus, Save, Search, Trash2, Palette, Upload } from "lucide-react";
+import { ImageUploadSingle, ImageUploadMulti, uploadFile } from "./ImageUpload";
 import SizeStockGrid, { calcTotalFromSizes } from "./SizeStockGrid";
 import type { AdminBrand, AdminProduct } from "./types";
 
@@ -21,6 +21,12 @@ interface ProductColorway {
   gallery_images: string[];
   stock_by_size: Record<string, number>;
   sort_order: number;
+}
+
+interface ProductImage {
+  id: string;
+  image_url: string;
+  position: number;
 }
 
 interface AdminProductsProps {
@@ -60,6 +66,11 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
   const [cwForm, setCwForm] = useState({ name: "", image_url: "", gallery_images: [] as string[], stock_by_size: {} as Record<string, number> });
   const [editingCwId, setEditingCwId] = useState<string | null>(null);
 
+  // Gallery state
+  const [productImages, setProductImages] = useState<ProductImage[]>([]);
+  const [galleryUploading, setGalleryUploading] = useState(false);
+  const galleryFileRef = useRef<HTMLInputElement>(null);
+
   const filteredProducts = useMemo(() => {
     const query = search.trim().toLowerCase();
     if (!query) return products;
@@ -70,7 +81,15 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
     );
   }, [products, search]);
 
-  // Load colorways when editing a product
+  const loadProductImages = async (productId: string) => {
+    const { data } = await (supabase.from("product_images" as any) as any)
+      .select("id, image_url, position")
+      .eq("product_id", productId)
+      .order("position");
+    setProductImages((data || []) as ProductImage[]);
+  };
+
+  // Load colorways + gallery when editing a product
   useEffect(() => {
     if (editing) {
       supabase.from("product_colorways").select("*").eq("product_id", editing.id).order("sort_order").then(({ data }) => {
@@ -80,8 +99,10 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
           stock_by_size: parseSbs(d.stock_by_size),
         })) as ProductColorway[]);
       });
+      loadProductImages(editing.id);
     } else {
       setColorways([]);
+      setProductImages([]);
     }
   }, [editing?.id]);
 
@@ -89,6 +110,53 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
     if (colorways.length === 0) return 0;
     return colorways.reduce((sum, cw) => sum + calcTotalFromSizes(cw.stock_by_size), 0);
   };
+
+  // ── Gallery handlers ──────────────────────────────────────────────────────
+
+  const handleGalleryFiles = async (files: FileList) => {
+    if (!editing) return;
+    setGalleryUploading(true);
+    const newImgs: ProductImage[] = [];
+    let pos = productImages.length;
+    for (const file of Array.from(files)) {
+      const url = await uploadFile(file, "products");
+      if (url) {
+        const { data } = await (supabase.from("product_images" as any) as any)
+          .insert({ product_id: editing.id, image_url: url, position: pos })
+          .select("id, image_url, position")
+          .single();
+        if (data) { newImgs.push(data as ProductImage); pos++; }
+      }
+    }
+    setProductImages(prev => [...prev, ...newImgs]);
+    setGalleryUploading(false);
+    if (galleryFileRef.current) galleryFileRef.current.value = "";
+  };
+
+  const deleteGalleryImage = async (id: string) => {
+    await (supabase.from("product_images" as any) as any).delete().eq("id", id);
+    const updated = productImages.filter(i => i.id !== id).map((img, idx) => ({ ...img, position: idx }));
+    await Promise.all(updated.map(img =>
+      (supabase.from("product_images" as any) as any).update({ position: img.position }).eq("id", img.id)
+    ));
+    setProductImages(updated);
+  };
+
+  const moveGalleryImage = async (idx: number, dir: -1 | 1) => {
+    const target = idx + dir;
+    if (target < 0 || target >= productImages.length) return;
+    const newImgs = [...productImages];
+    [newImgs[idx], newImgs[target]] = [newImgs[target], newImgs[idx]];
+    newImgs[idx] = { ...newImgs[idx], position: idx };
+    newImgs[target] = { ...newImgs[target], position: target };
+    await Promise.all([
+      (supabase.from("product_images" as any) as any).update({ position: idx }).eq("id", newImgs[idx].id),
+      (supabase.from("product_images" as any) as any).update({ position: target }).eq("id", newImgs[target].id),
+    ]);
+    setProductImages(newImgs);
+  };
+
+  // ─────────────────────────────────────────────────────────────────────────
 
   const handleSave = async () => {
     if (!form.name.trim()) { toast.error("NOM REQUIS"); return; }
@@ -117,7 +185,6 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
     } else {
       const { data, error } = await supabase.from("products").insert({ ...payload, sort_order: products.length + 1 }).select("id").single();
       if (error || !data) { setSaving(false); toast.error("ERREUR : " + (error?.message || "").toUpperCase()); return; }
-      // Save pending colorways for new product
       if (colorways.length > 0) {
         const cwPayloads = colorways.map((cw, i) => ({
           product_id: data.id,
@@ -165,6 +232,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
     setOpen(true);
     setForm({ name: "", description: "", brand_id: "", category: "Casques", price: "", image_url: "" });
     setColorways([]);
+    setProductImages([]);
     setCwForm({ name: "", image_url: "", gallery_images: [], stock_by_size: {} });
     setEditingCwId(null);
   };
@@ -278,7 +346,6 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
               {filteredProducts.map((p) => {
                 const total = p.stock_quantity || 0;
                 const lowStock = total > 0 && total <= 3;
-
                 return (
                   <TableRow key={p.id} className="border-[hsl(var(--admin-accent)/0.12)] bg-transparent hover:bg-[hsl(var(--admin-accent)/0.04)]">
                     <TableCell>
@@ -322,7 +389,6 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
           {filteredProducts.map((p) => {
             const total = p.stock_quantity || 0;
             const lowStock = total > 0 && total <= 3;
-
             return (
               <article key={p.id} className="border border-[hsl(var(--admin-accent)/0.16)] bg-[hsl(var(--admin-background))] p-4">
                 <div className="flex gap-4">
@@ -398,6 +464,84 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
               <ImageUploadSingle value={form.image_url} onChange={(value) => setForm({ ...form, image_url: value })} folder="products" label="OU IMPORTER UNE IMAGE" previewClass="h-28 w-28" />
             </div>
 
+            {/* ─── GALERIE PHOTOS ─── */}
+            {editing && (
+              <div className="md:col-span-2 mt-2 border-t border-[hsl(var(--admin-accent)/0.18)] pt-5">
+                <div className="mb-3 flex items-center gap-2">
+                  <Images className="h-5 w-5 text-[hsl(var(--admin-accent))]" />
+                  <h3 className="font-adminDisplay text-xl text-[hsl(var(--admin-foreground))]">
+                    GALERIE PHOTOS ({productImages.length})
+                  </h3>
+                </div>
+                <p className="mb-4 text-[11px] uppercase tracking-[0.14em] text-[hsl(var(--admin-muted-foreground))]">
+                  IMAGES SUPPLÉMENTAIRES — AFFICHÉES DANS LE CARROUSEL APRÈS L'IMAGE PRINCIPALE.
+                </p>
+
+                {/* Image grid */}
+                {productImages.length > 0 && (
+                  <div className="mb-4 grid grid-cols-3 gap-3 sm:grid-cols-4">
+                    {productImages.map((img, idx) => (
+                      <div key={img.id} className="group relative border border-[hsl(var(--admin-accent)/0.16)] bg-[hsl(var(--admin-background))]">
+                        <img src={img.image_url} alt="" className="aspect-square w-full object-cover" />
+                        {/* Hover overlay */}
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-black/70 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                          <div className="flex gap-1">
+                            <button
+                              onClick={() => moveGalleryImage(idx, -1)}
+                              disabled={idx === 0}
+                              className="flex h-7 w-7 items-center justify-center border border-white/30 bg-black/60 text-white transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-25"
+                            >
+                              <ArrowUp className="h-3 w-3" />
+                            </button>
+                            <button
+                              onClick={() => moveGalleryImage(idx, 1)}
+                              disabled={idx === productImages.length - 1}
+                              className="flex h-7 w-7 items-center justify-center border border-white/30 bg-black/60 text-white transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-25"
+                            >
+                              <ArrowDown className="h-3 w-3" />
+                            </button>
+                          </div>
+                          <button
+                            onClick={() => deleteGalleryImage(img.id)}
+                            className="flex h-7 items-center gap-1 border border-red-500/50 bg-red-500/20 px-2 font-adminDisplay text-[9px] tracking-[0.1em] text-red-400 transition-colors hover:bg-red-500/40"
+                          >
+                            <Trash2 className="h-3 w-3" /> SUPPR.
+                          </button>
+                        </div>
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/50 py-0.5 text-center font-adminDisplay text-[9px] text-white/50">#{idx + 1}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Upload zone */}
+                <div
+                  className="flex cursor-pointer items-center justify-center gap-3 border border-dashed border-[hsl(var(--admin-accent)/0.3)] p-5 transition-colors hover:border-[hsl(var(--admin-accent)/0.6)] hover:bg-[hsl(var(--admin-accent)/0.03)]"
+                  onClick={() => galleryFileRef.current?.click()}
+                >
+                  <input
+                    ref={galleryFileRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={e => e.target.files && handleGalleryFiles(e.target.files)}
+                  />
+                  {galleryUploading ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin text-[hsl(var(--admin-accent))]" />
+                      <span className="font-adminDisplay text-xs tracking-[0.16em] text-[hsl(var(--admin-accent))]">IMPORTATION EN COURS...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-5 w-5 text-[hsl(var(--admin-muted-foreground))]" />
+                      <span className="font-adminDisplay text-xs tracking-[0.16em] text-[hsl(var(--admin-muted-foreground))]">CLIQUER POUR AJOUTER DES PHOTOS (PLUSIEURS AUTORISÉES)</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* ─── COLORWAYS SECTION ─── */}
             <div className="md:col-span-2 mt-4 border-t border-[hsl(var(--admin-accent)/0.18)] pt-5">
               <div className="flex items-center gap-2 mb-4">
@@ -408,7 +552,6 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
                 STOCK TOTAL TOUS COLORIS : <span className="text-[hsl(var(--admin-accent))]">{getTotalStock()} PCS</span>
               </p>
 
-              {/* Existing colorways list */}
               {colorways.length > 0 && (
                 <div className="space-y-3 mb-5">
                   {colorways.map(cw => {
@@ -438,7 +581,6 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
                 </div>
               )}
 
-              {/* Add/Edit colorway form */}
               <div className="border border-dashed border-[hsl(var(--admin-accent)/0.25)] p-4 space-y-3">
                 <p className="admin-kicker text-xs text-[hsl(var(--admin-accent))]">{editingCwId ? "MODIFIER COLORIS" : "AJOUTER UN COLORIS"}</p>
                 <div className="grid gap-3 md:grid-cols-2">

@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Upload, X, Loader2, Image as ImageIcon } from "lucide-react";
 import ImageCropModal from "./ImageCropModal";
 
-async function uploadFile(file: File | Blob, folder: string): Promise<string | null> {
+export async function uploadFile(file: File | Blob, folder: string): Promise<string | null> {
   const ext = file instanceof File ? file.name.split(".").pop() : "png";
   const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
   const { error } = await supabase.storage.from("images").upload(path, file, { cacheControl: "3600", upsert: false });
