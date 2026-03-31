@@ -5,30 +5,39 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 import Layout from "@/components/Layout";
 import SectionHeading from "@/components/SectionHeading";
+import SEO from "@/components/SEO";
 
 const hours = [
-  { day: "Lundi", time: "Fermé", closed: true },
-  { day: "Mardi", time: "10h – 18h", closed: false },
-  { day: "Mercredi", time: "10h – 18h", closed: false },
-  { day: "Jeudi", time: "10h – 18h", closed: false },
-  { day: "Vendredi", time: "10h – 18h", closed: false },
-  { day: "Samedi", time: "10h – 17h", closed: false },
-  { day: "Dimanche", time: "Fermé", closed: true },
+  { day: "Lundi",    time: "Fermé",      closed: true },
+  { day: "Mardi",    time: "10h – 18h",  closed: false },
+  { day: "Mercredi", time: "10h – 18h",  closed: false },
+  { day: "Jeudi",    time: "10h – 18h",  closed: false },
+  { day: "Vendredi", time: "10h – 18h",  closed: false },
+  { day: "Samedi",   time: "10h – 17h",  closed: false },
+  { day: "Dimanche", time: "Fermé",      closed: true },
 ];
 
 export default function ContactPage() {
-  const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", message: "", rgpd: false });
+  const [rgpdErr, setRgpdErr] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.rgpd) { setRgpdErr(true); return; }
+    setRgpdErr(false);
     toast.success("Message envoyé avec succès ! Nous vous répondrons rapidement.");
-    setForm({ name: "", email: "", phone: "", message: "" });
+    setForm({ name: "", email: "", phone: "", message: "", rgpd: false });
   };
 
   return (
     <Layout>
+      <SEO
+        title="Contactez Desmet Équipement — Wavre"
+        description="Contactez Desmet Équipement à Wavre. Chaussée de Louvain 491, 1300 Wavre. Tél : 010/84 21 39. Ouvert du mardi au samedi."
+      />
       <section className="py-24">
         <div className="container mx-auto px-4">
           <SectionHeading title="CONTACTEZ-NOUS" subtitle="N'hésitez pas à nous rendre visite ou à nous contacter" />
@@ -120,7 +129,7 @@ export default function ContactPage() {
               transition={{ duration: 0.5 }}
             >
               <div className="bg-card border border-border rounded-xl p-8">
-                <h3 className="font-display text-2xl text-foreground mb-6">ENVOYEZ-NOUS UN MESSAGE</h3>
+                <h2 className="font-display text-2xl text-foreground mb-6">ENVOYEZ-NOUS UN MESSAGE</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <Input
                     placeholder="Nom complet"
@@ -151,6 +160,21 @@ export default function ContactPage() {
                     rows={5}
                     className="bg-secondary border-border"
                   />
+                  <label className={`flex cursor-pointer items-start gap-3 pt-1 ${rgpdErr ? "text-destructive" : "text-muted-foreground"}`}>
+                    <input
+                      type="checkbox"
+                      checked={form.rgpd}
+                      onChange={e => { setForm(f => ({ ...f, rgpd: e.target.checked })); if (e.target.checked) setRgpdErr(false); }}
+                      className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+                    />
+                    <span className="text-xs leading-relaxed">
+                      J'accepte de recevoir les communications de Desmet Équipement et confirme avoir lu la{" "}
+                      <Link to="/politique-confidentialite" target="_blank" className="underline hover:text-primary transition-colors">
+                        politique de confidentialité
+                      </Link>. *
+                      {rgpdErr && <span className="ml-1 text-xs text-destructive">(REQUIS)</span>}
+                    </span>
+                  </label>
                   <Button type="submit" className="w-full" size="lg">Envoyer</Button>
                 </form>
               </div>

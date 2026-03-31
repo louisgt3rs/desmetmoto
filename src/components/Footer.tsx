@@ -1,76 +1,60 @@
 import { Link } from "react-router-dom";
-import { MapPin, Phone, Clock, Instagram } from "lucide-react";
+
+const NAV_LINKS = [
+  { label: "Accueil",    path: "/" },
+  { label: "Produits",   path: "/brands" },
+  { label: "Événements", path: "/community" },
+  { label: "Arai",       path: "/arai" },
+  { label: "Contact",    path: "/contact" },
+];
 
 export default function Footer() {
   return (
-    <footer className="bg-card border-t border-border">
-      <div className="container mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-          {/* Brand */}
+    <footer className="border-t border-[#c9973a]/15" style={{ backgroundColor: "#111" }}>
+      <div className="container mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-3">
+
+          {/* Left — logo + address */}
           <div>
-            <h3 className="font-display text-2xl text-foreground mb-4">
-              DESMET <span className="text-primary">ÉQUIPEMENT</span>
-            </h3>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              Spécialiste en équipement moto à Wavre. Casques, vestes, gants et accessoires des meilleures marques.
+            <p className="font-display text-2xl leading-none text-white">
+              DESMET <span className="text-[#c9973a]">ÉQUIPEMENT</span>
+            </p>
+            <p className="mt-4 text-sm leading-relaxed text-white/50">
+              Chaussée de Louvain 491, 1300 Wavre&nbsp;·&nbsp;
+              <a href="tel:0108421390" className="text-[#c9973a] transition-opacity hover:opacity-75">
+                010/84 21 39
+              </a>
             </p>
           </div>
 
-          {/* Quick links */}
-          <div>
-            <h4 className="font-display text-lg text-foreground mb-4">NAVIGATION</h4>
-            <div className="flex flex-col gap-2">
-              {[
-                { label: "Accueil", path: "/" },
-                { label: "Marques", path: "/brands" },
-                { label: "Casques Arai", path: "/arai" },
-                { label: "Communauté", path: "/community" },
-                { label: "À Propos", path: "/about" },
-                { label: "Contact", path: "/contact" },
-              ].map((l) => (
-                <Link key={l.path} to={l.path} className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  {l.label}
-                </Link>
-              ))}
-            </div>
+          {/* Center — nav links */}
+          <div className="flex flex-col gap-3 sm:items-center">
+            {NAV_LINKS.map((l) => (
+              <Link
+                key={l.path}
+                to={l.path}
+                className="text-sm uppercase tracking-[0.14em] text-white/55 transition-colors hover:text-[#c9973a]"
+              >
+                {l.label}
+              </Link>
+            ))}
           </div>
 
-          {/* Contact */}
-          <div>
-            <h4 className="font-display text-lg text-foreground mb-4">CONTACT</h4>
-            <div className="flex flex-col gap-3 text-sm text-muted-foreground">
-              <div className="flex items-start gap-2">
-                <MapPin className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                <span>Chaussée de Wavre 491<br />1300 Wavre, Belgique</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-primary shrink-0" />
-                <a href="tel:010842139" className="hover:text-primary transition-colors">010 84 21 39</a>
-              </div>
-              <div className="flex items-start gap-2">
-                <Clock className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                <div>
-                  <p>Mar - Ven: 10h - 18h</p>
-                  <p>Sam: 10h - 17h</p>
-                  <p>Dim & Lun: Fermé</p>
-                </div>
-              </div>
-            </div>
+          {/* Right — copyright */}
+          <div className="sm:text-right">
+            <p className="text-sm text-white/40">© 2026 Desmet Équipement</p>
           </div>
 
-          {/* Social */}
-          <div>
-            <h4 className="font-display text-lg text-foreground mb-4">SUIVEZ-NOUS</h4>
-            <div className="flex gap-4">
-              <a href="https://www.instagram.com/desmetmotowavre" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors">
-                <Instagram className="w-5 h-5" />
-              </a>
-            </div>
-          </div>
         </div>
+      </div>
 
-        <div className="border-t border-border mt-12 pt-8 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Desmet Équipement. Tous droits réservés.
+      {/* Bottom bar */}
+      <div className="border-t border-[#c9973a]/10" style={{ backgroundColor: "#0d0d0d" }}>
+        <div className="container mx-auto px-4 py-3 text-center text-[11px] uppercase tracking-[0.14em] text-white/30">
+          <Link to="/politique-confidentialite" className="transition-colors hover:text-[#c9973a]">
+            Politique de confidentialité
+          </Link>
+          {" · "}Tous droits réservés
         </div>
       </div>
     </footer>

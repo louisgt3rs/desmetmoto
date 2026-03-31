@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Shield, Heart, Users, Award } from "lucide-react";
 import Layout from "@/components/Layout";
 import SectionHeading from "@/components/SectionHeading";
+import SEO from "@/components/SEO";
 import storeImg from "@/assets/store-interior.jpg";
 
 const values = [
@@ -14,6 +15,10 @@ const values = [
 export default function AboutPage() {
   return (
     <Layout>
+      <SEO
+        title="À Propos — Desmet Équipement"
+        description="Découvrez l'histoire de Desmet Équipement, votre spécialiste en équipement moto à Wavre depuis des années. Passion, expertise et qualité."
+      />
       <section className="py-24">
         <div className="container mx-auto px-4">
           <SectionHeading title="À PROPOS" subtitle="Votre spécialiste équipement moto à Wavre" />

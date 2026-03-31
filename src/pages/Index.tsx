@@ -1,4 +1,5 @@
 import Layout from "@/components/Layout";
+import SEO from "@/components/SEO";
 import HeroSection from "@/components/home/HeroSection";
 import AboutPreview from "@/components/home/AboutPreview";
 import BrandsSection from "@/components/home/BrandsSection";
@@ -12,6 +13,10 @@ import ContactSection from "@/components/home/ContactSection";
 export default function HomePage() {
   return (
     <Layout>
+      <SEO
+        title="Desmet Équipement — Spécialiste Équipement Moto à Wavre"
+        description="Votre spécialiste en équipement moto à Wavre. Casques Arai, vêtements, accessoires. Essayez nos casques lors de nos Test Days. Chaussée de Louvain 491, 1300 Wavre."
+      />
       <HeroSection />
       <AboutPreview />
       <BrandsSection />

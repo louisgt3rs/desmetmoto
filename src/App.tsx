@@ -14,6 +14,7 @@ import Admin from "./pages/Admin";
 import ResetPassword from "./pages/ResetPassword";
 import EventBooking from "./pages/EventBooking";
 import EventDetail from "./pages/EventDetail";
+import PolitiqueConfidentialite from "./pages/PolitiqueConfidentialite";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/evenements/:id" element={<EventDetail />} />
           <Route path="/evenements/:id/reserver" element={<EventBooking />} />
+          <Route path="/politique-confidentialite" element={<PolitiqueConfidentialite />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Package } from "lucide-react";
 import Layout from "@/components/Layout";
+import SEO from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { BrandLogo } from "@/components/home/BrandModal";
@@ -55,6 +56,10 @@ export default function BrandDetailPage() {
 
   return (
     <Layout>
+      <SEO
+        title={brand ? `${brand.name} — Desmet Équipement` : "Marque — Desmet Équipement"}
+        description={brand ? `Découvrez les produits ${brand.name} disponibles chez Desmet Équipement à Wavre. ${brand.description ?? ""}`.trim() : undefined}
+      />
       <section className="min-h-[80vh] py-20 bg-background">
         <div className="container mx-auto px-4">
           <Link

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout";
+import SEO from "@/components/SEO";
 import SectionHeading from "@/components/SectionHeading";
 import ReservationModal from "@/components/ReservationModal";
 import { supabase } from "@/integrations/supabase/client";
@@ -201,6 +202,10 @@ export default function AraiPage() {
 
   return (
     <Layout>
+      <SEO
+        title="Casques Arai — Desmet Équipement Wavre"
+        description="Découvrez et essayez les casques Arai chez Desmet Équipement à Wavre. Revendeur officiel Arai. Test Days disponibles — réservez votre créneau en ligne."
+      />
       <AraiViewer />
 
       {/* Store Photo */}

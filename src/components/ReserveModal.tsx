@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,13 +15,16 @@ interface Props {
 }
 
 export default function ReserveModal({ open, onClose, productId, productName, coloris }: Props) {
-  const [form, setForm] = useState({ first_name: "", last_name: "", email: "", phone: "", message: "" });
+  const [form, setForm] = useState({ first_name: "", last_name: "", email: "", phone: "", message: "", rgpd: false });
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
+  const [rgpdErr, setRgpdErr] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.rgpd) { setRgpdErr(true); return; }
+    setRgpdErr(false);
     setSubmitting(true);
     setError("");
 
@@ -65,8 +69,7 @@ export default function ReserveModal({ open, onClose, productId, productName, co
 
   const handleClose = () => {
     onClose();
-    // Reset after animation
-    setTimeout(() => { setSuccess(false); setError(""); setForm({ first_name: "", last_name: "", email: "", phone: "", message: "" }); }, 300);
+    setTimeout(() => { setSuccess(false); setError(""); setRgpdErr(false); setForm({ first_name: "", last_name: "", email: "", phone: "", message: "", rgpd: false }); }, 300);
   };
 
   return (
@@ -153,6 +156,21 @@ export default function ReserveModal({ open, onClose, productId, productName, co
                       className="w-full rounded-none border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 focus:border-[#c9973a] focus:outline-none resize-none"
                     />
                   </div>
+                  <label className={`flex cursor-pointer items-start gap-3 ${rgpdErr ? "text-red-400" : "text-white/50"}`}>
+                    <input
+                      type="checkbox"
+                      checked={form.rgpd}
+                      onChange={e => { setForm(f => ({ ...f, rgpd: e.target.checked })); if (e.target.checked) setRgpdErr(false); }}
+                      className="mt-0.5 h-4 w-4 shrink-0 accent-[#c9973a]"
+                    />
+                    <span className="text-xs leading-relaxed">
+                      J'accepte de recevoir les communications de Desmet Équipement et confirme avoir lu la{" "}
+                      <Link to="/politique-confidentialite" target="_blank" className="underline hover:text-[#c9973a]">
+                        politique de confidentialité
+                      </Link>. *
+                      {rgpdErr && <span className="ml-1 text-[10px] uppercase tracking-widest text-red-400">(REQUIS)</span>}
+                    </span>
+                  </label>
                   <Button
                     type="submit"
                     disabled={submitting}

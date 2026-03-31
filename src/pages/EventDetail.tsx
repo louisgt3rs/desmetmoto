@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/Layout";
+import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Calendar, Check, ChevronLeft, ChevronRight, Clock, MapPin, Users } from "lucide-react";
@@ -271,6 +272,10 @@ export default function EventDetailPage() {
 
   return (
     <Layout>
+      <SEO
+        title={`${event.title} — Desmet Équipement`}
+        description={event.description ?? `Réservez votre créneau pour ${event.title} chez Desmet Équipement à Wavre.`}
+      />
       <div className="min-h-screen bg-[#0e0e0e]">
 
         {/* ── Hero image ─────────────────────────────────────────────────── */}
@@ -527,11 +532,12 @@ export default function EventDetailPage() {
                               type="checkbox"
                               checked={form.consent}
                               onChange={e => { setForm(f => ({ ...f, consent: e.target.checked })); if (e.target.checked) setConsentErr(false); }}
-                              className="mt-0.5 h-4 w-4 accent-[#c9973a]"
+                              className="mt-0.5 h-4 w-4 shrink-0 accent-[#c9973a]"
                             />
-                            <span className="text-sm leading-relaxed">
-                              J'accepte de recevoir la newsletter et la confirmation de réservation par email. *
-                              {consentErr && <span className="ml-2 text-xs text-red-400">(REQUIS)</span>}
+                            <span className="text-xs leading-relaxed">
+                              J'accepte de recevoir les communications de Desmet Équipement et confirme avoir lu la{" "}
+                              <Link to="/politique-confidentialite" target="_blank" className="underline hover:text-[#c9973a]">politique de confidentialité</Link>. *
+                              {consentErr && <span className="ml-2 text-[10px] uppercase tracking-widest text-red-400">(REQUIS)</span>}
                             </span>
                           </label>
 

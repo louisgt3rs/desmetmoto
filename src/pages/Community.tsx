@@ -4,6 +4,7 @@ import { MapPin, Calendar, Clock, Coffee, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import Layout from "@/components/Layout";
 import SectionHeading from "@/components/SectionHeading";
+import SEO from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
 import bikesCoffeeImg from "@/assets/bikes-coffee.jpg";
 import type { Tables } from "@/integrations/supabase/types";
@@ -27,6 +28,10 @@ export default function CommunityPage() {
 
   return (
     <Layout>
+      <SEO
+        title="Communauté & Événements — Desmet Équipement"
+        description="Rejoignez la communauté Desmet Équipement à Wavre. Test Days Arai, Bikes & Coffee, événements moto. Réservez votre créneau en ligne."
+      />
       <section className="py-24">
         <div className="container mx-auto px-4">
           <SectionHeading title="COMMUNAUTÉ & ÉVÉNEMENTS" subtitle="Motos | Café | Communauté" />

@@ -1,10 +1,15 @@
 import { motion } from "framer-motion";
 import Layout from "@/components/Layout";
 import BrandsCarousel from "@/components/home/BrandsCarousel";
+import SEO from "@/components/SEO";
 
 export default function BrandsPage() {
   return (
     <Layout>
+      <SEO
+        title="Nos Produits & Marques — Desmet Équipement"
+        description="Découvrez notre sélection de plus de 30 marques d'équipement moto : casques, vêtements, gants, bottes. Disponibles en magasin à Wavre."
+      />
       <section className="py-24 min-h-[80vh] flex flex-col justify-center bg-background">
         <div className="container mx-auto px-4">
           <motion.div
