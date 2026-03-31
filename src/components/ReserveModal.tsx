@@ -25,7 +25,7 @@ export default function ReserveModal({ open, onClose, productId, productName, co
     setError("");
 
     // Insert reservation row
-    const { data, error: dbErr } = await (supabase.from("store_reservations" as any) as any).insert({
+    const { error: dbErr } = await (supabase.from("store_reservations" as any) as any).insert({
       product_id: productId,
       product_name: productName,
       coloris: coloris || null,
@@ -35,7 +35,7 @@ export default function ReserveModal({ open, onClose, productId, productName, co
       phone: form.phone,
       message: form.message || null,
       status: "pending",
-    }).select("id").single();
+    });
 
     if (dbErr) {
       setSubmitting(false);
@@ -48,7 +48,6 @@ export default function ReserveModal({ open, onClose, productId, productName, co
       body: {
         type: "new_reservation",
         reservation: {
-          id: data?.id,
           product_name: productName,
           coloris: coloris || null,
           first_name: form.first_name,
