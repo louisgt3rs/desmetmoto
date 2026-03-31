@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Package, ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-react";
+import { Package, ChevronLeft, ChevronRight, X, ZoomIn, ShoppingBag } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import ReserveModal from "@/components/ReserveModal";
 
 interface ProductColorway {
   id: string;
@@ -41,6 +42,7 @@ export default function ProductColorwaySelector({
   const [photoIdx, setPhotoIdx] = useState(0);
   const [productImgs, setProductImgs] = useState<string[]>([]);
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
+  const [reserveOpen, setReserveOpen] = useState(false);
   const touchStartX = useRef(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -318,8 +320,25 @@ export default function ProductColorwaySelector({
           ) : (
             <p className="text-xs text-muted-foreground">Stock total : {totalStock} PCS</p>
           )}
+
+          {/* Reserve CTA */}
+          <button
+            onClick={() => setReserveOpen(true)}
+            className="mt-4 flex w-full items-center justify-center gap-2 border border-primary/60 bg-primary/8 py-2.5 font-display text-xs uppercase tracking-[0.22em] text-primary transition-all duration-200 hover:bg-primary/15 hover:border-primary"
+          >
+            <ShoppingBag className="h-3.5 w-3.5" />
+            RÉSERVER EN MAGASIN
+          </button>
         </div>
       </article>
+
+      <ReserveModal
+        open={reserveOpen}
+        onClose={() => setReserveOpen(false)}
+        productId={productId}
+        productName={productName}
+        coloris={selected?.name ?? null}
+      />
 
       {/* ── Lightbox ──────────────────────────────────────────────────────────── */}
       <AnimatePresence>
