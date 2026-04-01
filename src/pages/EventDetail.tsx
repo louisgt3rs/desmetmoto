@@ -280,8 +280,8 @@ export default function EventDetailPage() {
 
         {/* ── Hero image ─────────────────────────────────────────────────── */}
         {event.image_url && (
-          <div className="relative h-56 w-full overflow-hidden sm:h-72 lg:h-96">
-            <img src={event.image_url} alt={event.title} className="h-full w-full object-cover" />
+          <div className="relative w-full bg-[#111]">
+            <img src={event.image_url} alt={event.title} className="w-full" style={{ height: "auto", display: "block" }} />
             <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e0e] via-[#0e0e0e]/30 to-transparent" />
           </div>
         )}

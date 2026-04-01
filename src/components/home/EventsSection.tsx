@@ -66,11 +66,12 @@ export default function EventsSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <div className="relative rounded-xl overflow-hidden group">
+            <div className="relative rounded-xl overflow-hidden group bg-[#111]">
               <img
                 src={nextEvent?.image_url || bikesCoffeeImg}
                 alt={nextEvent?.title || "Bikes & Coffee"}
-                className="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-700"
+                className="w-full transition-transform duration-700 group-hover:scale-105"
+                style={{ height: "auto", display: "block" }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
               <div className="absolute bottom-4 left-4 flex items-center gap-2">
