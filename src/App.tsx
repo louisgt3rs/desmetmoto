@@ -15,6 +15,7 @@ import ResetPassword from "./pages/ResetPassword";
 import EventBooking from "./pages/EventBooking";
 import EventDetail from "./pages/EventDetail";
 import PolitiqueConfidentialite from "./pages/PolitiqueConfidentialite";
+import ProductDetail from "./pages/ProductDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/brands" element={<Brands />} />
           <Route path="/marques/:slug" element={<BrandDetail />} />
+          <Route path="/marques/:slug/:productId" element={<ProductDetail />} />
           <Route path="/arai" element={<Arai />} />
           <Route path="/community" element={<Community />} />
           <Route path="/about" element={<About />} />
