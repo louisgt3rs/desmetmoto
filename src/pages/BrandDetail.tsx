@@ -214,7 +214,7 @@ export default function BrandDetailPage() {
                   {products.length} PRODUIT{products.length > 1 ? "S" : ""}
                 </motion.p>
 
-                <div className="grid gap-5 md:grid-cols-2">
+                <div className="grid gap-3 md:grid-cols-2">
                   {products.map((product, i) => {
                     const cws = colorways[product.id] || [];
                     const inStock = (product.stock_quantity ?? 0) > 0;
@@ -231,13 +231,13 @@ export default function BrandDetailPage() {
                         {/* Image */}
                         <div
                           className="relative overflow-hidden"
-                          style={{ height: 240, backgroundColor: "#111" }}
+                          style={{ height: 220, backgroundColor: "#1a1a1a" }}
                         >
                           {product.image_url ? (
                             <img
                               src={product.image_url}
                               alt={product.name}
-                              className="h-full w-full object-contain"
+                              className="h-full w-full object-cover"
                               loading="lazy"
                             />
                           ) : (
