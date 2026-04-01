@@ -57,7 +57,7 @@ export default function AboutPage() {
             src={imgExterior}
             alt="Façade Desmet Équipement Wavre"
             className="h-full w-full object-cover"
-            style={{ objectPosition: "center 60%" }}
+            style={{ objectPosition: "center top" }}
           />
           {/* Overlay bas → titre */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e0e] via-[#0e0e0e]/20 to-transparent" />
