@@ -103,8 +103,8 @@ export default function AboutPage() {
               <img
                 src={storeImg}
                 alt="Intérieur du magasin Desmet Équipement"
-                className="w-full"
-                style={{ height: "auto", display: "block" }}
+                className="w-full object-contain"
+                style={{ maxHeight: 420, display: "block" }}
               />
               {/* Gold corner accent */}
               <div className="absolute left-0 top-0 h-8 w-8 border-l-2 border-t-2 border-[#c9973a]" />
