@@ -231,13 +231,14 @@ export default function BrandDetailPage() {
                         {/* Image */}
                         <div
                           className="relative overflow-hidden"
-                          style={{ height: 220, backgroundColor: "#111" }}
+                          style={{ backgroundColor: "#111" }}
                         >
                           {product.image_url ? (
                             <img
                               src={product.image_url}
                               alt={product.name}
-                              className="h-full w-full object-contain"
+                              className="w-full"
+                              style={{ height: "auto", maxHeight: 400 }}
                               loading="lazy"
                             />
                           ) : (
