@@ -101,7 +101,7 @@ export default function ContactPage() {
                   <a href="tel:010842139"><Phone className="w-4 h-4" /> Appeler</a>
                 </Button>
                 <Button asChild variant="outline" size="lg">
-                  <a href="https://www.google.com/maps/dir/?api=1&destination=Chauss%C3%A9e+de+Louvain+491%2C+1300+Wavre%2C+Belgique" target="_blank" rel="noopener noreferrer">
+                  <a href="https://maps.app.goo.gl/usjUYzvsD9vi72BD8?g_st=ic" target="_blank" rel="noopener noreferrer">
                     <Navigation className="w-4 h-4" /> Itinéraire
                   </a>
                 </Button>
