@@ -3,30 +3,35 @@ import { ArrowRight, MapPin, Phone, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 import Layout from "@/components/Layout";
 import SEO from "@/components/SEO";
-import storeImg from "@/assets/store-interior.jpg";
+
+import imgExterior        from "@/assets/store-exterior.jpg";
+import imgAisle           from "@/assets/store-interior-1.jpeg";
+import imgAlpinestars     from "@/assets/store-interior-alpinestars.jpeg";
+import imgCafe            from "@/assets/store-interior-2.jpeg";
+import imgHelmets         from "@/assets/store-interior-3.jpeg";
 
 const FACTS = [
-  { value: "491",   label: "Chaussée de Louvain, Wavre" },
-  { value: "Arai",  label: "Revendeur officiel certifié" },
-  { value: "4.4★",  label: "Note Google · 272 avis" },
-  { value: "100%",  label: "Conseil personnalisé en magasin" },
+  { value: "491",  label: "Chaussée de Louvain, Wavre" },
+  { value: "Arai", label: "Revendeur officiel certifié" },
+  { value: "4.4★", label: "Note Google · 272 avis" },
+  { value: "100%", label: "Conseil personnalisé en magasin" },
 ];
 
 const PILLARS = [
   {
     num: "01",
     title: "Des vrais motards",
-    body: "L'équipe roule. Ce n'est pas du marketing — quand on vous parle d'un casque ou d'une veste, c'est parce qu'on les a portés. Ce point de vue change tout dans le conseil.",
+    body: "L'équipe roule. Ce n'est pas du marketing — quand on vous parle d'un casque ou d'une veste, c'est parce qu'on les a portés.",
   },
   {
     num: "02",
     title: "L'équipement avant tout",
-    body: "Pas de motos à vendre. Notre seule spécialité : vous équiper. Casques, vestes, gants, bottes — chaque produit est sélectionné pour sa qualité réelle, pas pour sa marge.",
+    body: "Pas de motos à vendre. Notre seule spécialité : vous équiper. Chaque produit est sélectionné pour sa qualité réelle.",
   },
   {
     num: "03",
     title: "Le temps de bien faire",
-    body: "On ne vous pousse pas vers la sortie. On prend le temps d'essayer, d'ajuster, de comparer. Un équipement mal choisi, c'est un équipement inutile.",
+    body: "On ne vous pousse pas vers la sortie. On prend le temps d'essayer, d'ajuster, de comparer.",
   },
 ];
 
@@ -40,31 +45,34 @@ export default function AboutPage() {
 
       <div className="bg-[#0e0e0e]">
 
-        {/* ── Headline ───────────────────────────────────────────────────────── */}
-        <div className="border-b border-[#c9973a]/10">
-          <div className="container mx-auto px-4 pt-16 pb-14">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <p className="mb-4 font-display text-[11px] uppercase tracking-[0.4em] text-[#c9973a]">
-                Wavre · Belgique
-              </p>
-              <h1 className="font-display text-6xl uppercase leading-[0.92] tracking-tight text-white md:text-8xl lg:text-[9rem]">
-                Desmet<br />
-                <span className="text-[#c9973a]">Équipement</span>
-              </h1>
-              <p className="mt-6 max-w-md text-sm leading-relaxed text-white/45 md:text-base">
-                Spécialiste indépendant en équipement moto. Un magasin, une équipe,
-                une seule obsession — vous équiper juste.
-              </p>
-            </motion.div>
+        {/* ── Façade plein largeur ──────────────────────────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6 }}
+          className="relative overflow-hidden"
+          style={{ height: 420 }}
+        >
+          <img
+            src={imgExterior}
+            alt="Façade Desmet Équipement Wavre"
+            className="h-full w-full object-cover"
+            style={{ objectPosition: "center 60%" }}
+          />
+          {/* Overlay bas → titre */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e0e] via-[#0e0e0e]/20 to-transparent" />
+          <div className="absolute bottom-0 left-0 container mx-auto px-4 pb-10">
+            <p className="font-display text-[11px] uppercase tracking-[0.4em] text-[#c9973a]">
+              Wavre · Belgique
+            </p>
+            <h1 className="mt-1 font-display text-5xl uppercase leading-none tracking-tight text-white md:text-7xl">
+              Desmet Équipement
+            </h1>
           </div>
-        </div>
+        </motion.div>
 
-        {/* ── Facts strip ────────────────────────────────────────────────────── */}
-        <div className="border-b border-[#c9973a]/10 bg-[#0a0a0a]">
+        {/* ── Facts strip ──────────────────────────────────────────────────── */}
+        <div className="border-y border-[#c9973a]/10 bg-[#0a0a0a]">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-2 md:grid-cols-4">
               {FACTS.map((f, i) => (
@@ -74,50 +82,45 @@ export default function AboutPage() {
                   whileInView={{ opacity: 1 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.08 }}
-                  className="border-r border-[#c9973a]/10 px-6 py-7 last:border-r-0 [&:nth-child(2)]:border-r-0 md:[&:nth-child(2)]:border-r"
+                  className="border-r border-[#c9973a]/10 px-6 py-6 last:border-r-0 [&:nth-child(2)]:border-r-0 md:[&:nth-child(2)]:border-r"
                 >
-                  <p className="font-display text-2xl uppercase tracking-tight text-[#c9973a] md:text-3xl">
-                    {f.value}
-                  </p>
-                  <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-white/35">
-                    {f.label}
-                  </p>
+                  <p className="font-display text-2xl uppercase tracking-tight text-[#c9973a]">{f.value}</p>
+                  <p className="mt-0.5 text-[11px] uppercase tracking-[0.16em] text-white/35">{f.label}</p>
                 </motion.div>
               ))}
             </div>
           </div>
         </div>
 
-        {/* ── Photo + intro ──────────────────────────────────────────────────── */}
-        <div className="container mx-auto px-4 py-16">
-          <div className="grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-start">
+        {/* ── Photo allée + texte ───────────────────────────────────────────── */}
+        <div className="container mx-auto px-4 py-14">
+          <div className="grid gap-8 lg:grid-cols-[1.1fr_1fr] lg:items-start">
 
-            {/* Photo */}
+            {/* Grande photo allée */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.55 }}
-              className="relative"
+              transition={{ duration: 0.5 }}
+              className="relative overflow-hidden"
+              style={{ height: 520 }}
             >
               <img
-                src={storeImg}
-                alt="Intérieur du magasin Desmet Équipement"
-                className="w-full object-contain"
-                style={{ maxHeight: 420, display: "block" }}
+                src={imgAisle}
+                alt="Intérieur du magasin — allée principale"
+                className="h-full w-full object-cover"
               />
-              {/* Gold corner accent */}
               <div className="absolute left-0 top-0 h-8 w-8 border-l-2 border-t-2 border-[#c9973a]" />
               <div className="absolute bottom-0 right-0 h-8 w-8 border-b-2 border-r-2 border-[#c9973a]" />
             </motion.div>
 
-            {/* Text */}
+            {/* Texte */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.55 }}
-              className="flex flex-col justify-center"
+              transition={{ duration: 0.5 }}
+              className="flex flex-col justify-center py-4"
             >
               <p className="mb-3 font-display text-[10px] uppercase tracking-[0.35em] text-[#c9973a]">
                 Notre histoire
@@ -134,8 +137,7 @@ export default function AboutPage() {
                 <p>
                   Installé Chaussée de Louvain à Wavre, le magasin accueille les motards
                   de toute la région. Revendeur officiel Arai, Shoei, Alpinestars, Richa
-                  et d'autres grandes marques — toujours avec la même exigence sur la qualité
-                  et le fitting.
+                  et d'autres grandes marques — toujours avec la même exigence.
                 </p>
                 <p>
                   L'essai en magasin n'est pas une option ici, c'est la règle. Parce qu'un
@@ -153,7 +155,40 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* ── Pillars ────────────────────────────────────────────────────────── */}
+        {/* ── Grille 3 photos intérieur ─────────────────────────────────────── */}
+        <div className="container mx-auto px-4 pb-14">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="grid grid-cols-1 gap-2 sm:grid-cols-3"
+          >
+            {[
+              { src: imgAlpinestars, alt: "Espace Alpinestars — présentoir SR10" },
+              { src: imgCafe,        alt: "Espace vêtements et coin café" },
+              { src: imgHelmets,     alt: "Espace casques Arai" },
+            ].map((img, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="overflow-hidden"
+                style={{ height: 280 }}
+              >
+                <img
+                  src={img.src}
+                  alt={img.alt}
+                  className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+                />
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+
+        {/* ── Pillars ──────────────────────────────────────────────────────── */}
         <div className="border-t border-[#c9973a]/10 bg-[#0a0a0a]">
           <div className="container mx-auto px-4 py-14">
             <p className="mb-10 font-display text-[10px] uppercase tracking-[0.35em] text-white/25">
@@ -170,9 +205,7 @@ export default function AboutPage() {
                   className="bg-[#0a0a0a] px-8 py-8"
                 >
                   <span className="font-display text-5xl leading-none text-[#c9973a]/20">{p.num}</span>
-                  <h3 className="mt-3 font-display text-xl uppercase tracking-[0.08em] text-white">
-                    {p.title}
-                  </h3>
+                  <h3 className="mt-3 font-display text-xl uppercase tracking-[0.08em] text-white">{p.title}</h3>
                   <p className="mt-3 text-sm leading-relaxed text-white/45">{p.body}</p>
                 </motion.div>
               ))}
@@ -180,7 +213,7 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* ── Contact block ──────────────────────────────────────────────────── */}
+        {/* ── Contact ──────────────────────────────────────────────────────── */}
         <div className="border-t border-[#c9973a]/10">
           <div className="container mx-auto px-4 py-14">
             <div className="grid gap-8 md:grid-cols-2 md:items-end">
@@ -206,15 +239,11 @@ export default function AboutPage() {
                 </a>
                 <a href="tel:+3210842139" className="flex items-center gap-3 group">
                   <Phone className="h-4 w-4 shrink-0 text-[#c9973a]" />
-                  <span className="text-sm text-white/50 transition-colors group-hover:text-white">
-                    +32 10 84 21 39
-                  </span>
+                  <span className="text-sm text-white/50 transition-colors group-hover:text-white">+32 10 84 21 39</span>
                 </a>
                 <a href="mailto:admindesmetequipement@gmail.com" className="flex items-center gap-3 group">
                   <Mail className="h-4 w-4 shrink-0 text-[#c9973a]" />
-                  <span className="text-sm text-white/50 transition-colors group-hover:text-white">
-                    admindesmetequipement@gmail.com
-                  </span>
+                  <span className="text-sm text-white/50 transition-colors group-hover:text-white">admindesmetequipement@gmail.com</span>
                 </a>
                 <p className="pt-1 text-[11px] uppercase tracking-[0.18em] text-white/25">
                   Mar–Ven 10h–18h · Sam 10h–17h
