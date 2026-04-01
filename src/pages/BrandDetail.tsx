@@ -81,12 +81,12 @@ export default function BrandDetailPage() {
 
           {/* ── Hero ─────────────────────────────────────────────────── */}
           <div className="border-b border-[#c9973a]/12 bg-[#0a0a0a]">
-            <div className="container mx-auto px-4 pt-10 pb-14">
+            <div className="container mx-auto px-4 pt-6 pb-8">
 
               {/* Back */}
               <Link
                 to="/brands"
-                className="mb-10 inline-flex items-center gap-2 text-xs uppercase tracking-widest text-white/35 transition-colors hover:text-[#c9973a]"
+                className="mb-6 inline-flex items-center gap-2 text-xs uppercase tracking-widest text-white/35 transition-colors hover:text-[#c9973a]"
               >
                 <ArrowLeft className="h-4 w-4" /> Retour aux marques
               </Link>
@@ -95,7 +95,7 @@ export default function BrandDetailPage() {
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="flex flex-col items-center gap-6 text-center"
+                className="flex flex-col items-center gap-5 text-center"
               >
                 {/* "Revendeur officiel" badge */}
                 <span className="inline-flex items-center gap-1.5 border border-[#c9973a]/30 bg-[#c9973a]/8 px-4 py-1.5 font-display text-[10px] uppercase tracking-[0.28em] text-[#c9973a]">
@@ -104,10 +104,10 @@ export default function BrandDetailPage() {
 
                 {/* Logo with golden halo */}
                 <div
-                  className="flex h-40 w-40 items-center justify-center overflow-hidden rounded-2xl border border-[#c9973a]/20 bg-[#111]"
-                  style={{ boxShadow: "0 0 60px rgba(201,151,58,0.22), 0 0 120px rgba(201,151,58,0.07)" }}
+                  className="flex items-center justify-center overflow-hidden rounded-2xl border border-[#c9973a]/20 bg-[#111]"
+                  style={{ width: 220, height: 220, boxShadow: "0 0 80px rgba(201,151,58,0.28), 0 0 160px rgba(201,151,58,0.09)" }}
                 >
-                  {brandForLogo && <BrandLogo brand={brandForLogo} size={160} darkFallback />}
+                  {brandForLogo && <BrandLogo brand={brandForLogo} size={220} darkFallback />}
                 </div>
 
                 {/* Brand name */}
@@ -127,24 +127,24 @@ export default function BrandDetailPage() {
 
           {/* ── Why choose ───────────────────────────────────────────── */}
           <div className="border-b border-[#c9973a]/10 bg-[#0d0d0d]">
-            <div className="container mx-auto px-4 py-10">
+            <div className="container mx-auto px-4 py-4">
               <motion.div
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.15 }}
-                className="grid grid-cols-1 gap-4 sm:grid-cols-3"
+                className="grid grid-cols-1 gap-2 sm:grid-cols-3"
               >
                 {WHY_ITEMS.map(({ icon: Icon, title, desc }) => (
                   <div
                     key={title}
-                    className="flex items-start gap-4 border border-[#c9973a]/12 bg-[#111] px-5 py-4 transition-colors duration-200 hover:border-[#c9973a]/28"
+                    className="flex items-center gap-3 border border-[#c9973a]/12 bg-[#111] px-4 py-3 transition-colors duration-200 hover:border-[#c9973a]/28"
                   >
-                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center border border-[#c9973a]/25 bg-[#c9973a]/8 text-[#c9973a]">
-                      <Icon className="h-4 w-4" />
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center border border-[#c9973a]/25 bg-[#c9973a]/8 text-[#c9973a]">
+                      <Icon className="h-3.5 w-3.5" />
                     </div>
                     <div>
-                      <p className="font-display text-sm uppercase tracking-[0.14em] text-white">{title}</p>
-                      <p className="mt-0.5 text-xs leading-relaxed text-white/40">{desc}</p>
+                      <p className="font-display text-xs uppercase tracking-[0.14em] text-white">{title}</p>
+                      <p className="text-[11px] leading-snug text-white/40">{desc}</p>
                     </div>
                   </div>
                 ))}
@@ -153,7 +153,7 @@ export default function BrandDetailPage() {
           </div>
 
           {/* ── Products grid ─────────────────────────────────────────── */}
-          <div className="container mx-auto px-4 py-14">
+          <div className="container mx-auto px-4 py-8">
 
             {products.length === 0 ? (
               <motion.div
@@ -185,7 +185,7 @@ export default function BrandDetailPage() {
                 >
                   {products.length} PRODUIT{products.length > 1 ? "S" : ""}
                 </motion.p>
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-6 md:grid-cols-2">
                   {products.map((product, i) => (
                     <motion.div
                       key={product.id}

@@ -229,8 +229,8 @@ export default function ProductColorwaySelector({
 
         {/* ── Carousel ──────────────────────────────────────────────────────── */}
         <div
-          className="relative aspect-[4/3] overflow-hidden"
-          style={{ backgroundColor: "#1a1a1a" }}
+          className="relative overflow-hidden"
+          style={{ backgroundColor: "#1a1a1a", height: "280px" }}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
