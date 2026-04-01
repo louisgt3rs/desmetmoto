@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Shield } from "lucide-react";
-import storeImg from "@/assets/store-interior.jpg";
+import storeImg from "@/assets/store-interior-1.jpeg";
 
 export default function AboutPreview() {
   return (
