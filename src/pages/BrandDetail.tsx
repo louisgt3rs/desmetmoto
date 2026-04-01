@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Package } from "lucide-react";
+import { ArrowLeft, Award, Package, ShoppingBag, Wrench } from "lucide-react";
 import Layout from "@/components/Layout";
 import SEO from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,40 +13,36 @@ import ProductColorwaySelector from "@/components/ProductColorwaySelector";
 type BrandRow = Tables<"brands">;
 type ProductRow = Tables<"products">;
 
+const WHY_ITEMS = [
+  { icon: Award,     title: "Revendeur agréé",              desc: "Produits authentiques, garantie constructeur." },
+  { icon: Wrench,    title: "Essai en magasin possible",    desc: "Testez avant d'acheter à Wavre." },
+  { icon: ShoppingBag, title: "Réservation en ligne",      desc: "Commandez et réservez directement sur le site." },
+];
+
 export default function BrandDetailPage() {
   const { slug } = useParams<{ slug: string }>();
-  const [brand, setBrand] = useState<BrandRow | null>(null);
+  const [brand,    setBrand]    = useState<BrandRow | null>(null);
   const [products, setProducts] = useState<ProductRow[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading,  setLoading]  = useState(true);
 
   useEffect(() => {
     if (!slug) return;
-
     const load = async () => {
       setLoading(true);
       const { data: allBrands } = await supabase.from("brands").select("*");
       const found = (allBrands ?? []).find(
         (b) => b.name.toLowerCase().replace(/\s+/g, "-") === slug.toLowerCase()
       );
-
-      if (!found) {
-        setBrand(null);
-        setLoading(false);
-        return;
-      }
-
+      if (!found) { setBrand(null); setLoading(false); return; }
       setBrand(found);
-
       const { data: productsData } = await supabase
         .from("products")
         .select("*")
         .eq("brand_id", found.id)
         .order("name");
-
       setProducts((productsData ?? []) as ProductRow[]);
       setLoading(false);
     };
-
     load();
   }, [slug]);
 
@@ -60,60 +56,142 @@ export default function BrandDetailPage() {
         title={brand ? `${brand.name} — Desmet Équipement` : "Marque — Desmet Équipement"}
         description={brand ? `Découvrez les produits ${brand.name} disponibles chez Desmet Équipement à Wavre. ${brand.description ?? ""}`.trim() : undefined}
       />
-      <section className="min-h-[80vh] py-20 bg-background">
-        <div className="container mx-auto px-4">
-          <Link
-            to="/brands"
-            className="mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
-          >
+
+      {/* ── Loading ────────────────────────────────────────────────────── */}
+      {loading && (
+        <div className="flex min-h-screen items-center justify-center bg-[#0e0e0e]">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#c9973a] border-t-transparent" />
+        </div>
+      )}
+
+      {/* ── Not found ──────────────────────────────────────────────────── */}
+      {!loading && !brand && (
+        <div className="flex min-h-screen flex-col items-center justify-center bg-[#0e0e0e] text-center px-4">
+          <h1 className="font-display text-4xl uppercase tracking-widest text-white mb-4">MARQUE INTROUVABLE</h1>
+          <p className="text-white/40 mb-8">Cette marque n'existe pas dans notre catalogue.</p>
+          <Link to="/brands" className="inline-flex items-center gap-2 text-sm uppercase tracking-widest text-[#c9973a] hover:opacity-70 transition-opacity">
             <ArrowLeft className="h-4 w-4" /> Retour aux marques
           </Link>
+        </div>
+      )}
 
-          {loading ? (
-            <div className="flex min-h-[40vh] items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-            </div>
-          ) : !brand ? (
-            <div className="text-center py-20">
-              <h1 className="font-display text-4xl text-foreground mb-4">MARQUE INTROUVABLE</h1>
-              <p className="text-muted-foreground">Cette marque n'existe pas dans notre catalogue.</p>
-            </div>
-          ) : (
-            <>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-12 flex flex-col items-center gap-5 text-center"
+      {/* ── Main content ───────────────────────────────────────────────── */}
+      {!loading && brand && (
+        <div className="min-h-screen bg-[#0e0e0e]">
+
+          {/* ── Hero ─────────────────────────────────────────────────── */}
+          <div className="border-b border-[#c9973a]/12 bg-[#0a0a0a]">
+            <div className="container mx-auto px-4 pt-10 pb-14">
+
+              {/* Back */}
+              <Link
+                to="/brands"
+                className="mb-10 inline-flex items-center gap-2 text-xs uppercase tracking-widest text-white/35 transition-colors hover:text-[#c9973a]"
               >
-                <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl border border-primary/30 bg-card shadow-[0_0_30px_hsl(var(--primary)/0.15)]">
-                  {brandForLogo && <BrandLogo brand={brandForLogo} size={96} darkFallback />}
+                <ArrowLeft className="h-4 w-4" /> Retour aux marques
+              </Link>
+
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="flex flex-col items-center gap-6 text-center"
+              >
+                {/* "Revendeur officiel" badge */}
+                <span className="inline-flex items-center gap-1.5 border border-[#c9973a]/30 bg-[#c9973a]/8 px-4 py-1.5 font-display text-[10px] uppercase tracking-[0.28em] text-[#c9973a]">
+                  <Award className="h-3 w-3" /> Revendeur officiel
+                </span>
+
+                {/* Logo with golden halo */}
+                <div
+                  className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-2xl border border-[#c9973a]/20 bg-[#111]"
+                  style={{ boxShadow: "0 0 40px rgba(201,151,58,0.18), 0 0 80px rgba(201,151,58,0.06)" }}
+                >
+                  {brandForLogo && <BrandLogo brand={brandForLogo} size={112} darkFallback />}
                 </div>
+
+                {/* Brand name */}
                 <div>
-                  <h1 className="font-display text-5xl md:text-6xl text-foreground">{brand.name.toUpperCase()}</h1>
+                  <h1 className="font-display text-5xl uppercase leading-none tracking-[0.06em] text-white md:text-7xl">
+                    {brand.name.toUpperCase()}
+                  </h1>
                   {brand.description && (
-                    <p className="mt-3 max-w-2xl text-muted-foreground text-sm md:text-base">{brand.description}</p>
+                    <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-white/50 md:text-base">
+                      {brand.description}
+                    </p>
                   )}
                 </div>
               </motion.div>
+            </div>
+          </div>
 
-              {products.length === 0 ? (
-                <motion.div
+          {/* ── Why choose ───────────────────────────────────────────── */}
+          <div className="border-b border-[#c9973a]/10 bg-[#0d0d0d]">
+            <div className="container mx-auto px-4 py-10">
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.15 }}
+                className="grid grid-cols-1 gap-4 sm:grid-cols-3"
+              >
+                {WHY_ITEMS.map(({ icon: Icon, title, desc }) => (
+                  <div
+                    key={title}
+                    className="flex items-start gap-4 border border-[#c9973a]/12 bg-[#111] px-5 py-4 transition-colors duration-200 hover:border-[#c9973a]/28"
+                  >
+                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center border border-[#c9973a]/25 bg-[#c9973a]/8 text-[#c9973a]">
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="font-display text-sm uppercase tracking-[0.14em] text-white">{title}</p>
+                      <p className="mt-0.5 text-xs leading-relaxed text-white/40">{desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </motion.div>
+            </div>
+          </div>
+
+          {/* ── Products grid ─────────────────────────────────────────── */}
+          <div className="container mx-auto px-4 py-14">
+
+            {products.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="mx-auto max-w-md border border-[#c9973a]/15 bg-[#111] p-12 text-center"
+              >
+                <Package className="mx-auto mb-4 h-10 w-10 text-[#c9973a]/30" />
+                <p className="font-display text-xl uppercase tracking-widest text-white">
+                  AUCUN ARTICLE DISPONIBLE
+                </p>
+                <p className="mt-2 text-sm text-white/35">
+                  Contactez-nous pour toute demande spécifique.
+                </p>
+                <Link
+                  to="/contact"
+                  className="mt-6 inline-flex h-10 items-center gap-2 border border-[#c9973a]/40 px-6 font-display text-xs uppercase tracking-[0.2em] text-[#c9973a] transition-colors hover:border-[#c9973a] hover:bg-[#c9973a]/8"
+                >
+                  Nous contacter
+                </Link>
+              </motion.div>
+            ) : (
+              <>
+                <motion.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="mx-auto max-w-md rounded-xl border border-border bg-card p-10 text-center"
+                  transition={{ delay: 0.2 }}
+                  className="mb-8 font-display text-[10px] uppercase tracking-[0.28em] text-white/25"
                 >
-                  <Package className="mx-auto mb-4 h-10 w-10 text-muted-foreground" />
-                  <p className="font-display text-xl text-foreground">AUCUN ARTICLE DISPONIBLE ACTUELLEMENT</p>
-                  <p className="mt-2 text-sm text-muted-foreground">Contactez-nous pour toute demande spécifique.</p>
-                </motion.div>
-              ) : (
-                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  {products.length} PRODUIT{products.length > 1 ? "S" : ""}
+                </motion.p>
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {products.map((product, i) => (
                     <motion.div
                       key={product.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.05 }}
+                      transition={{ duration: 0.35, delay: i * 0.06 }}
                     >
                       <ProductColorwaySelector
                         productId={product.id}
@@ -126,11 +204,12 @@ export default function BrandDetailPage() {
                     </motion.div>
                   ))}
                 </div>
-              )}
-            </>
-          )}
+              </>
+            )}
+          </div>
+
         </div>
-      </section>
+      )}
     </Layout>
   );
 }
