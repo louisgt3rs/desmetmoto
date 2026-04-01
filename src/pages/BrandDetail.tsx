@@ -104,10 +104,10 @@ export default function BrandDetailPage() {
 
                 {/* Logo with golden halo */}
                 <div
-                  className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-2xl border border-[#c9973a]/20 bg-[#111]"
-                  style={{ boxShadow: "0 0 40px rgba(201,151,58,0.18), 0 0 80px rgba(201,151,58,0.06)" }}
+                  className="flex h-40 w-40 items-center justify-center overflow-hidden rounded-2xl border border-[#c9973a]/20 bg-[#111]"
+                  style={{ boxShadow: "0 0 60px rgba(201,151,58,0.22), 0 0 120px rgba(201,151,58,0.07)" }}
                 >
-                  {brandForLogo && <BrandLogo brand={brandForLogo} size={112} darkFallback />}
+                  {brandForLogo && <BrandLogo brand={brandForLogo} size={160} darkFallback />}
                 </div>
 
                 {/* Brand name */}
