@@ -50,13 +50,12 @@ export default function AboutPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6 }}
-          className="relative overflow-hidden"
+          className="relative overflow-hidden h-[480px] lg:h-[640px]"
         >
           <img
             src={imgExterior}
             alt="Façade Desmet Équipement Wavre"
-            className="w-full"
-            style={{ display: "block", height: "auto" }}
+            className="h-full w-full object-cover object-center"
           />
           {/* Overlay bas → titre */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e0e] via-[#0e0e0e]/20 to-transparent" />
