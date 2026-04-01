@@ -2,26 +2,32 @@ import { motion } from "framer-motion";
 import { Star, Quote } from "lucide-react";
 import SectionHeading from "@/components/SectionHeading";
 
+const GOOGLE_URL = "https://maps.app.goo.gl/usjUYzvsD9vi72BD8?g_st=ic";
+
 const reviews = [
   {
-    name: "Thomas D.",
+    name: "Maxime M.",
     stars: 5,
-    text: "Super magasin avec un excellent choix de casques Arai et Shoei. L'équipe m'a aidé à trouver la taille parfaite.",
+    text: "Super conseil, le personnel est à l'écoute et nous trouve les meilleurs produits, superbe expérience.",
+    date: "janvier 2025",
   },
   {
-    name: "Laurent M.",
+    name: "Thierry P.",
     stars: 5,
-    text: "L'équipe est passionnée et donne de très bons conseils. Je recommande vivement pour tout équipement moto.",
+    text: "Super conseils pour l'achat d'un casque. Grande expérience et belle écoute de mes besoins pour trouver le produit qui répond à mes besoins.",
+    date: "novembre 2024",
   },
   {
-    name: "Sophie V.",
+    name: "Jean-Marie D.",
     stars: 5,
-    text: "Ambiance motarde incroyable pendant les Bikes & Coffee. Un vrai lieu de rencontre pour la communauté !",
+    text: "Un café et un passionné : quelle chouette expérience !",
+    date: "octobre 2024",
   },
   {
-    name: "Marc B.",
+    name: "Louis Z.",
     stars: 5,
-    text: "Large choix de marques et prix corrects. Le service est top, ils prennent le temps de bien vous conseiller.",
+    text: "Super service !",
+    date: "Google",
   },
 ];
 
@@ -44,29 +50,35 @@ export default function ReviewsSection() {
             ))}
           </div>
           <p className="font-display text-4xl text-foreground">4.4 / 5</p>
-          <p className="text-sm text-muted-foreground">basé sur <span className="text-foreground font-medium">281 avis</span> Google</p>
+          <p className="text-sm text-muted-foreground">basé sur <span className="text-foreground font-medium">272 avis</span> Google</p>
         </motion.div>
 
         {/* Review cards */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {reviews.map((review, i) => (
-            <motion.div
+            <motion.a
               key={review.name}
+              href={GOOGLE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               initial={{ opacity: 0, y: 25 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: i * 0.1 }}
-              className="group bg-card border border-border rounded-xl p-6 hover:border-primary/40 hover:shadow-[0_0_20px_hsl(var(--glow-soft))] transition-all duration-500"
+              className="group bg-card border border-border rounded-xl p-6 hover:border-primary/40 hover:shadow-[0_0_20px_hsl(var(--glow-soft))] transition-all duration-500 flex flex-col"
             >
               <Quote className="w-8 h-8 text-primary/20 mb-3" />
-              <p className="text-muted-foreground text-sm leading-relaxed mb-4">{review.text}</p>
+              <p className="text-muted-foreground text-sm leading-relaxed mb-4 flex-1">{review.text}</p>
               <div className="flex items-center gap-1 mb-2">
                 {[...Array(review.stars)].map((_, j) => (
                   <Star key={j} className="w-4 h-4 text-primary fill-primary" />
                 ))}
               </div>
-              <span className="text-foreground font-medium text-sm">{review.name}</span>
-            </motion.div>
+              <div className="flex items-center justify-between">
+                <span className="text-foreground font-medium text-sm">{review.name}</span>
+                <span className="text-xs text-muted-foreground">{review.date}</span>
+              </div>
+            </motion.a>
           ))}
         </div>
       </div>
