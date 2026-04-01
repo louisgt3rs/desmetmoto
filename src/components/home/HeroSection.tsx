@@ -67,6 +67,23 @@ export default function HeroSection() {
         }}
       />
 
+      {/* Slogan vertical gauche */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1, delay: 0.9 }}
+        className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-10 hidden sm:flex flex-col items-center gap-3"
+      >
+        <div className="w-px h-16 bg-primary/40" />
+        <p
+          className="font-display text-[10px] uppercase tracking-[0.3em] text-white/35 whitespace-nowrap"
+          style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+        >
+          Un casque se choisit sur la tête, pas sur une fiche technique
+        </p>
+        <div className="w-px h-16 bg-primary/40" />
+      </motion.div>
+
       {/* Particles */}
       <Particles count={35} />
 
