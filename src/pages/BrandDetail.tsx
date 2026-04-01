@@ -229,16 +229,12 @@ export default function BrandDetailPage() {
                         className="group cursor-pointer overflow-hidden border border-[#c9973a]/12 bg-[#111] transition-all duration-200 hover:border-[#c9973a]/40"
                       >
                         {/* Image */}
-                        <div
-                          className="relative overflow-hidden"
-                          style={{ backgroundColor: "#111" }}
-                        >
+                        <div className="relative aspect-square overflow-hidden bg-[#111]">
                           {product.image_url ? (
                             <img
                               src={product.image_url}
                               alt={product.name}
-                              className="w-full"
-                              style={{ height: "auto", maxHeight: 400 }}
+                              className="h-full w-full object-contain p-4"
                               loading="lazy"
                             />
                           ) : (
