@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const NotFound = () => {
   const location = useLocation();
+  const { t } = useLanguage();
 
   useEffect(() => {
     console.error("404: Route not found:", location.pathname);
@@ -17,16 +19,16 @@ const NotFound = () => {
       </p>
       <h1 className="mb-2 font-display text-8xl leading-none text-white">404</h1>
       <p className="mb-8 font-display text-xl uppercase tracking-widest text-white/40">
-        Page introuvable
+        {t("not_found_title")}
       </p>
       <p className="mb-10 max-w-sm text-sm leading-relaxed text-white/35">
-        La page que vous recherchez n'existe pas ou a été déplacée.
+        {t("not_found_text")}
       </p>
       <Link
         to="/"
         className="inline-flex h-12 items-center gap-2 bg-[#c9973a] px-8 font-display text-sm uppercase tracking-[0.2em] text-[#0e0e0e] transition-opacity hover:opacity-90"
       >
-        ← Retour à l'accueil
+        {t("not_found_back")}
       </Link>
     </div>
   );

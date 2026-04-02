@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import desmetLogo from "@/assets/desmet-logo-diamond.png";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 function Particles({ count = 30 }: { count?: number }) {
   const particles = useMemo(
@@ -53,6 +54,8 @@ function Particles({ count = 30 }: { count?: number }) {
 
 // Hero with logo
 export default function HeroSection() {
+  const { t } = useLanguage();
+
   return (
     <section
       className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
@@ -79,7 +82,7 @@ export default function HeroSection() {
           className="font-display text-[10px] uppercase tracking-[0.3em] text-white/35 whitespace-nowrap"
           style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
         >
-          Un casque se choisit sur la tête, pas sur une fiche technique
+          {t("hero_slogan")}
         </p>
         <div className="w-px h-16 bg-primary/40" />
       </motion.div>
@@ -130,7 +133,7 @@ export default function HeroSection() {
             variant="outline"
             className="border-primary bg-transparent px-8 py-6 text-lg text-primary shadow-[0_0_30px_hsl(var(--primary)/0.18)] transition-all duration-300 hover:bg-primary hover:text-primary-foreground hover:shadow-[0_0_50px_hsl(var(--primary)/0.35)]"
           >
-            Nous contacter
+            {t("contact_us")}
           </Button>
         </Link>
       </motion.div>

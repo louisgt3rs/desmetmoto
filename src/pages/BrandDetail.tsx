@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { BrandLogo } from "@/components/home/BrandModal";
 import type { BrandModalBrand } from "@/components/home/BrandModal";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type BrandRow = Tables<"brands">;
 type ProductRow = Tables<"products">;
@@ -19,15 +20,10 @@ interface ColorwayThumb {
   image_url: string | null;
 }
 
-const WHY_ITEMS = [
-  { icon: Award,       title: "Revendeur agréé",           desc: "Produits authentiques, garantie constructeur." },
-  { icon: Wrench,      title: "Essai en magasin possible", desc: "Testez avant d'acheter à Wavre." },
-  { icon: ShoppingBag, title: "Réservation en ligne",      desc: "Commandez et réservez directement sur le site." },
-];
-
 export default function BrandDetailPage() {
   const { slug }      = useParams<{ slug: string }>();
   const navigate      = useNavigate();
+  const { t }         = useLanguage();
   const [brand,       setBrand]       = useState<BrandRow | null>(null);
   const [products,    setProducts]    = useState<ProductRow[]>([]);
   const [colorways,   setColorways]   = useState<Record<string, ColorwayThumb[]>>({});
@@ -78,6 +74,12 @@ export default function BrandDetailPage() {
     ? { id: brand.id, name: brand.name, logo_url: brand.logo_url, description: brand.description }
     : null;
 
+  const WHY_ITEMS = [
+    { icon: Award,       title: t("why_dealer"),  desc: t("why_dealer_desc") },
+    { icon: Wrench,      title: t("why_test"),    desc: t("why_test_desc") },
+    { icon: ShoppingBag, title: t("why_reserve"), desc: t("why_reserve_desc") },
+  ];
+
   return (
     <Layout>
       <SEO
@@ -97,13 +99,13 @@ export default function BrandDetailPage() {
       {/* Not found */}
       {!loading && !brand && (
         <div className="flex min-h-screen flex-col items-center justify-center bg-[#0e0e0e] px-4 text-center">
-          <h1 className="font-display text-4xl uppercase tracking-widest text-white mb-4">MARQUE INTROUVABLE</h1>
-          <p className="text-white/40 mb-8">Cette marque n'existe pas dans notre catalogue.</p>
+          <h1 className="font-display text-4xl uppercase tracking-widest text-white mb-4">{t("brand_not_found")}</h1>
+          <p className="text-white/40 mb-8">{t("brand_not_found_text")}</p>
           <Link
             to="/brands"
             className="inline-flex items-center gap-2 text-sm uppercase tracking-widest text-[#c9973a] hover:opacity-70 transition-opacity"
           >
-            <ArrowLeft className="h-4 w-4" /> Retour aux marques
+            <ArrowLeft className="h-4 w-4" /> {t("back_to_brands")}
           </Link>
         </div>
       )}
@@ -120,7 +122,7 @@ export default function BrandDetailPage() {
                 to="/brands"
                 className="mb-6 inline-flex items-center gap-2 text-xs uppercase tracking-widest text-white/35 transition-colors hover:text-[#c9973a]"
               >
-                <ArrowLeft className="h-4 w-4" /> Retour aux marques
+                <ArrowLeft className="h-4 w-4" /> {t("back_to_brands")}
               </Link>
 
               <motion.div
@@ -130,7 +132,7 @@ export default function BrandDetailPage() {
                 className="flex flex-col items-center gap-5 text-center"
               >
                 <span className="inline-flex items-center gap-1.5 border border-[#c9973a]/30 bg-[#c9973a]/8 px-4 py-1.5 font-display text-[10px] uppercase tracking-[0.28em] text-[#c9973a]">
-                  <Award className="h-3 w-3" /> Revendeur officiel
+                  <Award className="h-3 w-3" /> {t("brand_official")}
                 </span>
 
                 <div
@@ -191,16 +193,16 @@ export default function BrandDetailPage() {
               >
                 <Package className="mx-auto mb-4 h-10 w-10 text-[#c9973a]/30" />
                 <p className="font-display text-xl uppercase tracking-widest text-white">
-                  AUCUN ARTICLE DISPONIBLE
+                  {t("brand_no_products")}
                 </p>
                 <p className="mt-2 text-sm text-white/35">
-                  Contactez-nous pour toute demande spécifique.
+                  {t("brand_no_products_text")}
                 </p>
                 <Link
                   to="/contact"
                   className="mt-6 inline-flex h-10 items-center gap-2 border border-[#c9973a]/40 px-6 font-display text-xs uppercase tracking-[0.2em] text-[#c9973a] transition-colors hover:border-[#c9973a] hover:bg-[#c9973a]/8"
                 >
-                  Nous contacter
+                  {t("contact_us")}
                 </Link>
               </motion.div>
             ) : (
@@ -211,7 +213,7 @@ export default function BrandDetailPage() {
                   transition={{ delay: 0.2 }}
                   className="mb-6 font-display text-[10px] uppercase tracking-[0.28em] text-white/25"
                 >
-                  {products.length} PRODUIT{products.length > 1 ? "S" : ""}
+                  {products.length} {products.length > 1 ? t("brand_products") : t("brand_product")}
                 </motion.p>
 
                 <div className="grid gap-3 md:grid-cols-2">
@@ -249,7 +251,7 @@ export default function BrandDetailPage() {
                               ? "bg-[#c9973a] text-[#0e0e0e]"
                               : "border border-white/15 bg-[#111]/80 text-white/40"
                           }`}>
-                            {inStock ? "EN STOCK" : "RUPTURE"}
+                            {inStock ? t("in_stock") : t("out_of_stock")}
                           </div>
                         </div>
 
@@ -290,7 +292,7 @@ export default function BrandDetailPage() {
                                 </div>
                               )}
                               <span className="ml-1 text-[10px] uppercase tracking-[0.14em] text-white/30">
-                                {cws.length} coloris
+                                {cws.length} {t("brand_colorways")}
                               </span>
                             </div>
                           )}

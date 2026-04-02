@@ -7,6 +7,7 @@ import SectionHeading from "@/components/SectionHeading";
 import { supabase } from "@/integrations/supabase/client";
 import bikesCoffeeImg from "@/assets/bikes-coffee.jpg";
 import type { Tables } from "@/integrations/supabase/types";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type Event = Tables<"events"> & {
   event_date?: string | null;
@@ -35,6 +36,7 @@ function useCountdown(targetDate: string | null) {
 }
 
 export default function EventsSection() {
+  const { t } = useLanguage();
   const [nextEvent, setNextEvent] = useState<Event | null>(null);
 
   useEffect(() => {
@@ -54,10 +56,17 @@ export default function EventsSection() {
   const countdown = useCountdown(effectiveDate);
   const hasCountdown = !!(effectiveDate && new Date(effectiveDate) > new Date());
 
+  const countdownItems = [
+    { label: t("countdown_days"),  value: countdown.days },
+    { label: t("countdown_hours"), value: countdown.hours },
+    { label: t("countdown_min"),   value: countdown.minutes },
+    { label: t("countdown_sec"),   value: countdown.seconds },
+  ];
+
   return (
     <section className="py-20">
       <div className="container mx-auto px-4">
-        <SectionHeading title="BIKES & COFFEE" subtitle="Un rassemblement convivial pour les passionnés de moto" />
+        <SectionHeading title="BIKES & COFFEE" subtitle={t("events_subtitle")} />
 
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <motion.div
@@ -76,7 +85,7 @@ export default function EventsSection() {
               <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
               <div className="absolute bottom-4 left-4 flex items-center gap-2">
                 <Coffee className="w-5 h-5 text-primary" />
-                <span className="text-foreground font-display text-lg">Motos | Café | Communauté</span>
+                <span className="text-foreground font-display text-lg">{t("events_tagline")}</span>
               </div>
             </div>
           </motion.div>
@@ -99,12 +108,7 @@ export default function EventsSection() {
                 {/* Countdown */}
                 {hasCountdown && (
                   <div className="grid grid-cols-4 gap-3 pt-2">
-                    {[
-                      { label: "Jours", value: countdown.days },
-                      { label: "Heures", value: countdown.hours },
-                      { label: "Min", value: countdown.minutes },
-                      { label: "Sec", value: countdown.seconds },
-                    ].map(({ label, value }) => (
+                    {countdownItems.map(({ label, value }) => (
                       <div key={label} className="text-center bg-secondary rounded-lg p-3">
                         <span className="font-display text-2xl text-primary">{String(value).padStart(2, "0")}</span>
                         <p className="text-xs text-muted-foreground mt-1">{label}</p>
@@ -115,13 +119,13 @@ export default function EventsSection() {
               </div>
             ) : (
               <div className="bg-card border border-border rounded-xl p-6 mb-6">
-                <p className="text-muted-foreground">Prochain événement à venir. Restez connecté !</p>
+                <p className="text-muted-foreground">{t("events_coming_soon")}</p>
               </div>
             )}
 
             <Button asChild size="lg" className="group">
               <Link to="/community">
-                Voir les Événements
+                {t("events_cta")}
                 <motion.span className="inline-block transition-transform group-hover:translate-x-1">→</motion.span>
               </Link>
             </Button>

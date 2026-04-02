@@ -1,14 +1,17 @@
 import { Link } from "react-router-dom";
-
-const NAV_LINKS = [
-  { label: "Accueil",    path: "/" },
-  { label: "Produits",   path: "/brands" },
-  { label: "Événements", path: "/community" },
-  { label: "Arai",       path: "/arai" },
-  { label: "Contact",    path: "/contact" },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Footer() {
+  const { t } = useLanguage();
+
+  const NAV_LINKS = [
+    { label: t("nav_home"),           path: "/" },
+    { label: t("footer_products"),    path: "/brands" },
+    { label: t("footer_events"),      path: "/community" },
+    { label: t("nav_arai"),           path: "/arai" },
+    { label: t("nav_contact"),        path: "/contact" },
+  ];
+
   return (
     <footer className="border-t border-[#c9973a]/15" style={{ backgroundColor: "#111" }}>
       <div className="container mx-auto px-4 py-12">
@@ -52,9 +55,9 @@ export default function Footer() {
       <div className="border-t border-[#c9973a]/10" style={{ backgroundColor: "#0d0d0d" }}>
         <div className="container mx-auto px-4 py-3 text-center text-[11px] uppercase tracking-[0.14em] text-white/30">
           <Link to="/politique-confidentialite" className="transition-colors hover:text-[#c9973a]">
-            Politique de confidentialité
+            {t("footer_privacy")}
           </Link>
-          {" · "}Tous droits réservés
+          {" · "}{t("footer_rights")}
         </div>
       </div>
     </footer>

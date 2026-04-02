@@ -3,6 +3,7 @@ import { ArrowRight, MapPin, Phone, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 import Layout from "@/components/Layout";
 import SEO from "@/components/SEO";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 import imgExterior        from "@/assets/store-exterior.jpg";
 import imgAisle           from "@/assets/store-interior-1.jpeg";
@@ -10,32 +11,22 @@ import imgAlpinestars     from "@/assets/store-interior-alpinestars.jpeg";
 import imgCafe            from "@/assets/store-interior-2.jpeg";
 import imgHelmets         from "@/assets/store-interior-3.jpeg";
 
-const FACTS = [
-  { value: "491",  label: "Chaussée de Louvain, Wavre" },
-  { value: "Arai", label: "Revendeur officiel certifié" },
-  { value: "4.4★", label: "Note Google · 272 avis" },
-  { value: "100%", label: "Conseil personnalisé en magasin" },
-];
-
-const PILLARS = [
-  {
-    num: "01",
-    title: "Des vrais motards",
-    body: "L'équipe roule. Ce n'est pas du marketing — quand on vous parle d'un casque ou d'une veste, c'est parce qu'on les a portés.",
-  },
-  {
-    num: "02",
-    title: "L'équipement avant tout",
-    body: "Pas de motos à vendre. Notre seule spécialité : vous équiper. Chaque produit est sélectionné pour sa qualité réelle.",
-  },
-  {
-    num: "03",
-    title: "Le temps de bien faire",
-    body: "On ne vous pousse pas vers la sortie. On prend le temps d'essayer, d'ajuster, de comparer.",
-  },
-];
-
 export default function AboutPage() {
+  const { t } = useLanguage();
+
+  const FACTS = [
+    { value: "491",  label: t("about_fact1") },
+    { value: "Arai", label: t("about_fact2") },
+    { value: "4.4★", label: t("about_fact3") },
+    { value: "100%", label: t("about_fact4") },
+  ];
+
+  const PILLARS = [
+    { num: "01", title: t("about_p1_title"), body: t("about_p1_body") },
+    { num: "02", title: t("about_p2_title"), body: t("about_p2_body") },
+    { num: "03", title: t("about_p3_title"), body: t("about_p3_body") },
+  ];
+
   return (
     <Layout>
       <SEO
@@ -57,11 +48,10 @@ export default function AboutPage() {
             alt="Façade Desmet Équipement Wavre"
             className="h-full w-full object-cover object-[center_60%]"
           />
-          {/* Overlay bas → titre */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e0e] via-[#0e0e0e]/20 to-transparent" />
           <div className="absolute bottom-0 left-0 container mx-auto px-4 pb-10">
             <p className="font-display text-[11px] uppercase tracking-[0.4em] text-[#c9973a]">
-              Wavre · Belgique
+              {t("about_location")}
             </p>
             <h1 className="mt-1 font-display text-5xl uppercase leading-none tracking-tight text-white md:text-7xl">
               Desmet Équipement
@@ -121,33 +111,22 @@ export default function AboutPage() {
               className="flex flex-col justify-center py-4"
             >
               <p className="mb-3 font-display text-[10px] uppercase tracking-[0.35em] text-[#c9973a]">
-                Notre histoire
+                {t("about_history_label")}
               </p>
               <h2 className="font-display text-4xl uppercase leading-tight text-white md:text-5xl">
-                Un magasin fait par des motards, pour des motards.
+                {t("about_history_title")}
               </h2>
               <div className="mt-6 space-y-4 text-sm leading-relaxed text-white/50">
-                <p>
-                  Desmet Équipement s'est construit sur une idée simple : les motards méritent
-                  un conseil honnête de la part de gens qui connaissent vraiment le sujet.
-                  Pas un vendeur qui lit une fiche produit — quelqu'un qui a roulé avec.
-                </p>
-                <p>
-                  Installé Chaussée de Louvain à Wavre, le magasin accueille les motards
-                  de toute la région. Revendeur officiel Arai, Shoei, Alpinestars, Richa
-                  et d'autres grandes marques — toujours avec la même exigence.
-                </p>
-                <p>
-                  L'essai en magasin n'est pas une option ici, c'est la règle. Parce qu'un
-                  casque se choisit sur la tête, pas sur une fiche technique.
-                </p>
+                <p>{t("about_p1")}</p>
+                <p>{t("about_p2")}</p>
+                <p>{t("about_p3")}</p>
               </div>
 
               <Link
                 to="/contact"
                 className="mt-8 inline-flex w-fit items-center gap-2 border border-[#c9973a]/40 px-6 py-3 font-display text-xs uppercase tracking-[0.24em] text-[#c9973a] transition-all duration-200 hover:border-[#c9973a] hover:bg-[#c9973a]/8"
               >
-                Nous rendre visite <ArrowRight className="h-3.5 w-3.5" />
+                {t("about_visit")} <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </motion.div>
           </div>
@@ -190,7 +169,7 @@ export default function AboutPage() {
         <div className="border-t border-[#c9973a]/10 bg-[#0a0a0a]">
           <div className="container mx-auto px-4 py-14">
             <p className="mb-10 font-display text-[10px] uppercase tracking-[0.35em] text-white/25">
-              Ce qui nous différencie
+              {t("about_differentiator")}
             </p>
             <div className="grid gap-px md:grid-cols-3" style={{ background: "rgba(201,151,58,0.08)" }}>
               {PILLARS.map((p, i) => (
@@ -217,10 +196,10 @@ export default function AboutPage() {
             <div className="grid gap-8 md:grid-cols-2 md:items-end">
               <div>
                 <p className="mb-3 font-display text-[10px] uppercase tracking-[0.35em] text-[#c9973a]">
-                  Nous trouver
+                  {t("about_find_us")}
                 </p>
                 <h2 className="font-display text-4xl uppercase leading-tight text-white md:text-5xl">
-                  Venez nous voir<br />à Wavre.
+                  {t("about_come_visit")}
                 </h2>
               </div>
               <div className="space-y-4">
@@ -244,7 +223,7 @@ export default function AboutPage() {
                   <span className="text-sm text-white/50 transition-colors group-hover:text-white">admindesmetequipement@gmail.com</span>
                 </a>
                 <p className="pt-1 text-[11px] uppercase tracking-[0.18em] text-white/25">
-                  Mar–Ven 10h–18h · Sam 10h–17h
+                  {t("about_hours")}
                 </p>
               </div>
             </div>

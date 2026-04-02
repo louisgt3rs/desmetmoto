@@ -7,6 +7,7 @@ import SEO from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import type { Tables } from "@/integrations/supabase/types";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type ProductRow = Tables<"products">;
 
@@ -28,6 +29,7 @@ function parseSbs(v: unknown): Record<string, number> {
 
 export default function ProductDetail() {
   const { slug, productId } = useParams<{ slug: string; productId: string }>();
+  const { t } = useLanguage();
 
   const [product,       setProduct]       = useState<ProductRow | null>(null);
   const [colorways,     setColorways]     = useState<Colorway[]>([]);
@@ -172,7 +174,7 @@ export default function ProductDetail() {
 
     if (dbErr) {
       setSubmitting(false);
-      setFormError("Une erreur est survenue. Veuillez réessayer.");
+      setFormError(t("error_occurred"));
       return;
     }
 
@@ -207,12 +209,12 @@ export default function ProductDetail() {
   if (!product) return (
     <Layout>
       <div className="flex min-h-screen flex-col items-center justify-center bg-[#0e0e0e] px-4 text-center">
-        <h1 className="font-display text-4xl uppercase tracking-widest text-white mb-4">PRODUIT INTROUVABLE</h1>
+        <h1 className="font-display text-4xl uppercase tracking-widest text-white mb-4">{t("product_not_found")}</h1>
         <Link
           to={`/marques/${slug}`}
           className="inline-flex items-center gap-2 text-sm uppercase tracking-widest text-[#c9973a] hover:opacity-70 transition-opacity"
         >
-          <ArrowLeft className="h-4 w-4" /> Retour
+          <ArrowLeft className="h-4 w-4" /> {t("product_back")}
         </Link>
       </div>
     </Layout>
@@ -231,7 +233,7 @@ export default function ProductDetail() {
             className="mb-8 inline-flex items-center gap-2 text-xs uppercase tracking-widest text-white/35 transition-colors hover:text-[#c9973a]"
           >
             <ArrowLeft className="h-4 w-4" />
-            Retour à {brandName || slug}
+            {t("product_back")} {brandName || slug}
           </Link>
 
           {/* ── Gallery + Info ────────────────────────────────────────────── */}
@@ -253,7 +255,7 @@ export default function ProductDetail() {
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center">
-                    <p className="font-display text-sm uppercase tracking-widest text-white/20">Aucune photo</p>
+                    <p className="font-display text-sm uppercase tracking-widest text-white/20">{t("product_no_photo")}</p>
                   </div>
                 )}
               </div>
@@ -296,13 +298,13 @@ export default function ProductDetail() {
                   ? "bg-[#c9973a] text-[#0e0e0e]"
                   : "border border-white/20 text-white/40"
               }`}>
-                {totalStock > 0 ? "EN STOCK" : "RUPTURE DE STOCK"}
+                {totalStock > 0 ? t("in_stock") : t("out_of_stock_full")}
               </span>
 
               {/* Colorway selector */}
               {hasColorways && (
                 <div>
-                  <p className="mb-2 text-[10px] uppercase tracking-[0.24em] text-white/40">COLORIS</p>
+                  <p className="mb-2 text-[10px] uppercase tracking-[0.24em] text-white/40">{t("product_colorway")}</p>
                   <div className="flex flex-wrap gap-2">
                     {colorways.map((cw) => (
                       <button
@@ -325,8 +327,8 @@ export default function ProductDetail() {
               {hasSizeData && (
                 <div>
                   <p className="mb-2 text-[10px] uppercase tracking-[0.24em] text-white/40">
-                    TAILLE
-                    {selectedSize ? ` — ${selectedSize} sélectionné` : ""}
+                    {t("product_size")}
+                    {selectedSize ? ` — ${selectedSize} ${t("product_size_selected")}` : ""}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {sizesForSelector.map((size) => {
@@ -367,12 +369,12 @@ export default function ProductDetail() {
           <div className="mt-10 border border-[#c9973a]/20 bg-[#111]">
             <div className="border-b border-[#c9973a]/15 px-6 py-4">
               <h2 className="font-display text-lg uppercase tracking-[0.14em] text-white">
-                RÉSERVER CE PRODUIT EN MAGASIN
+                {t("reserve_title")}
               </h2>
               <p className="mt-0.5 text-xs text-white/40">
                 {product.name}
                 {selectedColorway ? ` — ${selectedColorway.name}` : ""}
-                {selectedSize ? ` — Taille ${selectedSize}` : ""}
+                {selectedSize ? ` — ${t("product_size")} ${selectedSize}` : ""}
               </p>
             </div>
 
@@ -382,10 +384,8 @@ export default function ProductDetail() {
                   <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center bg-[#c9973a]">
                     <Check className="h-6 w-6 text-[#0e0e0e]" />
                   </div>
-                  <p className="font-display text-base uppercase tracking-widest text-white">DEMANDE ENVOYÉE</p>
-                  <p className="mt-2 text-sm text-white/50">
-                    Votre demande a été envoyée&nbsp;! Nous vous contacterons rapidement.
-                  </p>
+                  <p className="font-display text-base uppercase tracking-widest text-white">{t("reserve_success_title")}</p>
+                  <p className="mt-2 text-sm text-white/50">{t("reserve_success_text")}</p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-5">
@@ -397,21 +397,21 @@ export default function ProductDetail() {
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     {([
-                      { label: "PRÉNOM",    field: "first_name", type: "text",  placeholder: "Jean" },
-                      { label: "NOM",       field: "last_name",  type: "text",  placeholder: "Dupont" },
-                      { label: "EMAIL",     field: "email",      type: "email", placeholder: "jean@email.com" },
-                      { label: "TÉLÉPHONE", field: "phone",      type: "tel",   placeholder: "+32 470 000 000" },
-                    ] as const).map(({ label, field, type, placeholder }) => (
+                      { labelKey: "field_firstname", field: "first_name", type: "text",  phKey: "ph_firstname" },
+                      { labelKey: "field_lastname",  field: "last_name",  type: "text",  phKey: "ph_lastname" },
+                      { labelKey: "field_email",     field: "email",      type: "email", phKey: "ph_email" },
+                      { labelKey: "field_phone",     field: "phone",      type: "tel",   phKey: "ph_phone" },
+                    ] as const).map(({ labelKey, field, type, phKey }) => (
                       <div key={field} className="space-y-1">
                         <label className="block text-[10px] uppercase tracking-[0.2em] text-white/40">
-                          {label} *
+                          {t(labelKey)} *
                         </label>
                         <Input
                           required
                           type={type}
                           value={form[field]}
                           onChange={(e) => setForm((f) => ({ ...f, [field]: e.target.value }))}
-                          placeholder={placeholder}
+                          placeholder={t(phKey)}
                           className="h-10 rounded-none border-white/15 bg-white/5 text-white placeholder:text-white/20 focus:border-[#c9973a] focus-visible:ring-0"
                         />
                       </div>
@@ -420,12 +420,12 @@ export default function ProductDetail() {
 
                   <div className="space-y-1">
                     <label className="block text-[10px] uppercase tracking-[0.2em] text-white/40">
-                      MESSAGE (OPTIONNEL)
+                      {t("field_message")}
                     </label>
                     <textarea
                       value={form.message}
                       onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
-                      placeholder="Questions, précisions..."
+                      placeholder={t("ph_message")}
                       rows={3}
                       className="w-full resize-none rounded-none border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 focus:border-[#c9973a] focus:outline-none"
                     />
@@ -442,17 +442,17 @@ export default function ProductDetail() {
                       className="mt-0.5 h-4 w-4 shrink-0 accent-[#c9973a]"
                     />
                     <span className="text-xs leading-relaxed">
-                      J'accepte les communications de Desmet Équipement et confirme avoir lu la{" "}
+                      {t("rgpd_text")}{" "}
                       <Link
                         to="/politique-confidentialite"
                         target="_blank"
                         className="underline hover:text-[#c9973a]"
                       >
-                        politique de confidentialité
+                        {t("rgpd_link")}
                       </Link>. *
                       {rgpdErr && (
                         <span className="ml-1 text-[10px] uppercase tracking-widest text-red-400">
-                          (REQUIS)
+                          {t("required")}
                         </span>
                       )}
                     </span>
@@ -463,7 +463,7 @@ export default function ProductDetail() {
                     disabled={submitting}
                     className="h-12 w-full bg-[#c9973a] font-display text-sm uppercase tracking-[0.2em] text-[#0e0e0e] transition-opacity hover:opacity-90 disabled:opacity-50"
                   >
-                    {submitting ? "ENVOI EN COURS..." : "ENVOYER LA DEMANDE"}
+                    {submitting ? t("sending") : t("send_request")}
                   </button>
                 </form>
               )}
@@ -487,7 +487,7 @@ export default function ProductDetail() {
             <button
               className="absolute right-5 top-5 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/25"
               onClick={() => setLightboxIdx(null)}
-              aria-label="Fermer"
+              aria-label={t("product_close")}
             >
               <X className="h-5 w-5" />
             </button>
@@ -497,14 +497,14 @@ export default function ProductDetail() {
                 <button
                   className="absolute left-4 top-1/2 z-10 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/25"
                   onClick={(e) => { e.stopPropagation(); setLightboxIdx((i) => (i! > 0 ? i! - 1 : gallery.length - 1)); }}
-                  aria-label="Précédent"
+                  aria-label={t("product_prev")}
                 >
                   <ChevronLeft className="h-6 w-6" />
                 </button>
                 <button
                   className="absolute right-4 top-1/2 z-10 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/25"
                   onClick={(e) => { e.stopPropagation(); setLightboxIdx((i) => (i! < gallery.length - 1 ? i! + 1 : 0)); }}
-                  aria-label="Suivant"
+                  aria-label={t("product_next")}
                 >
                   <ChevronRight className="h-6 w-6" />
                 </button>

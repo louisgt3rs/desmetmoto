@@ -2,8 +2,11 @@ import { motion } from "framer-motion";
 import Layout from "@/components/Layout";
 import BrandsCarousel from "@/components/home/BrandsCarousel";
 import SEO from "@/components/SEO";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function BrandsPage() {
+  const { t } = useLanguage();
+
   return (
     <Layout>
       <SEO
@@ -19,11 +22,11 @@ export default function BrandsPage() {
             className="text-center mb-16"
           >
             <h1 className="font-display text-5xl md:text-6xl text-foreground mb-3">
-              NOS MARQUES
+              {t("brands_title")}
             </h1>
             <div className="w-20 h-1 bg-primary mx-auto mb-4" />
             <p className="text-muted-foreground text-base md:text-lg">
-              Plus de 30 marques disponibles en magasin à Wavre
+              {t("brands_subtitle")}
             </p>
           </motion.div>
 
@@ -35,7 +38,7 @@ export default function BrandsPage() {
             viewport={{ once: true }}
             className="text-muted-foreground text-sm text-center mt-16 max-w-2xl mx-auto"
           >
-            Et bien d'autres marques disponibles en magasin. N'hésitez pas à nous contacter pour toute demande spécifique.
+            {t("brands_more")}
           </motion.p>
         </div>
       </section>

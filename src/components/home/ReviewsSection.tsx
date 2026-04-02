@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Star, Quote } from "lucide-react";
 import SectionHeading from "@/components/SectionHeading";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const GOOGLE_URL = "https://maps.app.goo.gl/usjUYzvsD9vi72BD8?g_st=ic";
 
@@ -32,10 +33,12 @@ const reviews = [
 ];
 
 export default function ReviewsSection() {
+  const { t } = useLanguage();
+
   return (
     <section className="py-20">
       <div className="container mx-auto px-4">
-        <SectionHeading title="AVIS DES MOTARDS" subtitle="Ce que disent nos clients" />
+        <SectionHeading title={t("reviews_title")} subtitle={t("reviews_subtitle")} />
 
         {/* Overall rating */}
         <motion.div
@@ -50,7 +53,9 @@ export default function ReviewsSection() {
             ))}
           </div>
           <p className="font-display text-4xl text-foreground">4.4 / 5</p>
-          <p className="text-sm text-muted-foreground">basé sur <span className="text-foreground font-medium">272 avis</span> Google</p>
+          <p className="text-sm text-muted-foreground">
+            {t("reviews_based_on")} <span className="text-foreground font-medium">{t("reviews_count")}</span> {t("reviews_google")}
+          </p>
         </motion.div>
 
         {/* Review cards */}

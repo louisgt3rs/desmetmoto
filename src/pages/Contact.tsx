@@ -9,26 +9,28 @@ import { Link } from "react-router-dom";
 import Layout from "@/components/Layout";
 import SectionHeading from "@/components/SectionHeading";
 import SEO from "@/components/SEO";
-
-const hours = [
-  { day: "Lundi",    time: "Fermé",      closed: true },
-  { day: "Mardi",    time: "10h – 18h",  closed: false },
-  { day: "Mercredi", time: "10h – 18h",  closed: false },
-  { day: "Jeudi",    time: "10h – 18h",  closed: false },
-  { day: "Vendredi", time: "10h – 18h",  closed: false },
-  { day: "Samedi",   time: "10h – 17h",  closed: false },
-  { day: "Dimanche", time: "Fermé",      closed: true },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function ContactPage() {
+  const { t } = useLanguage();
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "", rgpd: false });
   const [rgpdErr, setRgpdErr] = useState(false);
+
+  const hours = [
+    { key: "day_mon", time: "Fermé",      closed: true },
+    { key: "day_tue", time: "10h – 18h",  closed: false },
+    { key: "day_wed", time: "10h – 18h",  closed: false },
+    { key: "day_thu", time: "10h – 18h",  closed: false },
+    { key: "day_fri", time: "10h – 18h",  closed: false },
+    { key: "day_sat", time: "10h – 17h",  closed: false },
+    { key: "day_sun", time: "Fermé",      closed: true },
+  ] as const;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.rgpd) { setRgpdErr(true); return; }
     setRgpdErr(false);
-    toast.success("Message envoyé avec succès ! Nous vous répondrons rapidement.");
+    toast.success(t("contact_success"));
     setForm({ name: "", email: "", phone: "", message: "", rgpd: false });
   };
 
@@ -40,7 +42,7 @@ export default function ContactPage() {
       />
       <section className="py-24">
         <div className="container mx-auto px-4">
-          <SectionHeading title="CONTACTEZ-NOUS" subtitle="N'hésitez pas à nous rendre visite ou à nous contacter" />
+          <SectionHeading title={t("contact_title")} subtitle={t("contact_subtitle")} />
 
           <div className="grid lg:grid-cols-2 gap-16">
             {/* Info */}
@@ -56,7 +58,7 @@ export default function ContactPage() {
                     <MapPin className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-display text-lg text-foreground">Adresse</h3>
+                    <h3 className="font-display text-lg text-foreground">{t("contact_address")}</h3>
                     <p className="text-muted-foreground text-sm">Chaussée de Louvain 491<br />1300 Wavre, Belgique</p>
                   </div>
                 </div>
@@ -65,7 +67,7 @@ export default function ContactPage() {
                     <Phone className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-display text-lg text-foreground">Téléphone</h3>
+                    <h3 className="font-display text-lg text-foreground">{t("contact_phone")}</h3>
                     <a href="tel:010842139" className="text-muted-foreground text-sm hover:text-primary transition-colors">010 84 21 39</a>
                   </div>
                 </div>
@@ -74,7 +76,7 @@ export default function ContactPage() {
                     <Mail className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-display text-lg text-foreground">Email</h3>
+                    <h3 className="font-display text-lg text-foreground">{t("contact_email_label")}</h3>
                     <p className="text-muted-foreground text-sm">info@desmet-equipement.be</p>
                   </div>
                 </div>
@@ -83,12 +85,14 @@ export default function ContactPage() {
                     <Clock className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-display text-lg text-foreground">Horaires d'ouverture</h3>
+                    <h3 className="font-display text-lg text-foreground">{t("contact_hours_label")}</h3>
                     <div className="text-sm space-y-1 mt-1">
                       {hours.map(h => (
-                        <div key={h.day} className="flex justify-between gap-8">
-                          <span className={h.closed ? "text-muted-foreground" : "text-foreground"}>{h.day}</span>
-                          <span className={h.closed ? "text-destructive" : "text-primary font-medium"}>{h.time}</span>
+                        <div key={h.key} className="flex justify-between gap-8">
+                          <span className={h.closed ? "text-muted-foreground" : "text-foreground"}>{t(h.key)}</span>
+                          <span className={h.closed ? "text-destructive" : "text-primary font-medium"}>
+                            {h.closed ? t("closed") : h.time}
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -98,11 +102,11 @@ export default function ContactPage() {
 
               <div className="flex flex-wrap gap-3 mb-8">
                 <Button asChild size="lg">
-                  <a href="tel:010842139"><Phone className="w-4 h-4" /> Appeler</a>
+                  <a href="tel:010842139"><Phone className="w-4 h-4" /> {t("contact_call")}</a>
                 </Button>
                 <Button asChild variant="outline" size="lg">
                   <a href="https://maps.app.goo.gl/usjUYzvsD9vi72BD8?g_st=ic" target="_blank" rel="noopener noreferrer">
-                    <Navigation className="w-4 h-4" /> Itinéraire
+                    <Navigation className="w-4 h-4" /> {t("contact_directions")}
                   </a>
                 </Button>
               </div>
@@ -129,17 +133,17 @@ export default function ContactPage() {
               transition={{ duration: 0.5 }}
             >
               <div className="bg-card border border-border rounded-xl p-8">
-                <h2 className="font-display text-2xl text-foreground mb-6">ENVOYEZ-NOUS UN MESSAGE</h2>
+                <h2 className="font-display text-2xl text-foreground mb-6">{t("contact_form_title")}</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <Input
-                    placeholder="Nom complet"
+                    placeholder={t("contact_form_name")}
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     required
                     className="bg-secondary border-border"
                   />
                   <Input
-                    placeholder="Email"
+                    placeholder={t("contact_form_email")}
                     type="email"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -147,13 +151,13 @@ export default function ContactPage() {
                     className="bg-secondary border-border"
                   />
                   <Input
-                    placeholder="Téléphone"
+                    placeholder={t("contact_form_phone")}
                     value={form.phone}
                     onChange={(e) => setForm({ ...form, phone: e.target.value })}
                     className="bg-secondary border-border"
                   />
                   <Textarea
-                    placeholder="Votre message"
+                    placeholder={t("contact_form_message")}
                     value={form.message}
                     onChange={(e) => setForm({ ...form, message: e.target.value })}
                     required
@@ -168,14 +172,14 @@ export default function ContactPage() {
                       className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
                     />
                     <span className="text-xs leading-relaxed">
-                      J'accepte de recevoir les communications de Desmet Équipement et confirme avoir lu la{" "}
+                      {t("rgpd_text")}{" "}
                       <Link to="/politique-confidentialite" target="_blank" className="underline hover:text-primary transition-colors">
-                        politique de confidentialité
+                        {t("rgpd_link")}
                       </Link>. *
-                      {rgpdErr && <span className="ml-1 text-xs text-destructive">(REQUIS)</span>}
+                      {rgpdErr && <span className="ml-1 text-xs text-destructive">{t("required")}</span>}
                     </span>
                   </label>
-                  <Button type="submit" className="w-full" size="lg">Envoyer</Button>
+                  <Button type="submit" className="w-full" size="lg">{t("contact_send")}</Button>
                 </form>
               </div>
             </motion.div>

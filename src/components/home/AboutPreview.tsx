@@ -1,8 +1,11 @@
 import { motion } from "framer-motion";
 import { Shield } from "lucide-react";
 import storeImg from "@/assets/store-interior-1.jpeg";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function AboutPreview() {
+  const { t } = useLanguage();
+
   return (
     <section className="py-20">
       <div className="container mx-auto px-4">
@@ -23,16 +26,22 @@ export default function AboutPreview() {
             transition={{ duration: 0.6, delay: 0.15 }}
           >
             <h2 className="font-display text-4xl md:text-5xl text-foreground mb-6">
-              VOTRE SPÉCIALISTE <span className="text-gradient">MOTO</span> À WAVRE
+              {t("about_preview_title").split("MOTO").length > 1 ? (
+                <>
+                  {t("about_preview_title").split(/MOTO|SPECIALIST|SPECIALIST/)[0]}
+                  <span className="text-gradient">MOTO</span>
+                  {t("about_preview_title").split("MOTO")[1]}
+                </>
+              ) : (
+                t("about_preview_title")
+              )}
             </h2>
             <p className="text-muted-foreground leading-relaxed mb-6">
-              Depuis des années, Desmet Équipement accompagne les motards avec passion et expertise.
-              Notre équipe expérimentée vous guide dans le choix de votre équipement pour une expérience
-              moto sûre et confortable.
+              {t("about_preview_desc")}
             </p>
             <div className="flex items-center gap-3 bg-card border border-border rounded-xl p-4">
               <Shield className="w-5 h-5 text-primary shrink-0" />
-              <span className="text-foreground font-medium text-sm">Conseils d'experts • Marques premium • Service personnalisé</span>
+              <span className="text-foreground font-medium text-sm">{t("about_preview_badges")}</span>
             </div>
           </motion.div>
         </div>

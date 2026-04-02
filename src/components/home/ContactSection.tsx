@@ -2,22 +2,25 @@ import { motion } from "framer-motion";
 import { MapPin, Phone, Clock, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SectionHeading from "@/components/SectionHeading";
-
-const hours = [
-  { day: "Lundi", time: "Fermé", closed: true },
-  { day: "Mardi", time: "10h – 18h", closed: false },
-  { day: "Mercredi", time: "10h – 18h", closed: false },
-  { day: "Jeudi", time: "10h – 18h", closed: false },
-  { day: "Vendredi", time: "10h – 18h", closed: false },
-  { day: "Samedi", time: "10h – 17h", closed: false },
-  { day: "Dimanche", time: "Fermé", closed: true },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function ContactSection() {
+  const { t } = useLanguage();
+
+  const hours = [
+    { key: "day_mon", time: "Fermé",      closed: true },
+    { key: "day_tue", time: "10h – 18h",  closed: false },
+    { key: "day_wed", time: "10h – 18h",  closed: false },
+    { key: "day_thu", time: "10h – 18h",  closed: false },
+    { key: "day_fri", time: "10h – 18h",  closed: false },
+    { key: "day_sat", time: "10h – 17h",  closed: false },
+    { key: "day_sun", time: "Fermé",      closed: true },
+  ] as const;
+
   return (
     <section className="py-20 bg-card">
       <div className="container mx-auto px-4">
-        <SectionHeading title="NOUS TROUVER" subtitle="Desmet Équipement – Wavre, Belgique" />
+        <SectionHeading title={t("contact_section_title")} subtitle={t("contact_section_subtitle")} />
 
         <div className="grid lg:grid-cols-2 gap-12">
           {/* Info + hours */}
@@ -33,8 +36,8 @@ export default function ContactSection() {
                 <MapPin className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h3 className="font-display text-lg text-foreground mb-1">Adresse</h3>
-                <p className="text-muted-foreground text-sm">Chaussée de Wavre 491<br />1300 Wavre, Belgique</p>
+                <h3 className="font-display text-lg text-foreground mb-1">{t("contact_address")}</h3>
+                <p className="text-muted-foreground text-sm">Chaussée de Louvain 491<br />1300 Wavre, Belgique</p>
               </div>
             </div>
 
@@ -43,13 +46,15 @@ export default function ContactSection() {
                 <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                   <Clock className="w-5 h-5 text-primary" />
                 </div>
-                <h3 className="font-display text-lg text-foreground">Horaires d'ouverture</h3>
+                <h3 className="font-display text-lg text-foreground">{t("contact_hours_label")}</h3>
               </div>
               <div className="space-y-2 pl-14">
                 {hours.map(h => (
-                  <div key={h.day} className="flex justify-between text-sm">
-                    <span className={h.closed ? "text-muted-foreground" : "text-foreground"}>{h.day}</span>
-                    <span className={h.closed ? "text-destructive" : "text-primary font-medium"}>{h.time}</span>
+                  <div key={h.key} className="flex justify-between text-sm">
+                    <span className={h.closed ? "text-muted-foreground" : "text-foreground"}>{t(h.key)}</span>
+                    <span className={h.closed ? "text-destructive" : "text-primary font-medium"}>
+                      {h.closed ? t("closed") : h.time}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -58,7 +63,7 @@ export default function ContactSection() {
             <div className="flex flex-wrap gap-3">
               <Button asChild size="lg">
                 <a href="tel:010842139">
-                  <Phone className="w-4 h-4" /> Appeler
+                  <Phone className="w-4 h-4" /> {t("contact_call")}
                 </a>
               </Button>
               <Button asChild variant="outline" size="lg">
@@ -67,7 +72,7 @@ export default function ContactSection() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <Navigation className="w-4 h-4" /> Itinéraire
+                  <Navigation className="w-4 h-4" /> {t("contact_directions")}
                 </a>
               </Button>
             </div>
