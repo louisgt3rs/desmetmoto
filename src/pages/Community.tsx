@@ -51,8 +51,8 @@ export default function CommunityPage() {
                 >
                   <div className="grid lg:grid-cols-2">
                     {event.image_url ? (
-                      <div className="bg-[#111]">
-                        <img src={event.image_url} alt={event.title} className="w-full transition-transform duration-500 group-hover:scale-[1.02]" style={{ height: "auto", display: "block" }} />
+                      <div className="bg-[#111] flex items-center justify-center">
+                        <img src={event.image_url} alt={event.title} className="w-full object-contain transition-transform duration-500 group-hover:scale-[1.02]" style={{ maxHeight: "280px", display: "block" }} />
                       </div>
                     ) : (
                       <div className="h-64 lg:h-auto bg-secondary flex items-center justify-center">

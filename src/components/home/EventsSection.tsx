@@ -70,8 +70,8 @@ export default function EventsSection() {
               <img
                 src={nextEvent?.image_url || bikesCoffeeImg}
                 alt={nextEvent?.title || "Bikes & Coffee"}
-                className="w-full transition-transform duration-700 group-hover:scale-105"
-                style={{ height: "auto", display: "block" }}
+                className="w-full object-contain transition-transform duration-700 group-hover:scale-105"
+                style={{ maxHeight: "320px", display: "block" }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
               <div className="absolute bottom-4 left-4 flex items-center gap-2">
