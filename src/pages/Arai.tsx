@@ -243,7 +243,7 @@ export default function AraiPage() {
             <img
               src={araiStoreWall}
               alt="Espace Arai en magasin — mur de casques"
-              className="w-full object-contain rounded-xl" style={{ maxHeight: "340px" }}
+              className="w-full object-contain rounded-xl" style={{ maxHeight: "260px" }}
             />
           </motion.div>
         </div>
