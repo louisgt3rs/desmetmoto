@@ -59,7 +59,7 @@ export default function HeroSection() {
   return (
     <section
       className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
-      style={{ background: "#0A0A0A" }}
+      style={{ background: "var(--c-surface-card)" }}
     >
       {/* Red radial glow */}
       <div

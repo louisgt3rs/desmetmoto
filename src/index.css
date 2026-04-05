@@ -68,6 +68,29 @@ html {
   }
 }
 
+/* ── Surface & text tokens — referenced by inline styles ─────────────────── */
+:root {
+  --c-surface-hero: #050505;
+  --c-surface-page: #0e0e0e;
+  --c-surface-card: #0a0a0a;
+  --c-surface-sub:  #080808;
+  --c-text:    white;
+  --c-text-75: rgba(255,255,255,0.75);
+  --c-text-65: rgba(255,255,255,0.65);
+  --c-text-60: rgba(255,255,255,0.60);
+  --c-text-55: rgba(255,255,255,0.55);
+  --c-text-50: rgba(255,255,255,0.50);
+  --c-text-45: rgba(255,255,255,0.45);
+  --c-text-40: rgba(255,255,255,0.40);
+  --c-text-35: rgba(255,255,255,0.35);
+  --c-text-30: rgba(255,255,255,0.30);
+  --c-text-25: rgba(255,255,255,0.25);
+  --c-text-20: rgba(255,255,255,0.20);
+  --c-text-18: rgba(255,255,255,0.18);
+  --c-bg-w025: rgba(255,255,255,0.025);
+  --c-bg-w02:  rgba(255,255,255,0.02);
+}
+
 /* ── Light mode CSS variable overrides ──────────────────────────────────── */
 html.light {
   --background: 0 0% 97%;
@@ -87,6 +110,26 @@ html.light {
   --border: 0 0% 84%;
   --input: 0 0% 84%;
   --ring: 43 74% 45%;
+
+  --c-surface-hero: #f8f5f0;
+  --c-surface-page: #f5f2ed;
+  --c-surface-card: #ece8e0;
+  --c-surface-sub:  #ede9e2;
+  --c-text:    #111111;
+  --c-text-75: rgba(0,0,0,0.75);
+  --c-text-65: rgba(0,0,0,0.65);
+  --c-text-60: rgba(0,0,0,0.60);
+  --c-text-55: rgba(0,0,0,0.55);
+  --c-text-50: rgba(0,0,0,0.50);
+  --c-text-45: rgba(0,0,0,0.45);
+  --c-text-40: rgba(0,0,0,0.40);
+  --c-text-35: rgba(0,0,0,0.40);
+  --c-text-30: rgba(0,0,0,0.38);
+  --c-text-25: rgba(0,0,0,0.32);
+  --c-text-20: rgba(0,0,0,0.28);
+  --c-text-18: rgba(0,0,0,0.25);
+  --c-bg-w025: rgba(0,0,0,0.025);
+  --c-bg-w02:  rgba(0,0,0,0.02);
 }
 
 /* Flip hardcoded dark background classes */
@@ -101,13 +144,20 @@ html.light .min-h-screen     { background-color: #f5f3ef; }
 
 /* Flip white text */
 html.light .text-white                { color: #111111 !important; }
+html.light .text-white\/80            { color: rgba(0,0,0,0.80) !important; }
+html.light .text-white\/70            { color: rgba(0,0,0,0.70) !important; }
+html.light .text-white\/65            { color: rgba(0,0,0,0.65) !important; }
+html.light .text-white\/60            { color: rgba(0,0,0,0.60) !important; }
+html.light .text-white\/55            { color: rgba(0,0,0,0.55) !important; }
 html.light .text-white\/50            { color: rgba(0,0,0,0.55) !important; }
 html.light .text-white\/45            { color: rgba(0,0,0,0.50) !important; }
 html.light .text-white\/40            { color: rgba(0,0,0,0.45) !important; }
 html.light .text-white\/35            { color: rgba(0,0,0,0.42) !important; }
 html.light .text-white\/30            { color: rgba(0,0,0,0.38) !important; }
 html.light .text-white\/25            { color: rgba(0,0,0,0.32) !important; }
+html.light .text-white\/22            { color: rgba(0,0,0,0.28) !important; }
 html.light .text-white\/20            { color: rgba(0,0,0,0.25) !important; }
+html.light .text-white\/18            { color: rgba(0,0,0,0.22) !important; }
 html.light .text-white\/15            { color: rgba(0,0,0,0.18) !important; }
 html.light .text-white\/10            { color: rgba(0,0,0,0.12) !important; }
 
@@ -118,8 +168,14 @@ html.light .border-white\/10          { border-color: rgba(0,0,0,0.10) !importan
 html.light .border-white\/8           { border-color: rgba(0,0,0,0.08) !important; }
 
 /* Flip white backgrounds */
+html.light .bg-white\/4               { background-color: rgba(0,0,0,0.02) !important; }
 html.light .bg-white\/5               { background-color: rgba(0,0,0,0.03) !important; }
+html.light .bg-white\/8               { background-color: rgba(0,0,0,0.05) !important; }
 html.light .bg-white\/10              { background-color: rgba(0,0,0,0.06) !important; }
+
+/* Flip additional dark bg classes */
+html.light .bg-\[\#080808\]           { background-color: #f0ede7 !important; }
+html.light .bg-\[\#050505\]           { background-color: #f8f5f0 !important; }
 
 /* Keep gold text on gold-bg buttons readable (dark text on gold) */
 html.light .bg-\[\#c9973a\] .text-\[\#0e0e0e\],
