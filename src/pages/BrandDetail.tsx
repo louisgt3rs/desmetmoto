@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ArrowLeft, Award, Package, ShoppingBag, Wrench, Navigation } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, Award, Package, ShoppingBag, Wrench, Navigation, Plus, Minus } from "lucide-react";
 import Layout from "@/components/Layout";
 import SEO from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +20,104 @@ interface ColorwayThumb {
   product_id: string;
   name: string;
   image_url: string | null;
+}
+
+/* ── Arai FAQ ──────────────────────────────────────────────────────── */
+const ARAI_FAQ = [
+  {
+    q: "Qu'est-ce qu'un Arai Technical Pro Shop ?",
+    a: "C'est le niveau de certification le plus élevé qu'Arai accorde à ses revendeurs. Seules quelques boutiques en Belgique détiennent ce titre. Cela signifie que notre équipe est formée directement par Arai pour conseiller, ajuster et fitter vos casques avec une expertise technique certifiée.",
+  },
+  {
+    q: "Pourquoi acheter un casque Arai chez un Pro Shop plutôt qu'en ligne ?",
+    a: "Un casque Arai doit être parfaitement adapté à la morphologie de votre tête. Chez Desmet Équipement, nous mesurons votre tête, testons plusieurs modèles et ajustons chaque détail pour garantir confort et sécurité optimaux. C'est un service impossible à obtenir en ligne.",
+  },
+  {
+    q: "Quels modèles Arai sont disponibles en boutique à Wavre ?",
+    a: "Nous stockons les modèles phares d'Arai : le SZ-R Evo, le Quantic et le RX-7V Evo. Contactez-nous pour vérifier la disponibilité d'un coloris spécifique.",
+  },
+  {
+    q: "Proposez-vous un service de fitting Arai ?",
+    a: "Oui, nous organisons régulièrement des journées Arai Essais & Fitting en boutique. Réservez votre créneau directement sur notre site pour un ajustement personnalisé par nos experts.",
+  },
+  {
+    q: "Livrez-vous les casques Arai ?",
+    a: "Nous sommes une boutique physique spécialisée. Nous recommandons fortement l'essai en boutique pour un casque de cette gamme, mais contactez-nous pour toute demande spécifique.",
+  },
+];
+
+function AraiFAQ() {
+  const [open, setOpen] = useState<number | null>(null);
+  return (
+    <div className="container mx-auto px-4 py-16">
+      {/* Section heading */}
+      <div className="flex flex-col items-center text-center mb-12">
+        <p className="font-display text-[10px] uppercase tracking-[0.5em] mb-4" style={{ color: "rgba(201,151,58,0.6)" }}>
+          Arai Pro Shop
+        </p>
+        <h2 className="font-display text-white mb-5" style={{ fontSize: "clamp(1.8rem,5vw,2.8rem)", letterSpacing: "0.1em" }}>
+          QUESTIONS FRÉQUENTES
+        </h2>
+        <div className="flex items-center gap-3">
+          <div className="h-px w-16" style={{ background: "linear-gradient(to right, transparent, rgba(201,151,58,0.5))" }} />
+          <div className="h-1 w-1 rotate-45" style={{ background: "#c9973a", opacity: 0.7 }} />
+          <div className="h-px w-16" style={{ background: "linear-gradient(to left, transparent, rgba(201,151,58,0.5))" }} />
+        </div>
+      </div>
+
+      {/* Accordion */}
+      <div className="max-w-2xl mx-auto space-y-0">
+        {ARAI_FAQ.map((item, i) => {
+          const isOpen = open === i;
+          return (
+            <div
+              key={i}
+              style={{
+                borderBottom: "1px solid rgba(201,151,58,0.12)",
+                borderTop: i === 0 ? "1px solid rgba(201,151,58,0.12)" : "none",
+              }}
+            >
+              <button
+                onClick={() => setOpen(isOpen ? null : i)}
+                className="w-full flex items-start justify-between gap-4 py-5 text-left transition-colors"
+                style={{ background: "transparent" }}
+              >
+                <span
+                  className="font-display text-sm uppercase tracking-[0.1em] leading-snug transition-colors"
+                  style={{ color: isOpen ? "#c9973a" : "var(--c-text-65)" }}
+                >
+                  {item.q}
+                </span>
+                <span className="shrink-0 mt-0.5" style={{ color: "#c9973a" }}>
+                  {isOpen ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                </span>
+              </button>
+
+              <AnimatePresence initial={false}>
+                {isOpen && (
+                  <motion.div
+                    key="body"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.25, ease: "easeInOut" }}
+                    className="overflow-hidden"
+                  >
+                    <p
+                      className="pb-5 text-sm leading-relaxed"
+                      style={{ color: "var(--c-text-50)" }}
+                    >
+                      {item.a}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 // Grain texture rendered via SVG feTurbulence
@@ -484,6 +582,13 @@ export default function BrandDetailPage() {
               </>
             )}
           </div>
+
+          {/* ── Arai FAQ ──────────────────────────────────────────────────────── */}
+          {slug === "arai" && (
+            <div style={{ background: "var(--c-surface-card)" }}>
+              <AraiFAQ />
+            </div>
+          )}
 
           {/* ── Store experience section ──────────────────────────────────────── */}
           <div className="relative overflow-hidden" style={{ minHeight: 500 }}>

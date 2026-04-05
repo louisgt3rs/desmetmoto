@@ -33,27 +33,27 @@ type ProductData = {
 type HelmetCompat = { brand: string; models: string[] };
 const COMPATIBILITY: Record<string, HelmetCompat[]> = {
   sf2: [
-    { brand: "Arai",        models: ["RX-7V Evo", "Profile-V", "Quantic"] },
+    { brand: "Arai",        models: ["RX-7V Evo", "Quantic", "SZ-R Evo"] },
     { brand: "Shoei",       models: ["GT-Air 3", "NXR2", "RF-1400"] },
     { brand: "Alpinestars", models: ["Supertech R10"] },
   ],
   sf4: [
-    { brand: "Arai",        models: ["RX-7V Evo", "Profile-V", "Quantic", "Tour-X5"] },
+    { brand: "Arai",        models: ["RX-7V Evo", "Quantic", "SZ-R Evo"] },
     { brand: "Shoei",       models: ["GT-Air 3", "NXR2", "RF-1400", "X-SPR Pro"] },
     { brand: "Alpinestars", models: ["Supertech R10"] },
   ],
   "50s": [
-    { brand: "Arai",        models: ["RX-7V Evo", "Quantic", "Concept-XE", "Astro GX"] },
+    { brand: "Arai",        models: ["RX-7V Evo", "Quantic", "SZ-R Evo"] },
     { brand: "Shoei",       models: ["GT-Air 3", "NXR2", "Neotec 3", "X-SPR Pro"] },
     { brand: "Alpinestars", models: ["Supertech R10"] },
   ],
   "50r": [
-    { brand: "Arai",        models: ["RX-7V Evo", "Quantic", "Profile-V"] },
+    { brand: "Arai",        models: ["RX-7V Evo", "Quantic", "SZ-R Evo"] },
     { brand: "Shoei",       models: ["GT-Air 3", "NXR2", "X-SPR Pro"] },
     { brand: "Alpinestars", models: ["Supertech R10"] },
   ],
   "30k": [
-    { brand: "Arai",        models: ["RX-7V Evo", "Quantic", "Tour-X5"] },
+    { brand: "Arai",        models: ["RX-7V Evo", "Quantic", "SZ-R Evo"] },
     { brand: "Shoei",       models: ["GT-Air 3", "NXR2", "Neotec 3"] },
     { brand: "Alpinestars", models: ["Supertech R10"] },
   ],
