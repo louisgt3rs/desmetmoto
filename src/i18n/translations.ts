@@ -1,7 +1,7 @@
 export const translations = {
   fr: {
     // Navbar
-    nav_home: "Accueil", nav_arai: "Arai", nav_community: "Communauté",
+    nav_home: "Accueil", nav_arai: "Marques", nav_community: "Communauté",
     nav_about: "À Propos", nav_contact: "Contact",
     // Footer
     footer_products: "Produits", footer_events: "Événements",
@@ -86,10 +86,15 @@ export const translations = {
     privacy_updated: "Dernière mise à jour : 31 mars 2026",
     // Hero slogan
     hero_slogan: "Un casque se choisit sur la tête, pas sur une fiche technique",
+    // Store experience section
+    store_exp_title: "VIVEZ L'EXPÉRIENCE EN MAGASIN",
+    store_exp_quote: "Un équipement se choisit en le portant. Notre équipe est là pour vous guider.",
+    store_exp_btn_primary: "Nous rendre visite",
+    store_exp_btn_secondary: "Obtenir l'itinéraire",
   },
 
   nl: {
-    nav_home: "Home", nav_arai: "Arai", nav_community: "Gemeenschap",
+    nav_home: "Home", nav_arai: "Marques", nav_community: "Gemeenschap",
     nav_about: "Over Ons", nav_contact: "Contact",
     footer_products: "Producten", footer_events: "Evenementen",
     footer_privacy: "Privacybeleid", footer_rights: "Alle rechten voorbehouden",
@@ -162,10 +167,14 @@ export const translations = {
     privacy_title: "PRIVACYBELEID", privacy_back: "← Terug naar de startpagina",
     privacy_updated: "Laatste update: 31 maart 2026",
     hero_slogan: "Een helm kies je op je hoofd, niet op een technische fiche",
+    store_exp_title: "BELEEF DE WINKELERVARING",
+    store_exp_quote: "Uitrusting kies je door het te dragen. Ons team staat klaar om u te begeleiden.",
+    store_exp_btn_primary: "Winkel bezoeken",
+    store_exp_btn_secondary: "Routebeschrijving",
   },
 
   en: {
-    nav_home: "Home", nav_arai: "Arai", nav_community: "Community",
+    nav_home: "Home", nav_arai: "Marques", nav_community: "Community",
     nav_about: "About", nav_contact: "Contact",
     footer_products: "Products", footer_events: "Events",
     footer_privacy: "Privacy Policy", footer_rights: "All rights reserved",
@@ -238,6 +247,10 @@ export const translations = {
     privacy_title: "PRIVACY POLICY", privacy_back: "← Back to home",
     privacy_updated: "Last updated: 31 March 2026",
     hero_slogan: "A helmet is chosen on your head, not on a spec sheet",
+    store_exp_title: "LIVE THE IN-STORE EXPERIENCE",
+    store_exp_quote: "Equipment is chosen by wearing it. Our team is here to guide you.",
+    store_exp_btn_primary: "Visit us",
+    store_exp_btn_secondary: "Get directions",
   },
 } as const;
 

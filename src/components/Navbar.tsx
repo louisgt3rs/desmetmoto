@@ -21,7 +21,7 @@ export default function Navbar() {
 
   const navLinks = [
     { label: t("nav_home"),      path: "/" },
-    { label: t("nav_arai"),      path: "/arai" },
+    { label: t("nav_arai"),      path: "/marques" },
     { label: t("nav_community"), path: "/community" },
     { label: t("nav_about"),     path: "/about" },
     { label: t("nav_contact"),   path: "/contact" },
@@ -53,7 +53,7 @@ export default function Navbar() {
                 key={l.path}
                 to={l.path}
                 className={`text-sm font-medium tracking-wide transition-colors hover:text-primary ${
-                  location.pathname === l.path ? "text-primary" : "text-muted-foreground"
+                  location.pathname.startsWith(l.path) && l.path !== "/" ? "text-primary" : location.pathname === l.path ? "text-primary" : "text-muted-foreground"
                 }`}
               >
                 {l.label}

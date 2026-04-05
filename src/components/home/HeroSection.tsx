@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import desmetLogo from "@/assets/desmet-logo-diamond.png";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { Shield } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 function Particles({ count = 30 }: { count?: number }) {
@@ -136,6 +137,24 @@ export default function HeroSection() {
             {t("contact_us")}
           </Button>
         </Link>
+
+        {/* Arai Official Pro Shop badge */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, delay: 0.9 }}
+        >
+          <Link
+            to="/marques/arai"
+            className="inline-flex items-center gap-2.5 px-5 py-2.5 font-display text-[11px] uppercase tracking-[0.35em] transition-all duration-300"
+            style={{ background: "#c9973a", color: "#0a0a0a", boxShadow: "0 0 24px rgba(201,151,58,0.35)" }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#d4a84a"; (e.currentTarget as HTMLElement).style.boxShadow = "0 0 36px rgba(201,151,58,0.55)"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#c9973a"; (e.currentTarget as HTMLElement).style.boxShadow = "0 0 24px rgba(201,151,58,0.35)"; }}
+          >
+            <Shield className="w-3.5 h-3.5" strokeWidth={2} />
+            Arai Official Pro Shop
+          </Link>
+        </motion.div>
       </motion.div>
     </section>
   );
