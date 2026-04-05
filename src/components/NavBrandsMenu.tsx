@@ -17,13 +17,13 @@ function BrandLogo({ brand }: { brand: BrandRow }) {
       <img
         src={brand.logo_url}
         alt={brand.name}
-        className="h-full w-full object-contain p-1"
+        className="h-full w-full object-contain p-2"
         onError={() => setFailed(true)}
       />
     );
   }
   return (
-    <span className="font-display text-[9px] uppercase tracking-wider text-foreground/60 leading-none text-center px-1">
+    <span className="font-display text-[11px] uppercase tracking-wide text-foreground/60 leading-none text-center px-2">
       {brand.name}
     </span>
   );
@@ -149,37 +149,39 @@ export function MegaMenuDesktop({
                     Toutes nos marques
                   </p>
 
-                  <div className="grid grid-cols-5 gap-2">
-                    {others.map((brand) => (
-                      <Link
-                        key={brand.id}
-                        to={`/marques/${brandSlug(brand.name)}`}
-                        onClick={onClose}
-                        className="group flex flex-col items-center gap-1.5 p-2 transition-all duration-200"
-                        style={{ border: "1px solid transparent" }}
-                        onMouseEnter={(e) => {
-                          (e.currentTarget as HTMLElement).style.border = "1px solid rgba(201,151,58,0.25)";
-                          (e.currentTarget as HTMLElement).style.background = "rgba(201,151,58,0.04)";
-                        }}
-                        onMouseLeave={(e) => {
-                          (e.currentTarget as HTMLElement).style.border = "1px solid transparent";
-                          (e.currentTarget as HTMLElement).style.background = "transparent";
-                        }}
-                      >
-                        <div
-                          className="w-full flex items-center justify-center"
-                          style={{ height: 40, background: "rgba(255,255,255,0.04)" }}
+                  <div className="overflow-y-auto pr-1" style={{ maxHeight: 300 }}>
+                    <div className="grid grid-cols-4 gap-2">
+                      {others.map((brand) => (
+                        <Link
+                          key={brand.id}
+                          to={`/marques/${brandSlug(brand.name)}`}
+                          onClick={onClose}
+                          className="group flex flex-col items-center gap-2 p-3 transition-all duration-200"
+                          style={{ border: "1px solid transparent" }}
+                          onMouseEnter={(e) => {
+                            (e.currentTarget as HTMLElement).style.border = "1px solid rgba(201,151,58,0.25)";
+                            (e.currentTarget as HTMLElement).style.background = "rgba(201,151,58,0.05)";
+                          }}
+                          onMouseLeave={(e) => {
+                            (e.currentTarget as HTMLElement).style.border = "1px solid transparent";
+                            (e.currentTarget as HTMLElement).style.background = "transparent";
+                          }}
                         >
-                          <BrandLogo brand={brand} />
-                        </div>
-                        <span
-                          className="font-display text-[8px] uppercase tracking-[0.2em] text-center leading-tight transition-colors group-hover:text-[#c9973a]"
-                          style={{ color: "rgba(255,255,255,0.4)" }}
-                        >
-                          {brand.name}
-                        </span>
-                      </Link>
-                    ))}
+                          <div
+                            className="w-full flex items-center justify-center"
+                            style={{ height: 52, background: "rgba(255,255,255,0.05)" }}
+                          >
+                            <BrandLogo brand={brand} />
+                          </div>
+                          <span
+                            className="font-display text-[10px] uppercase tracking-[0.18em] text-center leading-tight transition-colors group-hover:text-[#c9973a]"
+                            style={{ color: "rgba(255,255,255,0.55)" }}
+                          >
+                            {brand.name}
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
                   </div>
 
                   <Link
