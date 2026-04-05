@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Phone, Sun, Moon } from "lucide-react";
 import { createPortal } from "react-dom";
@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import type { Language } from "@/i18n/translations";
+import { MegaMenuDesktop, MegaMenuMobile, useBrandsForMenu } from "@/components/NavBrandsMenu";
 
 const LANGS: { code: Language; label: string }[] = [
   { code: "fr", label: "FR" },
@@ -15,17 +16,15 @@ const LANGS: { code: Language; label: string }[] = [
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const [megaOpen, setMegaOpen] = useState(false);
   const location = useLocation();
   const { lang, setLang, t } = useLanguage();
   const { isDark, toggleTheme } = useTheme();
+  const brands = useBrandsForMenu();
+  const navRef = useRef<HTMLElement>(null);
 
-  const navLinks = [
-    { label: t("nav_home"),      path: "/" },
-    { label: t("nav_arai"),      path: "/marques" },
-    { label: t("nav_community"), path: "/community" },
-    { label: t("nav_about"),     path: "/about" },
-    { label: t("nav_contact"),   path: "/contact" },
-  ];
+  // Close mega menu on route change
+  useEffect(() => { setMegaOpen(false); setOpen(false); }, [location.pathname]);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -35,9 +34,20 @@ export default function Navbar() {
   const navBg = isDark ? "#0A0A0A" : "#ffffff";
   const sidebarBg = isDark ? "#0A0A0A" : "#ffffff";
 
+  const staticLinks = [
+    { label: t("nav_home"),      path: "/" },
+    { label: t("nav_community"), path: "/community" },
+    { label: t("nav_about"),     path: "/about" },
+    { label: t("nav_contact"),   path: "/contact" },
+  ];
+
+  const isActive = (path: string) =>
+    path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
+
   return (
     <>
       <nav
+        ref={navRef}
         className="fixed top-0 left-0 right-0 z-50 border-b border-border"
         style={{ backgroundColor: navBg }}
       >
@@ -48,17 +58,48 @@ export default function Navbar() {
 
           {/* Desktop */}
           <div className="hidden lg:flex items-center gap-6">
-            {navLinks.map((l) => (
+            {/* Home */}
+            <Link
+              to="/"
+              className={`text-sm font-medium tracking-wide transition-colors hover:text-primary ${
+                location.pathname === "/" ? "text-primary" : "text-muted-foreground"
+              }`}
+            >
+              {t("nav_home")}
+            </Link>
+
+            {/* Marques — mega menu trigger */}
+            <div className="relative">
+              <button
+                onClick={() => setMegaOpen((v) => !v)}
+                className={`flex items-center gap-1 text-sm font-medium tracking-wide transition-colors hover:text-primary ${
+                  isActive("/marques") ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                {t("nav_arai")}
+                <svg
+                  className="w-3 h-3 transition-transform duration-200"
+                  style={{ transform: megaOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+                  viewBox="0 0 12 12" fill="none"
+                >
+                  <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            </div>
+
+            {/* Other static links */}
+            {staticLinks.slice(1).map((l) => (
               <Link
                 key={l.path}
                 to={l.path}
                 className={`text-sm font-medium tracking-wide transition-colors hover:text-primary ${
-                  location.pathname.startsWith(l.path) && l.path !== "/" ? "text-primary" : location.pathname === l.path ? "text-primary" : "text-muted-foreground"
+                  isActive(l.path) ? "text-primary" : "text-muted-foreground"
                 }`}
               >
                 {l.label}
               </Link>
             ))}
+
             <a href="tel:010842139" className="flex items-center gap-2 text-sm text-primary font-medium">
               <Phone className="w-4 h-4" /> 010 84 21 39
             </a>
@@ -100,6 +141,13 @@ export default function Navbar() {
             </button>
           </div>
         </div>
+
+        {/* Desktop mega menu — sits inside the nav so it's positioned relative to it */}
+        <MegaMenuDesktop
+          open={megaOpen}
+          onClose={() => setMegaOpen(false)}
+          brands={brands}
+        />
       </nav>
 
       {createPortal(
@@ -120,7 +168,7 @@ export default function Navbar() {
                 animate={{ x: 0 }}
                 exit={{ x: "100%" }}
                 transition={{ type: "tween", duration: 0.3, ease: "easeOut" }}
-                className="fixed top-0 right-0 bottom-0 lg:hidden flex flex-col border-l-2 border-primary"
+                className="fixed top-0 right-0 bottom-0 lg:hidden flex flex-col border-l-2 border-primary overflow-y-auto"
                 style={{ width: "280px", maxWidth: "80vw", backgroundColor: sidebarBg, zIndex: 9999 }}
               >
                 <div className="flex justify-end p-5">
@@ -130,13 +178,28 @@ export default function Navbar() {
                 </div>
 
                 <div className="flex flex-col gap-7 px-7 pt-2 flex-1">
-                  {navLinks.map((l) => (
+                  {/* Home */}
+                  <Link
+                    to="/"
+                    onClick={() => setOpen(false)}
+                    className={`text-base font-display uppercase tracking-wider transition-colors hover:text-primary ${
+                      location.pathname === "/" ? "text-primary" : "text-foreground"
+                    }`}
+                  >
+                    {t("nav_home")}
+                  </Link>
+
+                  {/* Marques accordion */}
+                  <MegaMenuMobile onClose={() => setOpen(false)} brands={brands} />
+
+                  {/* Other links */}
+                  {staticLinks.slice(1).map((l) => (
                     <Link
                       key={l.path}
                       to={l.path}
                       onClick={() => setOpen(false)}
                       className={`text-base font-display uppercase tracking-wider transition-colors hover:text-primary ${
-                        location.pathname === l.path ? "text-primary" : "text-foreground"
+                        isActive(l.path) ? "text-primary" : "text-foreground"
                       }`}
                     >
                       {l.label}
