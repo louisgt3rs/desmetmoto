@@ -1,12 +1,15 @@
 import { useEffect } from "react";
 
-const DEFAULT_OG_IMAGE =
-  "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/20258dc4-fa1a-4d45-a924-0eee670d0095/id-preview-47eafc64--3cfa2803-be3b-4e38-a987-3a6e334982ab.lovable.app-1773707042149.png";
+const SITE_URL = "https://desmetmoto.vercel.app";
+const DEFAULT_OG_IMAGE = "https://desmetmoto.vercel.app/og-image.jpg";
+const DEFAULT_DESCRIPTION =
+  "Desmet Équipement, votre spécialiste en équipement moto à Wavre. Casques Arai, vestes, gants, bottes et intercoms. Arai Technical Pro Shop certifié.";
 
 interface SEOProps {
   title: string;
   description?: string;
   image?: string;
+  canonicalPath?: string;
 }
 
 function setMeta(attr: "name" | "property", key: string, value: string) {
@@ -19,19 +22,38 @@ function setMeta(attr: "name" | "property", key: string, value: string) {
   el.setAttribute("content", value);
 }
 
-export default function SEO({ title, description, image = DEFAULT_OG_IMAGE }: SEOProps) {
+function setLink(rel: string, href: string) {
+  let el = document.querySelector(`link[rel="${rel}"]`) as HTMLLinkElement | null;
+  if (!el) {
+    el = document.createElement("link");
+    el.setAttribute("rel", rel);
+    document.head.appendChild(el);
+  }
+  el.setAttribute("href", href);
+}
+
+export default function SEO({ title, description = DEFAULT_DESCRIPTION, image = DEFAULT_OG_IMAGE, canonicalPath }: SEOProps) {
   useEffect(() => {
+    const canonical = canonicalPath ? `${SITE_URL}${canonicalPath}` : SITE_URL + window.location.pathname;
+
     document.title = title;
+
+    setMeta("name", "description", description);
+    setLink("canonical", canonical);
+
+    setMeta("property", "og:type", "website");
+    setMeta("property", "og:site_name", "Desmet Équipement");
     setMeta("property", "og:title", title);
-    setMeta("name", "twitter:title", title);
+    setMeta("property", "og:description", description);
     setMeta("property", "og:image", image);
+    setMeta("property", "og:url", canonical);
+    setMeta("property", "og:locale", "fr_BE");
+
+    setMeta("name", "twitter:card", "summary_large_image");
+    setMeta("name", "twitter:title", title);
+    setMeta("name", "twitter:description", description);
     setMeta("name", "twitter:image", image);
-    if (description) {
-      setMeta("name", "description", description);
-      setMeta("property", "og:description", description);
-      setMeta("name", "twitter:description", description);
-    }
-  }, [title, description, image]);
+  }, [title, description, image, canonicalPath]);
 
   return null;
 }

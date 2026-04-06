@@ -37,8 +37,9 @@ export default function ContactPage() {
   return (
     <Layout>
       <SEO
-        title="Contactez Desmet Équipement — Wavre"
-        description="Contactez Desmet Équipement à Wavre. Chaussée de Louvain 491, 1300 Wavre. Tél : 010/84 21 39. Ouvert du mardi au samedi."
+        title="Contact — Desmet Équipement Wavre | Chaussée de Louvain 491"
+        description="Contactez Desmet Équipement à Wavre. Chaussée de Louvain 491, 1300 Wavre. Tél : 010 84 21 39. Ouvert du mardi au samedi. Prise de rendez-vous en ligne."
+        canonicalPath="/contact"
       />
       <section className="py-24">
         <div className="container mx-auto px-4">

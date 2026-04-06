@@ -30,8 +30,9 @@ export default function AboutPage() {
   return (
     <Layout>
       <SEO
-        title="À Propos — Desmet Équipement"
-        description="Desmet Équipement, votre spécialiste en équipement moto à Wavre. Revendeur officiel Arai, Shoei, Alpinestars. Conseil par des passionnés."
+        title="À Propos — Desmet Équipement, Boutique Moto à Wavre | Arai Pro Shop"
+        description="Desmet Équipement, spécialiste en équipement moto à Wavre depuis de nombreuses années. Arai Technical Pro Shop certifié. Conseil expert par des passionnés de moto."
+        canonicalPath="/about"
       />
 
       <div className="bg-[#0e0e0e]">

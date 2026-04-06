@@ -14,8 +14,9 @@ export default function HomePage() {
   return (
     <Layout>
       <SEO
-        title="Desmet Équipement — Spécialiste Équipement Moto à Wavre"
-        description="Votre spécialiste en équipement moto à Wavre. Casques Arai, vêtements, accessoires. Essayez nos casques lors de nos Test Days. Chaussée de Louvain 491, 1300 Wavre."
+        title="Desmet Équipement — Spécialiste Moto à Wavre | Casques, Vestes, Intercoms"
+        description="Desmet Équipement, votre spécialiste en équipement moto à Wavre. Arai Technical Pro Shop certifié. Casques, vestes, gants, bottes, intercoms Sena & Cardo. Chaussée de Louvain 491, 1300 Wavre."
+        canonicalPath="/"
       />
       <HeroSection />
       <AboutPreview />

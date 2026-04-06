@@ -35,8 +35,9 @@ export default function IntercomsPage() {
   return (
     <Layout>
       <SEO
-        title="Intercoms moto Sena & Cardo — Desmet Équipement Wavre"
-        description="Découvrez notre sélection d'intercoms moto Sena et Cardo disponibles en boutique à Wavre. Installation comprise sur casque acheté chez nous."
+        title="Intercoms Moto Sena & Cardo — Installation en boutique à Wavre | Desmet Équipement"
+        description="Intercoms moto Sena et Cardo disponibles en boutique à Wavre. Technologie Mesh 2.0, jusqu'à 8 riders. Installation professionnelle sur casque acheté chez nous."
+        canonicalPath="/intercoms"
       />
 
       {/* Hero */}
