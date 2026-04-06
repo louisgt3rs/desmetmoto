@@ -66,6 +66,13 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
   const [cwForm, setCwForm] = useState({ name: "", image_url: "", gallery_images: [] as string[], stock_by_size: {} as Record<string, number> });
   const [editingCwId, setEditingCwId] = useState<string | null>(null);
 
+  // Draft autosave
+  const [draftSavedAt, setDraftSavedAt] = useState<Date | null>(null);
+  const draftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const getDraftKey = (prod: AdminProduct | null) =>
+    prod ? `desmet-draft-product-${prod.id}` : "desmet-draft-product-new";
+
   // Gallery state
   const [productImages, setProductImages] = useState<ProductImage[]>([]);
   const [galleryUploading, setGalleryUploading] = useState(false);
@@ -93,11 +100,23 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
   useEffect(() => {
     if (editing) {
       supabase.from("product_colorways").select("*").eq("product_id", editing.id).order("sort_order").then(({ data }) => {
-        setColorways((data || []).map(d => ({
+        const loaded = (data || []).map(d => ({
           ...d,
           gallery_images: Array.isArray(d.gallery_images) ? (d.gallery_images as string[]) : [],
           stock_by_size: parseSbs(d.stock_by_size),
-        })) as ProductColorway[]);
+        })) as ProductColorway[];
+        // Restore draft colorways if any
+        const key = getDraftKey(editing);
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          try {
+            const draft = JSON.parse(raw);
+            if (draft.colorways) setColorways(draft.colorways);
+            else setColorways(loaded);
+          } catch { setColorways(loaded); }
+        } else {
+          setColorways(loaded);
+        }
       });
       loadProductImages(editing.id);
     } else {
@@ -105,6 +124,18 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
       setProductImages([]);
     }
   }, [editing?.id]);
+
+  // Auto-save draft on form/colorways change (debounced 800ms)
+  useEffect(() => {
+    if (!open) return;
+    if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
+    draftTimerRef.current = setTimeout(() => {
+      const key = getDraftKey(editing);
+      localStorage.setItem(key, JSON.stringify({ form, colorways, savedAt: new Date().toISOString() }));
+      setDraftSavedAt(new Date());
+    }, 800);
+    return () => { if (draftTimerRef.current) clearTimeout(draftTimerRef.current); };
+  }, [form, colorways, open]);
 
   const getTotalStock = () => {
     if (colorways.length === 0) return 0;
@@ -181,6 +212,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
     if (editing) {
       const { error } = await supabase.from("products").update(payload).eq("id", editing.id);
       if (error) { setSaving(false); toast.error("ERREUR : " + error.message.toUpperCase()); return; }
+      localStorage.removeItem(getDraftKey(editing));
       toast.success("PRODUIT MODIFIÉ");
     } else {
       const { data, error } = await supabase.from("products").insert({ ...payload, sort_order: products.length + 1 }).select("id").single();
@@ -196,6 +228,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
         }));
         await supabase.from("product_colorways").insert(cwPayloads);
       }
+      localStorage.removeItem("desmet-draft-product-new");
       toast.success("PRODUIT AJOUTÉ");
     }
 
@@ -215,14 +248,26 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
   const startEdit = (p: AdminProduct) => {
     setEditing(p);
     setOpen(true);
-    setForm({
+    const key = `desmet-draft-product-${p.id}`;
+    const raw = localStorage.getItem(key);
+    let restoredForm = {
       name: p.name,
       description: p.description || "",
       brand_id: p.brand_id || "",
       category: p.category || "Casques",
       price: typeof p.price === "number" ? String(p.price) : "",
       image_url: p.image_url || "",
-    });
+    };
+    if (raw) {
+      try {
+        const draft = JSON.parse(raw);
+        if (draft.form) restoredForm = draft.form;
+        setDraftSavedAt(draft.savedAt ? new Date(draft.savedAt) : null);
+      } catch { setDraftSavedAt(null); }
+    } else {
+      setDraftSavedAt(null);
+    }
+    setForm(restoredForm);
     setCwForm({ name: "", image_url: "", gallery_images: [], stock_by_size: {} });
     setEditingCwId(null);
   };
@@ -230,17 +275,44 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
   const startAdd = () => {
     setEditing(null);
     setOpen(true);
-    setForm({ name: "", description: "", brand_id: "", category: "Casques", price: "", image_url: "" });
-    setColorways([]);
+    const key = "desmet-draft-product-new";
+    const raw = localStorage.getItem(key);
+    let restoredForm = { name: "", description: "", brand_id: "", category: "Casques", price: "", image_url: "" };
+    let restoredColorways: ProductColorway[] = [];
+    if (raw) {
+      try {
+        const draft = JSON.parse(raw);
+        if (draft.form) restoredForm = draft.form;
+        if (draft.colorways) restoredColorways = draft.colorways;
+        setDraftSavedAt(draft.savedAt ? new Date(draft.savedAt) : null);
+      } catch { setDraftSavedAt(null); }
+    } else {
+      setDraftSavedAt(null);
+    }
+    setForm(restoredForm);
+    setColorways(restoredColorways);
     setProductImages([]);
     setCwForm({ name: "", image_url: "", gallery_images: [], stock_by_size: {} });
     setEditingCwId(null);
+  };
+
+  const clearDraft = () => {
+    const key = getDraftKey(editing);
+    localStorage.removeItem(key);
+    const base = editing
+      ? { name: editing.name, description: editing.description || "", brand_id: editing.brand_id || "", category: editing.category || "Casques", price: typeof editing.price === "number" ? String(editing.price) : "", image_url: editing.image_url || "" }
+      : { name: "", description: "", brand_id: "", category: "Casques", price: "", image_url: "" };
+    setForm(base);
+    if (!editing) setColorways([]);
+    setDraftSavedAt(null);
+    toast.success("BROUILLON EFFACÉ");
   };
 
   const cancel = () => {
     setEditing(null);
     setOpen(false);
     setEditingCwId(null);
+    setDraftSavedAt(null);
   };
 
   // --- Colorway CRUD ---
@@ -639,11 +711,36 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
               </div>
             </div>
           </div>
-          <div className="flex flex-col gap-3 border-t border-[hsl(var(--admin-accent)/0.18)] p-6 sm:flex-row sm:justify-end">
-            <Button variant="outline" onClick={cancel} className="admin-button-secondary h-11 rounded-none px-5 font-adminDisplay tracking-[0.18em]">ANNULER</Button>
-            <Button onClick={handleSave} disabled={saving} className="admin-button h-11 rounded-none px-5 font-adminDisplay tracking-[0.18em]">
-              <Save className="h-4 w-4" /> {saving ? "ENREGISTREMENT..." : "ENREGISTRER"}
-            </Button>
+          <div className="border-t border-[hsl(var(--admin-accent)/0.18)] p-6 space-y-4">
+            {/* Draft indicator */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {draftSavedAt ? (
+                  <span className="text-[10px] uppercase tracking-[0.25em] text-[hsl(var(--admin-accent)/0.7)]">
+                    ✓ Brouillon sauvegardé — {draftSavedAt.toLocaleTimeString("fr-BE", { hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                ) : (
+                  <span className="text-[10px] uppercase tracking-[0.25em] text-[hsl(var(--admin-muted-foreground)/0.5)]">
+                    Brouillon non sauvegardé
+                  </span>
+                )}
+              </div>
+              {draftSavedAt && (
+                <button
+                  type="button"
+                  onClick={clearDraft}
+                  className="text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--admin-muted-foreground))] hover:text-destructive transition-colors underline underline-offset-2"
+                >
+                  Effacer le brouillon
+                </button>
+              )}
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+              <Button variant="outline" onClick={cancel} className="admin-button-secondary h-11 rounded-none px-5 font-adminDisplay tracking-[0.18em]">ANNULER</Button>
+              <Button onClick={handleSave} disabled={saving} className="admin-button h-11 rounded-none px-5 font-adminDisplay tracking-[0.18em]">
+                <Save className="h-4 w-4" /> {saving ? "ENREGISTREMENT..." : "ENREGISTRER"}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
