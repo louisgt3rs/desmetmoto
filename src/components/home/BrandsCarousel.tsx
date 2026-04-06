@@ -13,9 +13,9 @@ function nameToSlug(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
-const CARD_SIZE = 160;
-const GAP = 12;
-const VISIBLE = 5;
+const CARD_SIZE = 200;
+const GAP = 16;
+const VISIBLE = 4;
 
 export default function BrandsCarousel() {
   const navigate = useNavigate();
@@ -94,7 +94,7 @@ function BrandCard({ brand, onClick }: { brand: BrandEntry; onClick: () => void 
     <button
       type="button"
       onClick={onClick}
-      style={{ width: CARD_SIZE, height: CARD_SIZE, flexShrink: 0, padding: 16, boxSizing: "border-box" }}
+      style={{ width: CARD_SIZE, height: CARD_SIZE, flexShrink: 0, padding: 20, boxSizing: "border-box" }}
       className="flex items-center justify-center rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a] transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_16px_hsl(var(--primary)/0.15)]"
     >
       {brand.logo && !imgError ? (
