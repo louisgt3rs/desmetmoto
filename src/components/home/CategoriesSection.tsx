@@ -1,16 +1,16 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import SectionHeading from "@/components/SectionHeading";
-import helmetsImg from "@/assets/category-helmets.jpg";
-import jacketsImg from "@/assets/category-jackets.jpg";
-import glovesImg from "@/assets/category-gloves.jpg";
-import bootsImg from "@/assets/category-boots.jpg";
+import helmetsImg from "@/assets/IMG_1591.jpeg";
+import glovesImg from "@/assets/IMG_1592.jpeg";
+import bootsImg from "@/assets/IMG_1593.jpeg";
+import jacketsImg from "@/assets/IMG_1594.jpeg";
 
 const categories = [
-  { name: "Casques", image: helmetsImg, link: "/arai" },
-  { name: "Vestes", image: jacketsImg, link: "/brands" },
-  { name: "Gants", image: glovesImg, link: "/brands" },
-  { name: "Bottes", image: bootsImg, link: "/brands" },
+  { name: "Casques", image: helmetsImg, link: "/marques/arai" },
+  { name: "Vestes", image: jacketsImg, link: "/categorie/vestes" },
+  { name: "Gants", image: glovesImg, link: "/categorie/gants" },
+  { name: "Bottes", image: bootsImg, link: "/categorie/bottes" },
 ];
 
 export default function CategoriesSection() {
@@ -31,14 +31,18 @@ export default function CategoriesSection() {
                 <img
                   src={cat.image}
                   alt={cat.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
+                {/* Strong gradient overlay — always readable */}
+                <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.35) 50%, rgba(0,0,0,0.10) 100%)" }} />
                 <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6">
-                  <h3 className="font-display text-xl md:text-2xl text-foreground group-hover:text-primary transition-colors">
+                  <h3
+                    className="font-display text-white leading-none group-hover:text-[#c9973a] transition-colors duration-300"
+                    style={{ fontSize: "clamp(1.5rem, 4vw, 2.2rem)", textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}
+                  >
                     {cat.name}
                   </h3>
-                  <span className="text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <span className="mt-1 block font-display text-[11px] uppercase tracking-[0.3em] text-[#c9973a] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     Découvrir →
                   </span>
                 </div>
