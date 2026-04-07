@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, Battery, Radio, Users, Wifi, Wrench,
-  CheckCircle2, Shield, Zap, Volume2, Mic, Cloud,
+  CheckCircle2, Shield, Zap, Volume2, Mic, Cloud, X,
 } from "lucide-react";
 import Layout from "@/components/Layout";
 import SEO from "@/components/SEO";
 import InstallationModal from "@/components/InstallationModal";
+import { supabase } from "@/integrations/supabase/client";
 
 /* ─────────────────────────────────────────────────────────
    Types
@@ -232,9 +233,25 @@ export default function IntercomDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const [modalOpen, setModalOpen] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [gallery, setGallery] = useState<string[]>([]);
+  const [lightbox, setLightbox] = useState<string | null>(null);
 
   const product = slug ? PRODUCTS[slug] : null;
   const compat  = slug ? COMPATIBILITY[slug] ?? [] : [];
+
+  useEffect(() => {
+    if (!slug) return;
+    supabase
+      .from("installation_intercoms")
+      .select("gallery_images")
+      .eq("slug", slug)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.gallery_images && Array.isArray(data.gallery_images)) {
+          setGallery(data.gallery_images as string[]);
+        }
+      });
+  }, [slug]);
 
   if (!product) {
     return (
@@ -473,6 +490,65 @@ export default function IntercomDetailPage() {
           </div>
         </div>
       </section>
+
+      {/* ══════════ GALLERY ══════════ */}
+      {gallery.length > 0 && (
+        <section style={{ background: "var(--c-surface-card)" }} className="py-14">
+          <div className="container mx-auto px-4">
+            <p className="font-display text-[10px] uppercase tracking-[0.45em] mb-6" style={{ color: "rgba(201,151,58,0.6)" }}>Photos</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              {gallery.map((url, i) => (
+                <motion.button
+                  key={i}
+                  type="button"
+                  onClick={() => setLightbox(url)}
+                  className="relative overflow-hidden rounded-lg aspect-square"
+                  style={{ border: "1px solid rgba(201,151,58,0.12)" }}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, delay: i * 0.05 }}
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <img src={url} alt={`${product.brand} ${product.name} photo ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
+                </motion.button>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Lightbox */}
+      <AnimatePresence>
+        {lightbox && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ background: "rgba(0,0,0,0.9)" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setLightbox(null)}
+          >
+            <button
+              type="button"
+              className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full"
+              style={{ background: "rgba(201,151,58,0.15)", border: "1px solid rgba(201,151,58,0.3)", color: "#c9973a" }}
+              onClick={() => setLightbox(null)}
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <motion.img
+              src={lightbox}
+              alt=""
+              className="max-h-[90vh] max-w-full object-contain rounded-lg"
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              onClick={e => e.stopPropagation()}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <InstallationModal
         open={modalOpen}

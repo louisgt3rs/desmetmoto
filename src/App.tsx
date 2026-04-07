@@ -19,6 +19,9 @@ import EventDetail from "./pages/EventDetail";
 import PolitiqueConfidentialite from "./pages/PolitiqueConfidentialite";
 import ProductDetail from "./pages/ProductDetail";
 import NotFound from "./pages/NotFound";
+import CategoryPage from "./pages/CategoryPage";
+import Intercoms from "./pages/Intercoms";
+import IntercomDetail from "./pages/IntercomDetail";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +47,9 @@ const App = () => (
           <Route path="/evenements/:id" element={<EventDetail />} />
           <Route path="/evenements/:id/reserver" element={<EventBooking />} />
           <Route path="/politique-confidentialite" element={<PolitiqueConfidentialite />} />
+          <Route path="/categorie/:slug" element={<CategoryPage />} />
+          <Route path="/intercoms" element={<Intercoms />} />
+          <Route path="/intercoms/:slug" element={<IntercomDetail />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

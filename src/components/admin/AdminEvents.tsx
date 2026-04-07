@@ -7,8 +7,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { CalendarDays, Download, MapPin, Pencil, Plus, Save, Search, Trash2, Users } from "lucide-react";
-import { ImageUploadSingle } from "./ImageUpload";
+import { CalendarDays, Download, MapPin, Plus, Save, Search, Trash2, Users } from "lucide-react";
+import { ImageUploadSingle, ImageUploadMulti } from "./ImageUpload";
 import type { AdminEvent } from "./types";
 
 interface AdminEventsProps {
@@ -78,6 +78,7 @@ export default function AdminEvents({ events, onRefresh }: AdminEventsProps) {
     capacity: "0",
     registered_count: "0",
     image_url: "",
+    photos_after: [] as string[],
   });
 
   // Tab state
@@ -164,6 +165,7 @@ export default function AdminEvents({ events, onRefresh }: AdminEventsProps) {
       capacity: Number(form.capacity) || 0,
       registered_count: Number(form.registered_count) || 0,
       image_url: form.image_url || null,
+      photos_after: form.photos_after.length > 0 ? form.photos_after : null,
       is_upcoming: !form.event_date || new Date(form.event_date) >= new Date(new Date().toDateString()),
       is_published: true,
     };
@@ -204,6 +206,7 @@ export default function AdminEvents({ events, onRefresh }: AdminEventsProps) {
       capacity: String(event.capacity || 0),
       registered_count: String(event.registered_count || 0),
       image_url: event.image_url || "",
+      photos_after: Array.isArray(event.photos_after) ? (event.photos_after as string[]) : [],
     });
   };
 
@@ -211,7 +214,7 @@ export default function AdminEvents({ events, onRefresh }: AdminEventsProps) {
     setEditing(null);
     setOpen(true);
     setActiveTab("info");
-    setForm({ title: "", description: "", event_date: "", time: "", location: "", capacity: "0", registered_count: "0", image_url: "" });
+    setForm({ title: "", description: "", event_date: "", time: "", location: "", capacity: "0", registered_count: "0", image_url: "", photos_after: [] });
   };
 
   const cancel = () => {
@@ -299,14 +302,6 @@ export default function AdminEvents({ events, onRefresh }: AdminEventsProps) {
     await loadSlotsData(editing.id);
   };
 
-  const handleDeleteConfig = async (id: string) => {
-    if (!editing) return;
-    if (!confirm("SUPPRIMER CE CRÉNEAU ?")) return;
-    const { error } = await supabase.from("event_slots_config").delete().eq("id", id);
-    if (error) { toast.error("ERREUR : " + error.message.toUpperCase()); return; }
-    toast.success("CRÉNEAU SUPPRIMÉ");
-    await loadSlotsData(editing.id);
-  };
 
   const handleAddItem = async () => {
     if (!editing) return;
@@ -479,6 +474,17 @@ export default function AdminEvents({ events, onRefresh }: AdminEventsProps) {
       <div className="md:col-span-2">
         <ImageUploadSingle value={form.image_url} onChange={(value) => setForm({ ...form, image_url: value })} folder="events" label="OU IMPORTER UNE IMAGE" previewClass="h-28 w-28" />
       </div>
+      {form.event_date && new Date(form.event_date) < new Date() && (
+        <div className="space-y-2 md:col-span-2 border-t border-[hsl(var(--admin-accent)/0.18)] pt-5">
+          <Label className="admin-kicker text-xs text-[hsl(var(--admin-accent))]">PHOTOS APRÈS L'ÉVÉNEMENT</Label>
+          <ImageUploadMulti
+            value={form.photos_after}
+            onChange={(urls) => setForm({ ...form, photos_after: urls })}
+            folder="events/after"
+            label="Importez les photos prises lors de l'événement"
+          />
+        </div>
+      )}
     </div>
   );
 
@@ -546,6 +552,9 @@ export default function AdminEvents({ events, onRefresh }: AdminEventsProps) {
                 </div>
                 <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                   <Button onClick={() => startEdit(event)} className="admin-button-secondary h-10 flex-1 rounded-none font-adminDisplay tracking-[0.16em]">MODIFIER</Button>
+                  {event.date && new Date(event.date) < new Date() && (
+                    <Button onClick={() => startEdit(event)} className="h-10 rounded-none border border-[hsl(var(--admin-accent)/0.4)] bg-transparent font-adminDisplay text-xs tracking-[0.14em] text-[hsl(var(--admin-accent))] hover:bg-[hsl(var(--admin-accent)/0.1)]">PHOTOS APRÈS</Button>
+                  )}
                   <Button onClick={() => handleDelete(event.id)} className="h-10 rounded-none border border-destructive/40 bg-transparent font-adminDisplay tracking-[0.16em] text-destructive hover:bg-destructive hover:text-destructive-foreground">SUPPRIMER</Button>
                 </div>
               </article>

@@ -51,7 +51,20 @@ export default function BrandsCarousel() {
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <div className="flex items-center gap-3">
+      {/* Mobile: native horizontal scroll */}
+      <div
+        className="lg:hidden w-full overflow-x-auto"
+        style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties}
+      >
+        <div className="flex px-4" style={{ gap: GAP }}>
+          {brands.map((brand) => (
+            <BrandCard key={brand.slug} brand={brand} onClick={() => navigate(`/marques/${brand.slug}`)} />
+          ))}
+        </div>
+      </div>
+
+      {/* Desktop: button-controlled carousel */}
+      <div className="hidden lg:flex items-center gap-3">
         <button
           type="button"
           onClick={prev}

@@ -59,6 +59,24 @@ export type Database = {
         }
         Relationships: []
       }
+      installation_brands: {
+        Row: { id: string; name: string; sort_order: number; created_at: string }
+        Insert: { id?: string; name: string; sort_order?: number; created_at?: string }
+        Update: { id?: string; name?: string; sort_order?: number; created_at?: string }
+        Relationships: []
+      }
+      installation_models: {
+        Row: { id: string; brand_id: string; name: string; is_modular: boolean; is_coming_soon: boolean; sort_order: number; created_at: string }
+        Insert: { id?: string; brand_id: string; name: string; is_modular?: boolean; is_coming_soon?: boolean; sort_order?: number; created_at?: string }
+        Update: { id?: string; brand_id?: string; name?: string; is_modular?: boolean; is_coming_soon?: boolean; sort_order?: number; created_at?: string }
+        Relationships: [{ foreignKeyName: "installation_models_brand_id_fkey"; columns: ["brand_id"]; isOneToOne: false; referencedRelation: "installation_brands"; referencedColumns: ["id"] }]
+      }
+      installation_intercoms: {
+        Row: { id: string; brand: string; name: string; slug: string | null; description: string | null; image_url: string | null; gallery_images: string[] | null; is_coming_soon: boolean; sort_order: number; created_at: string }
+        Insert: { id?: string; brand: string; name: string; slug?: string | null; description?: string | null; image_url?: string | null; gallery_images?: string[] | null; is_coming_soon?: boolean; sort_order?: number; created_at?: string }
+        Update: { id?: string; brand?: string; name?: string; slug?: string | null; description?: string | null; image_url?: string | null; gallery_images?: string[] | null; is_coming_soon?: boolean; sort_order?: number; created_at?: string }
+        Relationships: []
+      }
       events: {
         Row: {
           capacity: number
@@ -71,6 +89,7 @@ export type Database = {
           is_published: boolean | null
           is_upcoming: boolean
           location: string | null
+          photos_after: string[] | null
           registered_count: number
           sort_order: number | null
           time: string | null
@@ -88,6 +107,7 @@ export type Database = {
           is_published?: boolean | null
           is_upcoming?: boolean
           location?: string | null
+          photos_after?: string[] | null
           registered_count?: number
           sort_order?: number | null
           time?: string | null
@@ -105,6 +125,7 @@ export type Database = {
           is_published?: boolean | null
           is_upcoming?: boolean
           location?: string | null
+          photos_after?: string[] | null
           registered_count?: number
           sort_order?: number | null
           time?: string | null
