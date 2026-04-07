@@ -275,162 +275,145 @@ export default function IntercomDetailPage() {
       />
 
       {/* ══════════ HERO ══════════ */}
-      <section
-        className="relative overflow-hidden"
-        style={{ background: "var(--c-surface-hero)", minHeight: "min(92vh, 760px)" }}
-      >
+      <section className="relative overflow-hidden" style={{ background: "var(--c-surface-hero)" }}>
         {/* Grain */}
         <svg className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.045]" style={{ mixBlendMode: "overlay" }} aria-hidden="true">
           <filter id="g"><feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="4" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
           <rect width="100%" height="100%" filter="url(#g)"/>
         </svg>
+        <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 70% 50% at 50% 0%, rgba(201,151,58,0.08), transparent 60%)" }} />
 
-        {/* Gold radial glow */}
-        <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 55% 70% at 30% 50%, rgba(201,151,58,0.09), transparent 65%)" }} />
+        <div className="relative container mx-auto px-4 pt-20 pb-10">
+          {/* Back link */}
+          <Link
+            to="/intercoms"
+            className="inline-flex items-center gap-2 font-display text-[10px] uppercase tracking-[0.35em] mb-8 transition-colors"
+            style={{ color: "var(--c-text-30)" }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#c9973a"}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "var(--c-text-30)"}
+          >
+            <ArrowLeft className="w-3 h-3" /> Tous les intercoms
+          </Link>
 
-        {/* Carbon texture on right half */}
-        <div
-          className="pointer-events-none absolute inset-y-0 right-0 w-1/2 opacity-[0.03]"
-          style={{
-            backgroundImage: "repeating-linear-gradient(60deg,#c9973a 0,#c9973a 1px,transparent 0,transparent 50%),repeating-linear-gradient(-60deg,#c9973a 0,#c9973a 1px,transparent 0,transparent 50%)",
-            backgroundSize: "20px 20px",
-          }}
-        />
-
-        <div className="relative container mx-auto px-4 h-full flex flex-col lg:grid lg:grid-cols-2 lg:gap-0 pt-20 pb-16" style={{ minHeight: "inherit" }}>
-          {/* LEFT — text */}
-          <div className="flex flex-col justify-center pr-0 lg:pr-12">
-            <Link
-              to="/intercoms"
-              className="inline-flex items-center gap-2 font-display text-[10px] uppercase tracking-[0.35em] mb-10 w-fit transition-colors"
-              style={{ color: "var(--c-text-30)" }}
-              onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#c9973a"}
-              onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "var(--c-text-30)"}
-            >
-              <ArrowLeft className="w-3 h-3" /> Tous les intercoms
-            </Link>
-
-            {/* Brand badge */}
-            <div className="inline-flex items-center gap-2 mb-5 w-fit px-3 py-1.5" style={{ border: "1px solid rgba(201,151,58,0.3)", background: "rgba(201,151,58,0.06)" }}>
-              <Radio className="w-3 h-3" style={{ color: "#c9973a" }} />
-              <span className="font-display text-[10px] uppercase tracking-[0.4em]" style={{ color: "#c9973a" }}>{product.brand} — Intercom Bluetooth</span>
-            </div>
-
-            {/* Model name */}
-            <h1
-              className="font-display text-white leading-none mb-3"
-              style={{ fontSize: "clamp(5rem,16vw,10rem)", textShadow: "0 0 80px rgba(201,151,58,0.25), 0 0 160px rgba(201,151,58,0.1)" }}
-            >
-              {product.name}
-            </h1>
-
-            {/* Decorative line */}
-            <div className="flex items-center gap-3 mb-5">
-              <div className="h-px w-16" style={{ background: "linear-gradient(to right, rgba(201,151,58,0.6), transparent)" }} />
-              <div className="h-1 w-1 rotate-45" style={{ background: "#c9973a", opacity: 0.6 }} />
-            </div>
-
-            <p className="font-display text-xl mb-3" style={{ color: "#c9973a" }}>{product.tagline}</p>
-            <p className="text-sm leading-relaxed mb-8 max-w-md" style={{ color: "var(--c-text-50)" }}>{product.shortDesc}</p>
-
-            {/* Stats row — visible in hero */}
-            <div className="grid grid-cols-4 gap-2 mb-8">
-              {product.stats.map((s, i) => (
-                <StatBlock key={i} stat={s} delay={0.15 + i * 0.07} />
-              ))}
-            </div>
-
-            {/* CTA */}
-            <div className="flex flex-wrap gap-3">
-              <button
-                onClick={() => setModalOpen(true)}
-                className="inline-flex items-center gap-3 font-display text-sm uppercase tracking-[0.25em] px-7 py-4 transition-all duration-300"
-                style={{ background: "#c9973a", color: "#050505" }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#d4a44a"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#c9973a"; }}
-              >
-                <Wrench className="w-4 h-4" /> Demander l'installation
-              </button>
-              <Link
-                to="/intercoms"
-                className="inline-flex items-center gap-2 font-display text-sm uppercase tracking-[0.2em] px-7 py-4 transition-all duration-300"
-                style={{ border: "1px solid rgba(201,151,58,0.3)", color: "var(--c-text-50)", background: "transparent" }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(201,151,58,0.6)"; (e.currentTarget as HTMLElement).style.color = "#c9973a"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(201,151,58,0.3)"; (e.currentTarget as HTMLElement).style.color = "var(--c-text-50)"; }}
-              >
-                Voir tous les modèles
-              </Link>
-            </div>
+          {/* Brand badge */}
+          <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5" style={{ border: "1px solid rgba(201,151,58,0.3)", background: "rgba(201,151,58,0.06)" }}>
+            <Radio className="w-3 h-3" style={{ color: "#c9973a" }} />
+            <span className="font-display text-[10px] uppercase tracking-[0.4em]" style={{ color: "#c9973a" }}>{product.brand} — Intercom Bluetooth</span>
           </div>
 
-          {/* RIGHT — product image */}
-          <div className="hidden lg:flex items-center justify-center relative">
-            {/* Halo glow */}
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{ background: "radial-gradient(ellipse 60% 60% at 50% 50%, rgba(201,151,58,0.12), transparent 70%)" }}
-            />
-            {!imgError ? (
-              <motion.img
-                src={product.imageUrl}
-                alt={`${product.brand} ${product.name}`}
-                className="relative z-10 object-contain drop-shadow-2xl"
-                style={{ maxHeight: "480px", maxWidth: "100%", filter: "drop-shadow(0 0 40px rgba(201,151,58,0.15))" }}
-                initial={{ opacity: 0, scale: 0.92 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.7, ease: "easeOut" }}
-                onError={() => setImgError(true)}
-              />
-            ) : (
-              /* Fallback when image fails */
-              <div className="relative z-10 flex flex-col items-center justify-center" style={{ width: "320px", height: "320px", border: "1px solid rgba(201,151,58,0.15)", background: "rgba(201,151,58,0.03)" }}>
-                <Radio className="w-16 h-16 mb-4" style={{ color: "rgba(201,151,58,0.3)" }} />
-                <p className="font-display text-4xl" style={{ color: "rgba(201,151,58,0.4)" }}>{product.name}</p>
-                <p className="font-display text-[10px] uppercase tracking-[0.4em] mt-2" style={{ color: "var(--c-text-20)" }}>{product.brand}</p>
+          {/* Model name */}
+          <h1
+            className="font-display text-white leading-none mb-6"
+            style={{ fontSize: "clamp(4rem,14vw,9rem)", textShadow: "0 0 80px rgba(201,151,58,0.25), 0 0 160px rgba(201,151,58,0.1)" }}
+          >
+            {product.name}
+          </h1>
+
+          {/* 2-col: gallery + info */}
+          <div className="grid gap-8 md:grid-cols-2">
+            {/* LEFT — gallery */}
+            <div>
+              {gallery.length > 0 ? (
+                <>
+                  <div
+                    className="relative overflow-hidden bg-[#111] cursor-zoom-in mb-2"
+                    style={{ height: "480px", border: "1px solid rgba(201,151,58,0.1)" }}
+                    onClick={() => setLightboxOpen(true)}
+                  >
+                    <img
+                      src={gallery[activeIdx]}
+                      alt={`${product.brand} ${product.name}`}
+                      className="h-full w-full object-cover transition-opacity duration-200"
+                    />
+                  </div>
+                  {gallery.length > 1 && (
+                    <div className="flex gap-2 overflow-x-auto pb-1">
+                      {gallery.map((url, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => setActiveIdx(i)}
+                          className={`shrink-0 overflow-hidden border-2 transition-all duration-200 ${
+                            i === activeIdx ? "border-[#c9973a]" : "border-transparent opacity-40 hover:opacity-80"
+                          }`}
+                          style={{ width: 72, height: 72 }}
+                        >
+                          <img src={url} alt="" className="h-full w-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                /* Fallback: product image from static data */
+                <div className="relative overflow-hidden bg-[#111] flex items-center justify-center" style={{ height: "480px", border: "1px solid rgba(201,151,58,0.1)" }}>
+                  <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 60% 60% at 50% 50%, rgba(201,151,58,0.1), transparent 70%)" }} />
+                  {!imgError ? (
+                    <motion.img
+                      src={product.imageUrl}
+                      alt={`${product.brand} ${product.name}`}
+                      className="relative z-10 object-contain"
+                      style={{ maxHeight: "400px", maxWidth: "100%", filter: "drop-shadow(0 0 40px rgba(201,151,58,0.15))" }}
+                      initial={{ opacity: 0, scale: 0.92 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.7 }}
+                      onError={() => setImgError(true)}
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center">
+                      <Radio className="w-16 h-16 mb-4" style={{ color: "rgba(201,151,58,0.3)" }} />
+                      <p className="font-display text-4xl" style={{ color: "rgba(201,151,58,0.4)" }}>{product.name}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* RIGHT — info */}
+            <div className="flex flex-col justify-center gap-6">
+              {/* Decorative line */}
+              <div className="flex items-center gap-3">
+                <div className="h-px w-16" style={{ background: "linear-gradient(to right, rgba(201,151,58,0.6), transparent)" }} />
+                <div className="h-1 w-1 rotate-45" style={{ background: "#c9973a", opacity: 0.6 }} />
               </div>
-            )}
+
+              <div>
+                <p className="font-display text-xl mb-2" style={{ color: "#c9973a" }}>{product.tagline}</p>
+                <p className="text-sm leading-relaxed" style={{ color: "var(--c-text-50)" }}>{product.shortDesc}</p>
+              </div>
+
+              {/* Stats */}
+              <div className="grid grid-cols-2 gap-2">
+                {product.stats.map((s, i) => (
+                  <StatBlock key={i} stat={s} delay={0.1 + i * 0.07} />
+                ))}
+              </div>
+
+              {/* CTA */}
+              <div className="flex flex-wrap gap-3">
+                <button
+                  onClick={() => setModalOpen(true)}
+                  className="inline-flex items-center gap-3 font-display text-sm uppercase tracking-[0.25em] px-7 py-4 transition-all duration-300"
+                  style={{ background: "#c9973a", color: "#050505" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#d4a44a"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#c9973a"; }}
+                >
+                  <Wrench className="w-4 h-4" /> Demander l'installation
+                </button>
+                <Link
+                  to="/intercoms"
+                  className="inline-flex items-center gap-2 font-display text-sm uppercase tracking-[0.2em] px-7 py-4 transition-all duration-300"
+                  style={{ border: "1px solid rgba(201,151,58,0.3)", color: "var(--c-text-50)", background: "transparent" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(201,151,58,0.6)"; (e.currentTarget as HTMLElement).style.color = "#c9973a"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(201,151,58,0.3)"; (e.currentTarget as HTMLElement).style.color = "var(--c-text-50)"; }}
+                >
+                  Voir tous les modèles
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
-
-      {/* ══════════ GALLERY ══════════ */}
-      {gallery.length > 0 && (
-        <section style={{ background: "var(--c-surface-page)" }} className="py-10">
-          <div className="container mx-auto px-4">
-            {/* Main image */}
-            <div
-              className="relative overflow-hidden bg-[#111] cursor-zoom-in mb-2"
-              style={{ height: "480px", border: "1px solid rgba(201,151,58,0.1)" }}
-              onClick={() => setLightboxOpen(true)}
-            >
-              <img
-                src={gallery[activeIdx]}
-                alt={`${product.brand} ${product.name}`}
-                className="h-full w-full object-cover transition-opacity duration-200"
-              />
-            </div>
-
-            {/* Thumbnails */}
-            {gallery.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto pb-1">
-                {gallery.map((url, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => setActiveIdx(i)}
-                    className={`shrink-0 overflow-hidden border-2 transition-all duration-200 ${
-                      i === activeIdx ? "border-[#c9973a]" : "border-transparent opacity-40 hover:opacity-80"
-                    }`}
-                    style={{ width: 72, height: 72 }}
-                  >
-                    <img src={url} alt="" className="h-full w-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-      )}
 
       {/* ══════════ HIGHLIGHTS + COMPAT + SPECS ══════════ */}
       <section style={{ background: "var(--c-surface-page)" }} className="py-16">
