@@ -6,7 +6,7 @@ import Layout from "@/components/Layout";
 import SEO from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
 
-type Intercom = { id: string; brand: string; name: string; slug: string | null; description: string | null; is_coming_soon: boolean };
+type Intercom = { id: string; brand: string; name: string; slug: string | null; description: string | null; image_url: string | null; is_coming_soon: boolean };
 
 export default function IntercomsPage() {
   const [intercoms, setIntercoms] = useState<Intercom[]>([]);
@@ -15,7 +15,7 @@ export default function IntercomsPage() {
   useEffect(() => {
     supabase
       .from("installation_intercoms")
-      .select("id, brand, name, slug, description, is_coming_soon")
+      .select("id, brand, name, slug, description, image_url, is_coming_soon")
       .order("brand")
       .order("sort_order")
       .then(({ data }) => {
@@ -117,6 +117,14 @@ export default function IntercomsPage() {
                           opacity: item.is_coming_soon ? 0.6 : 1,
                         }}
                       >
+                        {/* Card image */}
+                        {item.image_url && (
+                          <div className="relative h-44 overflow-hidden" style={{ borderBottom: "1px solid rgba(201,151,58,0.1)" }}>
+                            <img src={item.image_url} alt={item.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                            <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 60%)" }} />
+                          </div>
+                        )}
+
                         {/* Card body */}
                         <div className="p-5 flex-1">
                           {item.is_coming_soon && (

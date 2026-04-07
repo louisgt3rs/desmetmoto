@@ -7,7 +7,7 @@ import InstallationModal from "@/components/InstallationModal";
 import storeImg from "@/assets/store-interior-1.jpeg";
 import { supabase } from "@/integrations/supabase/client";
 
-type InstIntercom = { id: string; brand: string; name: string; is_coming_soon: boolean };
+type InstIntercom = { id: string; brand: string; name: string; image_url: string | null; is_coming_soon: boolean };
 
 const services = [
   "Intercoms Sena & Cardo intégrés dans votre casque",
@@ -23,13 +23,14 @@ export default function ServiceSection() {
   useEffect(() => {
     supabase
       .from("installation_intercoms")
-      .select("id, brand, name, is_coming_soon")
+      .select("id, brand, name, image_url, is_coming_soon")
       .order("brand")
       .order("sort_order")
       .then(({ data }) => { if (data) setIntercoms(data as InstIntercom[]); });
   }, []);
 
   const uniqueIntercomBrands = [...new Set(intercoms.map(i => i.brand))];
+  const heroImg = intercoms.find(i => i.image_url && !i.is_coming_soon)?.image_url || null;
 
   return (
     <>
@@ -49,7 +50,7 @@ export default function ServiceSection() {
               transition={{ duration: 0.6 }}
               className="relative rounded-xl overflow-hidden aspect-[4/3]"
             >
-              <img src={storeImg} alt="Boutique Desmet Équipement — installation en magasin" className="w-full h-full object-cover" />
+              <img src={heroImg || storeImg} alt="Boutique Desmet Équipement — installation en magasin" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
               <div className="absolute bottom-4 left-4 flex items-center gap-2 bg-primary/90 text-primary-foreground px-3 py-1.5 rounded-md text-sm font-medium">
                 <Wrench className="w-4 h-4" />

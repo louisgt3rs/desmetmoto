@@ -5,11 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Save, X } from "lucide-react";
-import { ImageUploadMulti } from "./ImageUpload";
+import { ImageUploadSingle, ImageUploadMulti } from "./ImageUpload";
 
 type InstBrand   = { id: string; name: string; sort_order: number };
 type InstModel   = { id: string; brand_id: string; name: string; is_modular: boolean; is_coming_soon: boolean; sort_order: number };
-type InstIntercom = { id: string; brand: string; name: string; is_coming_soon: boolean; sort_order: number; gallery_images: string[] };
+type InstIntercom = { id: string; brand: string; name: string; image_url: string | null; is_coming_soon: boolean; sort_order: number; gallery_images: string[] };
 
 const kicker = "admin-kicker text-[10px] text-[hsl(var(--admin-muted-foreground))]";
 const inp    = "admin-input h-9 text-sm";
@@ -221,7 +221,7 @@ function IntercomsTab() {
   const [intercoms, setIntercoms] = useState<InstIntercom[]>([]);
   const [editing, setEditing] = useState<InstIntercom | null>(null);
   const [adding, setAdding] = useState(false);
-  const [form, setForm] = useState({ brand: "", name: "", is_coming_soon: false, gallery_images: [] as string[] });
+  const [form, setForm] = useState({ brand: "", name: "", image_url: "", is_coming_soon: false, gallery_images: [] as string[] });
 
   const load = async () => {
     const { data } = await supabase.from("installation_intercoms").select("*").order("brand").order("sort_order");
@@ -257,7 +257,7 @@ function IntercomsTab() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <p className={kicker}>INTERCOMS ({intercoms.length})</p>
-        <Button onClick={() => { setAdding(true); setEditing(null); setForm({ brand: "", name: "", is_coming_soon: false, gallery_images: [] }); }} className="admin-button h-9 rounded-none px-4 font-adminDisplay text-xs tracking-[0.16em]">
+        <Button onClick={() => { setAdding(true); setEditing(null); setForm({ brand: "", name: "", image_url: "", is_coming_soon: false, gallery_images: [] }); }} className="admin-button h-9 rounded-none px-4 font-adminDisplay text-xs tracking-[0.16em]">
           <Plus className="h-3 w-3" /> AJOUTER
         </Button>
       </div>
@@ -276,7 +276,11 @@ function IntercomsTab() {
           </div>
           <Toggle checked={form.is_coming_soon} onChange={v => setForm(f => ({ ...f, is_coming_soon: v }))} label="BIENTÔT DISPONIBLE" />
           <div>
-            <p className={kicker + " mb-2"}>PHOTOS (GALERIE)</p>
+            <p className={kicker + " mb-2"}>PHOTO PRINCIPALE (carte)</p>
+            <ImageUploadSingle value={form.image_url} onChange={v => setForm(f => ({ ...f, image_url: v }))} folder="intercoms" previewClass="h-24 w-24" />
+          </div>
+          <div>
+            <p className={kicker + " mb-2"}>PHOTOS GALERIE</p>
             <ImageUploadMulti value={form.gallery_images} onChange={v => setForm(f => ({ ...f, gallery_images: v }))} folder="intercoms" label="" />
           </div>
           <div className="flex gap-2">
@@ -292,12 +296,15 @@ function IntercomsTab() {
           <div className="space-y-1">
             {intercoms.filter(i => i.brand === brand).map(i => (
               <div key={i.id} className={rowCls}>
-                <span className="text-sm text-[hsl(var(--admin-foreground))]">
-                  {i.name}
-                  {i.is_coming_soon && <span className={comingSoonBadge}>· BIENTÔT</span>}
-                </span>
+                <div className="flex items-center gap-3">
+                  {i.image_url ? <img src={i.image_url} alt={i.name} className="h-10 w-10 object-cover rounded" /> : <div className="h-10 w-10 rounded border border-[hsl(var(--admin-accent)/0.15)] bg-[hsl(var(--admin-card))]" />}
+                  <span className="text-sm text-[hsl(var(--admin-foreground))]">
+                    {i.name}
+                    {i.is_coming_soon && <span className={comingSoonBadge}>· BIENTÔT</span>}
+                  </span>
+                </div>
                 <div className="flex gap-1">
-                  <Button onClick={() => { setEditing(i); setAdding(false); setForm({ brand: i.brand, name: i.name, is_coming_soon: i.is_coming_soon, gallery_images: i.gallery_images || [] }); }} className="h-8 w-8 rounded-none border border-[hsl(var(--admin-accent)/0.2)] bg-transparent p-0 text-[hsl(var(--admin-muted-foreground))] hover:text-[hsl(var(--admin-accent))]"><Pencil className="h-3 w-3" /></Button>
+                  <Button onClick={() => { setEditing(i); setAdding(false); setForm({ brand: i.brand, name: i.name, image_url: i.image_url || "", is_coming_soon: i.is_coming_soon, gallery_images: i.gallery_images || [] }); }} className="h-8 w-8 rounded-none border border-[hsl(var(--admin-accent)/0.2)] bg-transparent p-0 text-[hsl(var(--admin-muted-foreground))] hover:text-[hsl(var(--admin-accent))]"><Pencil className="h-3 w-3" /></Button>
                   <Button onClick={() => del(i.id)} className="h-8 w-8 rounded-none border border-destructive/30 bg-transparent p-0 text-destructive hover:bg-destructive hover:text-destructive-foreground"><Trash2 className="h-3 w-3" /></Button>
                 </div>
               </div>
