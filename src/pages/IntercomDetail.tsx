@@ -236,6 +236,7 @@ export default function IntercomDetailPage() {
   const [gallery, setGallery] = useState<string[]>([]);
   const [activeIdx, setActiveIdx] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [dbData, setDbData] = useState<{ prix: number | null; stock: number | null; pack_duo: boolean; prix_duo: number | null } | null>(null);
 
   const product = slug ? PRODUCTS[slug] : null;
   const compat  = slug ? COMPATIBILITY[slug] ?? [] : [];
@@ -244,13 +245,20 @@ export default function IntercomDetailPage() {
     if (!slug) return;
     supabase
       .from("installation_intercoms")
-      .select("gallery_images")
+      .select("gallery_images, prix, stock, pack_duo, prix_duo")
       .eq("slug", slug)
       .maybeSingle()
       .then(({ data }) => {
-        if (data?.gallery_images && Array.isArray(data.gallery_images)) {
+        if (!data) return;
+        if (data.gallery_images && Array.isArray(data.gallery_images)) {
           setGallery(data.gallery_images as string[]);
         }
+        setDbData({
+          prix: (data as any).prix ?? null,
+          stock: (data as any).stock ?? null,
+          pack_duo: (data as any).pack_duo ?? false,
+          prix_duo: (data as any).prix_duo ?? null,
+        });
       });
   }, [slug]);
 
@@ -388,6 +396,48 @@ export default function IntercomDetailPage() {
                   <StatBlock key={i} stat={s} delay={0.1 + i * 0.07} />
                 ))}
               </div>
+
+              {/* Prix + Stock */}
+              {dbData && (dbData.prix != null || dbData.stock != null) && (
+                <div className="flex items-center gap-4 flex-wrap">
+                  {dbData.prix != null && (
+                    <p className="font-display leading-none" style={{ fontSize: "clamp(1.8rem,5vw,2.4rem)", color: "#c9973a" }}>
+                      {dbData.prix.toLocaleString("fr-BE", { minimumFractionDigits: 2 })} €
+                    </p>
+                  )}
+                  {dbData.stock != null && (
+                    <span
+                      className="font-display text-[11px] uppercase tracking-[0.25em] px-3 py-1.5"
+                      style={{
+                        border: "1px solid",
+                        borderColor: dbData.stock > 3 ? "rgba(201,151,58,0.5)" : dbData.stock > 0 ? "rgba(255,180,0,0.5)" : "rgba(255,80,80,0.4)",
+                        color: dbData.stock > 3 ? "#c9973a" : dbData.stock > 0 ? "#ffb400" : "#ff5050",
+                        background: dbData.stock > 3 ? "rgba(201,151,58,0.06)" : dbData.stock > 0 ? "rgba(255,180,0,0.06)" : "rgba(255,80,80,0.06)",
+                      }}
+                    >
+                      {dbData.stock > 3 ? "En stock" : dbData.stock > 0 ? `Stock limité — ${dbData.stock} restant${dbData.stock > 1 ? "s" : ""}` : "Rupture de stock"}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* Pack duo */}
+              {dbData?.pack_duo && dbData.prix_duo != null && dbData.prix != null && (
+                <div className="p-4" style={{ background: "rgba(201,151,58,0.06)", border: "1px solid rgba(201,151,58,0.25)" }}>
+                  <p className="font-display text-[10px] uppercase tracking-[0.4em] mb-2" style={{ color: "rgba(201,151,58,0.7)" }}>Pack Duo</p>
+                  <div className="flex items-baseline gap-3 flex-wrap">
+                    <p className="font-display text-2xl" style={{ color: "#c9973a" }}>
+                      {dbData.prix_duo.toLocaleString("fr-BE", { minimumFractionDigits: 2 })} €
+                    </p>
+                    <p className="text-xs" style={{ color: "var(--c-text-50)" }}>pour 2 unités</p>
+                  </div>
+                  {dbData.prix_duo < dbData.prix * 2 && (
+                    <p className="mt-1.5 text-xs" style={{ color: "#c9973a" }}>
+                      Économisez {(dbData.prix * 2 - dbData.prix_duo).toLocaleString("fr-BE", { minimumFractionDigits: 2 })} € par rapport à l'achat séparé
+                    </p>
+                  )}
+                </div>
+              )}
 
               {/* CTA */}
               <div className="flex flex-wrap gap-3">

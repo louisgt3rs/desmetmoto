@@ -72,9 +72,9 @@ export type Database = {
         Relationships: [{ foreignKeyName: "installation_models_brand_id_fkey"; columns: ["brand_id"]; isOneToOne: false; referencedRelation: "installation_brands"; referencedColumns: ["id"] }]
       }
       installation_intercoms: {
-        Row: { id: string; brand: string; name: string; slug: string | null; description: string | null; image_url: string | null; gallery_images: string[] | null; is_coming_soon: boolean; sort_order: number; created_at: string }
-        Insert: { id?: string; brand: string; name: string; slug?: string | null; description?: string | null; image_url?: string | null; gallery_images?: string[] | null; is_coming_soon?: boolean; sort_order?: number; created_at?: string }
-        Update: { id?: string; brand?: string; name?: string; slug?: string | null; description?: string | null; image_url?: string | null; gallery_images?: string[] | null; is_coming_soon?: boolean; sort_order?: number; created_at?: string }
+        Row: { id: string; brand: string; name: string; slug: string | null; description: string | null; image_url: string | null; gallery_images: string[] | null; prix: number | null; stock: number | null; pack_duo: boolean; prix_duo: number | null; is_coming_soon: boolean; sort_order: number; created_at: string }
+        Insert: { id?: string; brand: string; name: string; slug?: string | null; description?: string | null; image_url?: string | null; gallery_images?: string[] | null; prix?: number | null; stock?: number | null; pack_duo?: boolean; prix_duo?: number | null; is_coming_soon?: boolean; sort_order?: number; created_at?: string }
+        Update: { id?: string; brand?: string; name?: string; slug?: string | null; description?: string | null; image_url?: string | null; gallery_images?: string[] | null; prix?: number | null; stock?: number | null; pack_duo?: boolean; prix_duo?: number | null; is_coming_soon?: boolean; sort_order?: number; created_at?: string }
         Relationships: []
       }
       events: {

@@ -9,7 +9,7 @@ import { ImageUploadSingle, ImageUploadMulti } from "./ImageUpload";
 
 type InstBrand   = { id: string; name: string; sort_order: number };
 type InstModel   = { id: string; brand_id: string; name: string; is_modular: boolean; is_coming_soon: boolean; sort_order: number };
-type InstIntercom = { id: string; brand: string; name: string; image_url: string | null; is_coming_soon: boolean; sort_order: number; gallery_images: string[] };
+type InstIntercom = { id: string; brand: string; name: string; image_url: string | null; is_coming_soon: boolean; sort_order: number; gallery_images: string[]; prix: number | null; description: string | null; stock: number | null; pack_duo: boolean; prix_duo: number | null };
 
 const kicker = "admin-kicker text-[10px] text-[hsl(var(--admin-muted-foreground))]";
 const inp    = "admin-input h-9 text-sm";
@@ -217,27 +217,60 @@ function ModelsTab() {
 }
 
 /* ══════════════════ INTERCOMS TAB ══════════════════ */
+const EMPTY_FORM = { brand: "", name: "", image_url: "", is_coming_soon: false, gallery_images: [] as string[], prix: "", description: "", stock: "", pack_duo: false, prix_duo: "" };
+
+function toPayload(form: typeof EMPTY_FORM) {
+  return {
+    brand: form.brand,
+    name: form.name,
+    image_url: form.image_url || null,
+    is_coming_soon: form.is_coming_soon,
+    gallery_images: form.gallery_images,
+    description: form.description || null,
+    prix: form.prix !== "" ? parseFloat(form.prix) : null,
+    stock: form.stock !== "" ? parseInt(form.stock, 10) : null,
+    pack_duo: form.pack_duo,
+    prix_duo: form.pack_duo && form.prix_duo !== "" ? parseFloat(form.prix_duo) : null,
+  };
+}
+
+function formFromRecord(i: InstIntercom): typeof EMPTY_FORM {
+  return {
+    brand: i.brand,
+    name: i.name,
+    image_url: i.image_url || "",
+    is_coming_soon: i.is_coming_soon,
+    gallery_images: i.gallery_images || [],
+    description: i.description || "",
+    prix: i.prix != null ? String(i.prix) : "",
+    stock: i.stock != null ? String(i.stock) : "",
+    pack_duo: i.pack_duo,
+    prix_duo: i.prix_duo != null ? String(i.prix_duo) : "",
+  };
+}
+
 function IntercomsTab() {
   const [intercoms, setIntercoms] = useState<InstIntercom[]>([]);
   const [editing, setEditing] = useState<InstIntercom | null>(null);
   const [adding, setAdding] = useState(false);
-  const [form, setForm] = useState({ brand: "", name: "", image_url: "", is_coming_soon: false, gallery_images: [] as string[] });
+  const [form, setForm] = useState<typeof EMPTY_FORM>(EMPTY_FORM);
 
   const load = async () => {
     const { data } = await supabase.from("installation_intercoms").select("*").order("brand").order("sort_order");
-    if (data) setIntercoms(data.map(d => ({ ...d, gallery_images: Array.isArray(d.gallery_images) ? (d.gallery_images as string[]) : [] })) as InstIntercom[]);
+    if (data) setIntercoms(data.map(d => ({ ...d, gallery_images: Array.isArray(d.gallery_images) ? (d.gallery_images as string[]) : [], pack_duo: d.pack_duo ?? false })) as InstIntercom[]);
   };
   useEffect(() => { load(); }, []);
 
   const save = async () => {
     if (!form.brand.trim() || !form.name.trim()) { toast.error("MARQUE ET NOM REQUIS"); return; }
+    const payload = toPayload(form);
     if (editing) {
-      const { error } = await supabase.from("installation_intercoms").update(form).eq("id", editing.id);
+      const { error } = await supabase.from("installation_intercoms").update(payload).eq("id", editing.id);
       if (error) { toast.error(error.message); return; }
       toast.success("INTERCOM MODIFIÉ");
     } else {
       const sameB = intercoms.filter(i => i.brand === form.brand).length;
-      const { error } = await supabase.from("installation_intercoms").insert({ ...form, sort_order: sameB });
+      const { error } = await supabase.from("installation_intercoms").insert({ ...payload, sort_order: sameB });
       if (error) { toast.error(error.message); return; }
       toast.success("INTERCOM AJOUTÉ");
     }
@@ -253,17 +286,22 @@ function IntercomsTab() {
 
   const uniqueBrands = [...new Set(intercoms.map(i => i.brand))];
 
+  const prixNum = parseFloat(form.prix) || 0;
+  const prixDuoNum = parseFloat(form.prix_duo) || 0;
+  const economie = form.pack_duo && prixNum > 0 && prixDuoNum > 0 ? Math.max(0, prixNum * 2 - prixDuoNum) : 0;
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <p className={kicker}>INTERCOMS ({intercoms.length})</p>
-        <Button onClick={() => { setAdding(true); setEditing(null); setForm({ brand: "", name: "", image_url: "", is_coming_soon: false, gallery_images: [] }); }} className="admin-button h-9 rounded-none px-4 font-adminDisplay text-xs tracking-[0.16em]">
+        <Button onClick={() => { setAdding(true); setEditing(null); setForm(EMPTY_FORM); }} className="admin-button h-9 rounded-none px-4 font-adminDisplay text-xs tracking-[0.16em]">
           <Plus className="h-3 w-3" /> AJOUTER
         </Button>
       </div>
 
       {(adding || editing) && (
         <div className="border border-[hsl(var(--admin-accent)/0.25)] bg-[hsl(var(--admin-card))] p-4 space-y-3">
+          {/* Marque + Modèle */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <p className={kicker + " mb-1"}>MARQUE</p>
@@ -274,7 +312,48 @@ function IntercomsTab() {
               <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="50S" className={inp} />
             </div>
           </div>
+
+          {/* Prix + Stock */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <p className={kicker + " mb-1"}>PRIX UNITAIRE (€)</p>
+              <Input type="number" min="0" step="0.01" value={form.prix} onChange={e => setForm(f => ({ ...f, prix: e.target.value }))} placeholder="149.99" className={inp} />
+            </div>
+            <div>
+              <p className={kicker + " mb-1"}>STOCK</p>
+              <Input type="number" min="0" step="1" value={form.stock} onChange={e => setForm(f => ({ ...f, stock: e.target.value }))} placeholder="5" className={inp} />
+            </div>
+          </div>
+
+          {/* Description */}
+          <div>
+            <p className={kicker + " mb-1"}>DESCRIPTION</p>
+            <textarea
+              value={form.description}
+              onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+              placeholder="Description libre du produit…"
+              rows={3}
+              className="admin-input w-full text-sm resize-none p-2"
+            />
+          </div>
+
+          {/* Pack duo */}
+          <Toggle checked={form.pack_duo} onChange={v => setForm(f => ({ ...f, pack_duo: v }))} label="PACK DUO DISPONIBLE" />
+          {form.pack_duo && (
+            <div className="pl-4 border-l-2 border-[hsl(var(--admin-accent)/0.3)] space-y-2">
+              <div>
+                <p className={kicker + " mb-1"}>PRIX PACK DUO (€)</p>
+                <Input type="number" min="0" step="0.01" value={form.prix_duo} onChange={e => setForm(f => ({ ...f, prix_duo: e.target.value }))} placeholder="269.99" className={inp} />
+              </div>
+              {economie > 0 && (
+                <p className="text-[11px]" style={{ color: "#c9973a" }}>Économie : {economie.toFixed(2)} € par rapport à 2× le prix unitaire</p>
+              )}
+            </div>
+          )}
+
           <Toggle checked={form.is_coming_soon} onChange={v => setForm(f => ({ ...f, is_coming_soon: v }))} label="BIENTÔT DISPONIBLE" />
+
+          {/* Photos */}
           <div>
             <p className={kicker + " mb-2"}>PHOTO PRINCIPALE (carte)</p>
             <ImageUploadSingle value={form.image_url} onChange={v => setForm(f => ({ ...f, image_url: v }))} folder="intercoms" previewClass="h-24 w-24" />
@@ -283,6 +362,7 @@ function IntercomsTab() {
             <p className={kicker + " mb-2"}>PHOTOS GALERIE</p>
             <ImageUploadMulti value={form.gallery_images} onChange={v => setForm(f => ({ ...f, gallery_images: v }))} folder="intercoms" label="" />
           </div>
+
           <div className="flex gap-2">
             <Button onClick={save} className="admin-button h-9 rounded-none px-4 font-adminDisplay text-xs tracking-[0.16em]"><Save className="h-3 w-3" /> ENREGISTRER</Button>
             <Button onClick={() => { setAdding(false); setEditing(null); }} className="admin-button-secondary h-9 rounded-none px-4 font-adminDisplay text-xs tracking-[0.16em]"><X className="h-3 w-3" /> ANNULER</Button>
@@ -298,13 +378,17 @@ function IntercomsTab() {
               <div key={i.id} className={rowCls}>
                 <div className="flex items-center gap-3">
                   {i.image_url ? <img src={i.image_url} alt={i.name} className="h-10 w-10 object-cover rounded" /> : <div className="h-10 w-10 rounded border border-[hsl(var(--admin-accent)/0.15)] bg-[hsl(var(--admin-card))]" />}
-                  <span className="text-sm text-[hsl(var(--admin-foreground))]">
-                    {i.name}
-                    {i.is_coming_soon && <span className={comingSoonBadge}>· BIENTÔT</span>}
-                  </span>
+                  <div>
+                    <span className="text-sm text-[hsl(var(--admin-foreground))]">
+                      {i.name}
+                      {i.is_coming_soon && <span className={comingSoonBadge}>· BIENTÔT</span>}
+                      {i.pack_duo && <span className="ml-2 text-[10px] uppercase tracking-[0.2em] font-adminDisplay" style={{ color: "#c9973a" }}>· DUO</span>}
+                    </span>
+                    {i.prix != null && <p className="text-[11px] text-[hsl(var(--admin-muted-foreground))]">{i.prix} € {i.stock != null ? `· Stock : ${i.stock}` : ""}</p>}
+                  </div>
                 </div>
                 <div className="flex gap-1">
-                  <Button onClick={() => { setEditing(i); setAdding(false); setForm({ brand: i.brand, name: i.name, image_url: i.image_url || "", is_coming_soon: i.is_coming_soon, gallery_images: i.gallery_images || [] }); }} className="h-8 w-8 rounded-none border border-[hsl(var(--admin-accent)/0.2)] bg-transparent p-0 text-[hsl(var(--admin-muted-foreground))] hover:text-[hsl(var(--admin-accent))]"><Pencil className="h-3 w-3" /></Button>
+                  <Button onClick={() => { setEditing(i); setAdding(false); setForm(formFromRecord(i)); }} className="h-8 w-8 rounded-none border border-[hsl(var(--admin-accent)/0.2)] bg-transparent p-0 text-[hsl(var(--admin-muted-foreground))] hover:text-[hsl(var(--admin-accent))]"><Pencil className="h-3 w-3" /></Button>
                   <Button onClick={() => del(i.id)} className="h-8 w-8 rounded-none border border-destructive/30 bg-transparent p-0 text-destructive hover:bg-destructive hover:text-destructive-foreground"><Trash2 className="h-3 w-3" /></Button>
                 </div>
               </div>
