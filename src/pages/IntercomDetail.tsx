@@ -234,7 +234,8 @@ export default function IntercomDetailPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [imgError, setImgError] = useState(false);
   const [gallery, setGallery] = useState<string[]>([]);
-  const [lightbox, setLightbox] = useState<string | null>(null);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const product = slug ? PRODUCTS[slug] : null;
   const compat  = slug ? COMPATIBILITY[slug] ?? [] : [];
@@ -392,6 +393,45 @@ export default function IntercomDetailPage() {
         </div>
       </section>
 
+      {/* ══════════ GALLERY ══════════ */}
+      {gallery.length > 0 && (
+        <section style={{ background: "var(--c-surface-page)" }} className="py-10">
+          <div className="container mx-auto px-4">
+            {/* Main image */}
+            <div
+              className="relative overflow-hidden bg-[#111] cursor-zoom-in mb-2"
+              style={{ height: "480px", border: "1px solid rgba(201,151,58,0.1)" }}
+              onClick={() => setLightboxOpen(true)}
+            >
+              <img
+                src={gallery[activeIdx]}
+                alt={`${product.brand} ${product.name}`}
+                className="h-full w-full object-cover transition-opacity duration-200"
+              />
+            </div>
+
+            {/* Thumbnails */}
+            {gallery.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {gallery.map((url, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setActiveIdx(i)}
+                    className={`shrink-0 overflow-hidden border-2 transition-all duration-200 ${
+                      i === activeIdx ? "border-[#c9973a]" : "border-transparent opacity-40 hover:opacity-80"
+                    }`}
+                    style={{ width: 72, height: 72 }}
+                  >
+                    <img src={url} alt="" className="h-full w-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
       {/* ══════════ HIGHLIGHTS + COMPAT + SPECS ══════════ */}
       <section style={{ background: "var(--c-surface-page)" }} className="py-16">
         <div className="container mx-auto px-4">
@@ -491,61 +531,47 @@ export default function IntercomDetailPage() {
         </div>
       </section>
 
-      {/* ══════════ GALLERY ══════════ */}
-      {gallery.length > 0 && (
-        <section style={{ background: "var(--c-surface-card)" }} className="py-14">
-          <div className="container mx-auto px-4">
-            <p className="font-display text-[10px] uppercase tracking-[0.45em] mb-6" style={{ color: "rgba(201,151,58,0.6)" }}>Photos</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-              {gallery.map((url, i) => (
-                <motion.button
-                  key={i}
-                  type="button"
-                  onClick={() => setLightbox(url)}
-                  className="relative overflow-hidden rounded-lg aspect-square"
-                  style={{ border: "1px solid rgba(201,151,58,0.12)" }}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.3, delay: i * 0.05 }}
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <img src={url} alt={`${product.brand} ${product.name} photo ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
-                </motion.button>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
       {/* Lightbox */}
       <AnimatePresence>
-        {lightbox && (
+        {lightboxOpen && gallery.length > 0 && (
           <motion.div
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            style={{ background: "rgba(0,0,0,0.9)" }}
+            style={{ background: "rgba(0,0,0,0.93)" }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setLightbox(null)}
+            onClick={() => setLightboxOpen(false)}
           >
             <button
               type="button"
               className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full"
               style={{ background: "rgba(201,151,58,0.15)", border: "1px solid rgba(201,151,58,0.3)", color: "#c9973a" }}
-              onClick={() => setLightbox(null)}
+              onClick={() => setLightboxOpen(false)}
             >
               <X className="w-5 h-5" />
             </button>
             <motion.img
-              src={lightbox}
+              src={gallery[activeIdx]}
               alt=""
-              className="max-h-[90vh] max-w-full object-contain rounded-lg"
-              initial={{ scale: 0.9 }}
+              className="max-h-[90vh] max-w-full object-contain"
+              initial={{ scale: 0.92 }}
               animate={{ scale: 1 }}
-              exit={{ scale: 0.9 }}
+              exit={{ scale: 0.92 }}
               onClick={e => e.stopPropagation()}
             />
+            {gallery.length > 1 && (
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+                {gallery.map((_, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={e => { e.stopPropagation(); setActiveIdx(i); }}
+                    className="w-2 h-2 rounded-full transition-colors"
+                    style={{ background: i === activeIdx ? "#c9973a" : "rgba(255,255,255,0.3)" }}
+                  />
+                ))}
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
