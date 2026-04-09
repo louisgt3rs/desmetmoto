@@ -10,6 +10,7 @@ import SEO from "@/components/SEO";
 import InstallationModal from "@/components/InstallationModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/contexts/CartContext";
+import { toast } from "sonner";
 
 /* ─────────────────────────────────────────────────────────
    Types
@@ -444,13 +445,16 @@ export default function IntercomDetailPage() {
               {/* CTA */}
               <div className="flex flex-wrap gap-3">
                 <button
-                  onClick={() => addItem({
-                    id: slug!,
-                    type: "intercom",
-                    name: `${product.brand} ${product.name}`,
-                    price: dbData?.prix ?? null,
-                    imageUrl: gallery[0] ?? undefined,
-                  })}
+                  onClick={() => {
+                    addItem({
+                      id: slug!,
+                      type: "intercom",
+                      name: `${product.brand} ${product.name}`,
+                      price: dbData?.prix ?? null,
+                      imageUrl: gallery[0] ?? undefined,
+                    });
+                    toast.success("Ajouté au panier");
+                  }}
                   className="inline-flex items-center gap-3 font-display text-sm uppercase tracking-[0.25em] px-7 py-4 transition-all duration-300"
                   style={{ background: "#c9973a", color: "#050505" }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#d4a44a"; }}

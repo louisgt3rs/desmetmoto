@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import type { Tables } from "@/integrations/supabase/types";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
+import { toast } from "sonner";
 
 type ProductRow = Tables<"products">;
 
@@ -372,13 +373,24 @@ export default function ProductDetail() {
             <div className="mt-8">
               <button
                 type="button"
-                onClick={() => addItem({
-                  id: product.id,
-                  type: "product",
-                  name: product.name + (selectedColorway ? ` — ${selectedColorway.name}` : "") + (selectedSize ? ` — ${selectedSize}` : ""),
-                  price: typeof product.price === "number" ? product.price : null,
-                  imageUrl: gallery[0] ?? undefined,
-                })}
+                onClick={() => {
+                  if (hasColorways && !selectedColorway) {
+                    toast.error("Veuillez sélectionner un coloris");
+                    return;
+                  }
+                  if (hasSizeData && !selectedSize) {
+                    toast.error("Veuillez sélectionner une taille");
+                    return;
+                  }
+                  addItem({
+                    id: product.id + (selectedColorway ? `-${selectedColorway.id}` : "") + (selectedSize ? `-${selectedSize}` : ""),
+                    type: "product",
+                    name: product.name + (selectedColorway ? ` — ${selectedColorway.name}` : "") + (selectedSize ? ` — ${selectedSize}` : ""),
+                    price: typeof product.price === "number" ? product.price : null,
+                    imageUrl: gallery[0] ?? undefined,
+                  });
+                  toast.success("Ajouté au panier");
+                }}
                 className="inline-flex items-center gap-3 font-display text-sm uppercase tracking-[0.25em] px-6 py-3 transition-all"
                 style={{ background: "#c9973a", color: "#050505" }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#d4a44a"; }}

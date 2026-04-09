@@ -5,13 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
-import { CalendarDays, ChevronLeft, LayoutDashboard, Loader2, LogOut, Package, ShieldCheck, ShoppingBag, Tag, Wrench } from "lucide-react";
+import { CalendarDays, ChevronLeft, LayoutDashboard, Loader2, LogOut, Package, ShieldCheck, ShoppingBag, Tag, Wrench, ShoppingCart } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import AdminProducts from "@/components/admin/AdminProducts";
 import AdminEvents from "@/components/admin/AdminEvents";
 import AdminBrands from "@/components/admin/AdminBrands";
 import AdminReservations from "@/components/admin/AdminReservations";
+import AdminCartReservations from "@/components/admin/AdminCartReservations";
 import AdminInstallation from "@/components/admin/AdminInstallation";
 import type { AdminBrand, AdminEvent, AdminProduct } from "@/components/admin/types";
 
@@ -19,6 +20,7 @@ const tabs = [
   { id: "dashboard",     label: "Dashboard",    icon: LayoutDashboard },
   { id: "products",      label: "Produits",      icon: Package },
   { id: "reservations",  label: "Réservations",  icon: ShoppingBag },
+  { id: "commandes",     label: "Commandes",     icon: ShoppingCart },
   { id: "events",        label: "Événements",    icon: CalendarDays },
   { id: "brands",        label: "Marques",       icon: Tag },
   { id: "installation",  label: "Installation",  icon: Wrench },
@@ -244,6 +246,7 @@ export default function AdminPage() {
               {tab === "dashboard"    && <AdminDashboard products={products} events={events} />}
               {tab === "products"     && <AdminProducts products={products} brands={brands} onRefresh={loadAdminData} />}
               {tab === "reservations" && <AdminReservations />}
+              {tab === "commandes"    && <AdminCartReservations />}
               {tab === "events"       && <AdminEvents events={events} onRefresh={loadAdminData} />}
               {tab === "brands"       && <AdminBrands />}
               {tab === "installation" && <AdminInstallation />}
