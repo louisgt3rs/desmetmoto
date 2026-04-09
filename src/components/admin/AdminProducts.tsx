@@ -195,11 +195,23 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
     const brand = brands.find(b => b.id === form.brand_id)?.name || "";
     setGeneratingDesc(true);
     try {
-      const { data, error } = await supabase.functions.invoke("generate-description", {
-        body: { name: form.name, brand, category: form.category, price: form.price ? Number(form.price) : null },
-      });
-      if (error || !data?.description) throw new Error(error?.message || "Réponse vide");
-      setForm(f => ({ ...f, description: data.description }));
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-description`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+            "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ name: form.name, brand, category: form.category, price: form.price ? Number(form.price) : null }),
+        }
+      );
+      const json = await res.json();
+      if (!res.ok || !json.description) throw new Error(json.error || "Réponse vide");
+      setForm(f => ({ ...f, description: json.description }));
       toast.success("DESCRIPTION GÉNÉRÉE");
     } catch (err) {
       toast.error("ERREUR GÉNÉRATION : " + String(err));
