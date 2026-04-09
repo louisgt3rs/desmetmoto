@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Save, X } from "lucide-react";
+import { Plus, Pencil, Trash2, Save, X, Star } from "lucide-react";
 import { ImageUploadSingle, ImageUploadMulti } from "./ImageUpload";
 
 type InstBrand   = { id: string; name: string; sort_order: number };
 type InstModel   = { id: string; brand_id: string; name: string; is_modular: boolean; is_coming_soon: boolean; sort_order: number };
-type InstIntercom = { id: string; brand: string; name: string; image_url: string | null; is_coming_soon: boolean; sort_order: number; gallery_images: string[]; prix: number | null; description: string | null; stock: number | null; pack_duo: boolean; prix_duo: number | null };
+type InstIntercom = { id: string; brand: string; name: string; image_url: string | null; is_coming_soon: boolean; sort_order: number; gallery_images: string[]; prix: number | null; description: string | null; stock: number | null; pack_duo: boolean; prix_duo: number | null; featured: boolean };
 
 const kicker = "admin-kicker text-[10px] text-[hsl(var(--admin-muted-foreground))]";
 const inp    = "admin-input h-9 text-sm";
@@ -217,7 +217,7 @@ function ModelsTab() {
 }
 
 /* ══════════════════ INTERCOMS TAB ══════════════════ */
-const EMPTY_FORM = { brand: "", name: "", image_url: "", is_coming_soon: false, gallery_images: [] as string[], prix: "", description: "", stock: "", pack_duo: false, prix_duo: "" };
+const EMPTY_FORM = { brand: "", name: "", image_url: "", is_coming_soon: false, gallery_images: [] as string[], prix: "", description: "", stock: "", pack_duo: false, prix_duo: "", featured: false };
 
 function toPayload(form: typeof EMPTY_FORM) {
   return {
@@ -231,6 +231,7 @@ function toPayload(form: typeof EMPTY_FORM) {
     stock: form.stock !== "" ? parseInt(form.stock, 10) : null,
     pack_duo: form.pack_duo,
     prix_duo: form.pack_duo && form.prix_duo !== "" ? parseFloat(form.prix_duo) : null,
+    featured: form.featured,
   };
 }
 
@@ -246,6 +247,7 @@ function formFromRecord(i: InstIntercom): typeof EMPTY_FORM {
     stock: i.stock != null ? String(i.stock) : "",
     pack_duo: i.pack_duo,
     prix_duo: i.prix_duo != null ? String(i.prix_duo) : "",
+    featured: i.featured,
   };
 }
 
@@ -264,6 +266,9 @@ function IntercomsTab() {
   const save = async () => {
     if (!form.brand.trim() || !form.name.trim()) { toast.error("MARQUE ET NOM REQUIS"); return; }
     const payload = toPayload(form);
+    if (form.featured) {
+      await supabase.from("installation_intercoms").update({ featured: false }).neq("id", editing?.id ?? "");
+    }
     if (editing) {
       const { error } = await supabase.from("installation_intercoms").update(payload).eq("id", editing.id);
       if (error) { toast.error(error.message); return; }
@@ -352,6 +357,7 @@ function IntercomsTab() {
           )}
 
           <Toggle checked={form.is_coming_soon} onChange={v => setForm(f => ({ ...f, is_coming_soon: v }))} label="BIENTÔT DISPONIBLE" />
+          <Toggle checked={form.featured} onChange={v => setForm(f => ({ ...f, featured: v }))} label="PHOTO À LA UNE — PAGE D'ACCUEIL" />
 
           {/* Photos */}
           <div>
@@ -379,7 +385,8 @@ function IntercomsTab() {
                 <div className="flex items-center gap-3">
                   {i.image_url ? <img src={i.image_url} alt={i.name} className="h-10 w-10 object-cover rounded" /> : <div className="h-10 w-10 rounded border border-[hsl(var(--admin-accent)/0.15)] bg-[hsl(var(--admin-card))]" />}
                   <div>
-                    <span className="text-sm text-[hsl(var(--admin-foreground))]">
+                    <span className="text-sm text-[hsl(var(--admin-foreground))] flex items-center gap-1.5">
+                      {i.featured && <Star className="h-3 w-3 fill-[#c9973a] text-[#c9973a]" />}
                       {i.name}
                       {i.is_coming_soon && <span className={comingSoonBadge}>· BIENTÔT</span>}
                       {i.pack_duo && <span className="ml-2 text-[10px] uppercase tracking-[0.2em] font-adminDisplay" style={{ color: "#c9973a" }}>· DUO</span>}
@@ -410,7 +417,7 @@ export default function AdminInstallation() {
       </div>
 
       <Tabs defaultValue="brands">
-        <TabsList className="h-auto gap-0 rounded-none bg-transparent p-0 mb-6 border-b border-[hsl(var(--admin-accent)/0.18)]">
+        <TabsList className="h-auto gap-0 rounded-none bg-transparent p-0 mb-6 border-b border-[hsl(var(--admin-accent)/0.18)] overflow-x-auto flex-nowrap w-full" style={{ scrollbarWidth: "none" }}>
           {[
             { value: "brands", label: "MARQUES DE CASQUES" },
             { value: "models", label: "MODÈLES DE CASQUES" },
@@ -419,7 +426,7 @@ export default function AdminInstallation() {
             <TabsTrigger
               key={t.value}
               value={t.value}
-              className="rounded-none border-b-2 border-transparent px-5 py-3 font-adminDisplay text-sm tracking-[0.14em] text-[hsl(var(--admin-muted-foreground))] data-[state=active]:border-[hsl(var(--admin-accent))] data-[state=active]:bg-transparent data-[state=active]:text-[hsl(var(--admin-accent))]"
+              className="rounded-none border-b-2 border-transparent shrink-0 px-3 py-3 font-adminDisplay text-xs tracking-[0.1em] text-[hsl(var(--admin-muted-foreground))] data-[state=active]:border-[hsl(var(--admin-accent))] data-[state=active]:bg-transparent data-[state=active]:text-[hsl(var(--admin-accent))]"
             >
               {t.label}
             </TabsTrigger>

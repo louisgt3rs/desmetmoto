@@ -7,7 +7,7 @@ import InstallationModal from "@/components/InstallationModal";
 import storeImg from "@/assets/store-interior-1.jpeg";
 import { supabase } from "@/integrations/supabase/client";
 
-type InstIntercom = { id: string; brand: string; name: string; image_url: string | null; is_coming_soon: boolean };
+type InstIntercom = { id: string; brand: string; name: string; image_url: string | null; is_coming_soon: boolean; featured: boolean };
 
 const services = [
   "Intercoms Sena & Cardo intégrés dans votre casque",
@@ -23,14 +23,17 @@ export default function ServiceSection() {
   useEffect(() => {
     supabase
       .from("installation_intercoms")
-      .select("id, brand, name, image_url, is_coming_soon")
+      .select("id, brand, name, image_url, is_coming_soon, featured")
       .order("brand")
       .order("sort_order")
       .then(({ data }) => { if (data) setIntercoms(data as InstIntercom[]); });
   }, []);
 
   const uniqueIntercomBrands = [...new Set(intercoms.map(i => i.brand))];
-  const heroImg = intercoms.find(i => i.image_url && !i.is_coming_soon)?.image_url || null;
+  const heroImg =
+    intercoms.find(i => i.featured && i.image_url)?.image_url ||
+    intercoms.find(i => i.image_url && !i.is_coming_soon)?.image_url ||
+    null;
 
   return (
     <>
