@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
-import { AlertTriangle, ArrowDown, ArrowUp, Images, Loader2, Pencil, Plus, Save, Search, Trash2, Palette, Upload } from "lucide-react";
+import { AlertTriangle, ArrowDown, ArrowUp, Images, Loader2, Pencil, Plus, Save, Search, Trash2, Palette, Upload, Sparkles } from "lucide-react";
 import { ImageUploadSingle, ImageUploadMulti, uploadFile } from "./ImageUpload";
 import SizeStockGrid, { calcTotalFromSizes } from "./SizeStockGrid";
 import type { AdminBrand, AdminProduct } from "./types";
@@ -52,6 +52,7 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [saving, setSaving] = useState(false);
+  const [generatingDesc, setGeneratingDesc] = useState(false);
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -188,6 +189,24 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
   };
 
   // ─────────────────────────────────────────────────────────────────────────
+
+  const generateDescription = async () => {
+    if (!form.name.trim()) { toast.error("ENTREZ D'ABORD LE NOM DU PRODUIT"); return; }
+    const brand = brands.find(b => b.id === form.brand_id)?.name || "";
+    setGeneratingDesc(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-description", {
+        body: { name: form.name, brand, category: form.category, price: form.price ? Number(form.price) : null },
+      });
+      if (error || !data?.description) throw new Error(error?.message || "Réponse vide");
+      setForm(f => ({ ...f, description: data.description }));
+      toast.success("DESCRIPTION GÉNÉRÉE");
+    } catch (err) {
+      toast.error("ERREUR GÉNÉRATION : " + String(err));
+    } finally {
+      setGeneratingDesc(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!form.name.trim()) { toast.error("NOM REQUIS"); return; }
@@ -525,7 +544,23 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
               <Input type="number" min="0" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="0.00" className="admin-input" />
             </div>
             <div className="space-y-2 md:col-span-2">
-              <Label className="admin-kicker text-xs text-[hsl(var(--admin-muted-foreground))]">DESCRIPTION</Label>
+              <div className="flex items-center justify-between">
+                <Label className="admin-kicker text-xs text-[hsl(var(--admin-muted-foreground))]">DESCRIPTION</Label>
+                <button
+                  type="button"
+                  onClick={generateDescription}
+                  disabled={generatingDesc}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 font-adminDisplay text-[10px] uppercase tracking-[0.18em] border transition-all disabled:opacity-50"
+                  style={{ borderColor: "rgba(201,151,58,0.35)", color: "#c9973a", background: "rgba(201,151,58,0.06)" }}
+                  onMouseEnter={e => { if (!generatingDesc) (e.currentTarget as HTMLElement).style.background = "rgba(201,151,58,0.14)"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(201,151,58,0.06)"; }}
+                >
+                  {generatingDesc
+                    ? <><Loader2 className="h-3 w-3 animate-spin" /> Génération...</>
+                    : <><Sparkles className="h-3 w-3" /> Générer avec IA</>
+                  }
+                </button>
+              </div>
               <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="DESCRIPTION COURTE" className="admin-input min-h-[120px]" />
             </div>
             <div className="space-y-2 md:col-span-2">
