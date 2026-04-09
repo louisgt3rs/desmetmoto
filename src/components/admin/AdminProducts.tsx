@@ -195,22 +195,21 @@ export default function AdminProducts({ products, brands, onRefresh }: AdminProd
     const brand = brands.find(b => b.id === form.brand_id)?.name || "";
     setGeneratingDesc(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhdHN1ZGdwaWVjem1vZGpieW5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxOTI5OTksImV4cCI6MjA4OTc2ODk5OX0.nyknLVoppUcDeHjQWC-Nmw2wFYQiC4RLGFo51qEEE4w";
       const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-description`,
+        "https://qatsudgpieczmodjbynh.supabase.co/functions/v1/generate-description",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-            "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            "Authorization": `Bearer ${ANON_KEY}`,
+            "apikey": ANON_KEY,
           },
           body: JSON.stringify({ name: form.name, brand, category: form.category, price: form.price ? Number(form.price) : null }),
         }
       );
       const json = await res.json();
-      if (!res.ok || !json.description) throw new Error(json.error || "Réponse vide");
+      if (!json.description) throw new Error(json.error || `HTTP ${res.status}`);
       setForm(f => ({ ...f, description: json.description }));
       toast.success("DESCRIPTION GÉNÉRÉE");
     } catch (err) {
