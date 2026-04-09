@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { CartProvider } from "./contexts/CartContext";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -22,12 +23,15 @@ import NotFound from "./pages/NotFound";
 import CategoryPage from "./pages/CategoryPage";
 import Intercoms from "./pages/Intercoms";
 import IntercomDetail from "./pages/IntercomDetail";
+import Panier from "./pages/Panier";
+import PanierConfirmation from "./pages/PanierConfirmation";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <ThemeProvider>
   <LanguageProvider>
+  <CartProvider>
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -50,11 +54,14 @@ const App = () => (
           <Route path="/categorie/:slug" element={<CategoryPage />} />
           <Route path="/intercoms" element={<Intercoms />} />
           <Route path="/intercoms/:slug" element={<IntercomDetail />} />
+          <Route path="/panier" element={<Panier />} />
+          <Route path="/panier/confirmation" element={<PanierConfirmation />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
+  </CartProvider>
   </LanguageProvider>
   </ThemeProvider>
 );

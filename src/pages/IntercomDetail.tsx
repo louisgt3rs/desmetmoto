@@ -3,12 +3,13 @@ import { useParams, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, Battery, Radio, Users, Wifi, Wrench,
-  CheckCircle2, Shield, Zap, Volume2, Mic, Cloud, X,
+  CheckCircle2, Shield, Zap, Volume2, Mic, Cloud, X, ShoppingBag,
 } from "lucide-react";
 import Layout from "@/components/Layout";
 import SEO from "@/components/SEO";
 import InstallationModal from "@/components/InstallationModal";
 import { supabase } from "@/integrations/supabase/client";
+import { useCart } from "@/contexts/CartContext";
 
 /* ─────────────────────────────────────────────────────────
    Types
@@ -238,6 +239,7 @@ export default function IntercomDetailPage() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [dbData, setDbData] = useState<{ prix: number | null; stock: number | null; pack_duo: boolean; prix_duo: number | null } | null>(null);
 
+  const { addItem } = useCart();
   const product = slug ? PRODUCTS[slug] : null;
   const compat  = slug ? COMPATIBILITY[slug] ?? [] : [];
 
@@ -442,11 +444,26 @@ export default function IntercomDetailPage() {
               {/* CTA */}
               <div className="flex flex-wrap gap-3">
                 <button
-                  onClick={() => setModalOpen(true)}
+                  onClick={() => addItem({
+                    id: slug!,
+                    type: "intercom",
+                    name: `${product.brand} ${product.name}`,
+                    price: dbData?.prix ?? null,
+                    imageUrl: gallery[0] ?? undefined,
+                  })}
                   className="inline-flex items-center gap-3 font-display text-sm uppercase tracking-[0.25em] px-7 py-4 transition-all duration-300"
                   style={{ background: "#c9973a", color: "#050505" }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#d4a44a"; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#c9973a"; }}
+                >
+                  <ShoppingBag className="w-4 h-4" /> Ajouter au panier
+                </button>
+                <button
+                  onClick={() => setModalOpen(true)}
+                  className="inline-flex items-center gap-3 font-display text-sm uppercase tracking-[0.25em] px-7 py-4 transition-all duration-300"
+                  style={{ border: "1px solid rgba(201,151,58,0.3)", color: "var(--c-text-50)", background: "transparent" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(201,151,58,0.6)"; (e.currentTarget as HTMLElement).style.color = "#c9973a"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(201,151,58,0.3)"; (e.currentTarget as HTMLElement).style.color = "var(--c-text-50)"; }}
                 >
                   <Wrench className="w-4 h-4" /> Demander l'installation
                 </button>

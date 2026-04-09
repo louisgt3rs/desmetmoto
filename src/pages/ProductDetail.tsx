@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, ChevronLeft, ChevronRight, X, Check } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, X, Check, ShoppingBag } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import Layout from "@/components/Layout";
 import SEO from "@/components/SEO";
@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import type { Tables } from "@/integrations/supabase/types";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useCart } from "@/contexts/CartContext";
 
 type ProductRow = Tables<"products">;
 
@@ -30,6 +31,7 @@ function parseSbs(v: unknown): Record<string, number> {
 export default function ProductDetail() {
   const { slug, productId } = useParams<{ slug: string; productId: string }>();
   const { t } = useLanguage();
+  const { addItem } = useCart();
 
   const [product,       setProduct]       = useState<ProductRow | null>(null);
   const [colorways,     setColorways]     = useState<Colorway[]>([]);
@@ -364,6 +366,28 @@ export default function ProductDetail() {
               )}
             </div>
           </div>
+
+          {/* ── Add to cart ──────────────────────────────────────────────── */}
+          {product && (
+            <div className="mt-8">
+              <button
+                type="button"
+                onClick={() => addItem({
+                  id: product.id,
+                  type: "product",
+                  name: product.name + (selectedColorway ? ` — ${selectedColorway.name}` : "") + (selectedSize ? ` — ${selectedSize}` : ""),
+                  price: typeof product.price === "number" ? product.price : null,
+                  imageUrl: gallery[0] ?? undefined,
+                })}
+                className="inline-flex items-center gap-3 font-display text-sm uppercase tracking-[0.25em] px-6 py-3 transition-all"
+                style={{ background: "#c9973a", color: "#050505" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#d4a44a"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#c9973a"; }}
+              >
+                <ShoppingBag className="w-4 h-4" /> Ajouter au panier
+              </button>
+            </div>
+          )}
 
           {/* ── Reservation form ─────────────────────────────────────────── */}
           <div className="mt-10 border border-[#c9973a]/20 bg-[#111]">

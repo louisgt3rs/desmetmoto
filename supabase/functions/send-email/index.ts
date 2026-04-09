@@ -95,6 +95,42 @@ serve(async (req) => {
           </div>
         `,
       });
+    } else if (type === "cart_reservation") {
+      const r = reservation;
+      const itemsHtml = (r.items as any[]).map((item: any) =>
+        `<tr>
+          <td style="padding:6px 0;font-size:14px;color:#ddd">${item.name}</td>
+          <td style="padding:6px 0;font-size:14px;color:#ddd;text-align:center">${item.quantity}</td>
+          <td style="padding:6px 0;font-size:14px;color:#c9973a;text-align:right">${item.price != null ? (item.price * item.quantity).toLocaleString("fr-BE", { minimumFractionDigits: 2 }) + " €" : "Prix sur demande"}</td>
+        </tr>`
+      ).join("");
+      emails.push({
+        to: ADMIN_EMAIL,
+        subject: `Nouvelle réservation panier — ${r.first_name} ${r.last_name}`,
+        html: `
+          <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0e0e0e;color:#fff;padding:32px;border:1px solid #c9973a33">
+            <h1 style="font-family:sans-serif;font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#c9973a;margin:0 0 24px">RÉSERVATION PANIER</h1>
+            <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
+              <tr><td style="padding:8px 0;color:#999;font-size:12px;letter-spacing:2px;text-transform:uppercase;width:140px">PRÉNOM</td><td style="padding:8px 0;font-size:14px">${r.first_name}</td></tr>
+              <tr><td style="padding:8px 0;color:#999;font-size:12px;letter-spacing:2px;text-transform:uppercase">NOM</td><td style="padding:8px 0;font-size:14px">${r.last_name}</td></tr>
+              <tr><td style="padding:8px 0;color:#999;font-size:12px;letter-spacing:2px;text-transform:uppercase">EMAIL</td><td style="padding:8px 0;font-size:14px"><a href="mailto:${r.email}" style="color:#c9973a">${r.email}</a></td></tr>
+              <tr><td style="padding:8px 0;color:#999;font-size:12px;letter-spacing:2px;text-transform:uppercase">TÉLÉPHONE</td><td style="padding:8px 0;font-size:14px">${r.phone}</td></tr>
+              ${r.notes ? `<tr><td style="padding:8px 0;color:#999;font-size:12px;letter-spacing:2px;text-transform:uppercase;vertical-align:top">MESSAGE</td><td style="padding:8px 0;font-size:14px">${r.notes}</td></tr>` : ""}
+            </table>
+            <p style="color:#999;font-size:12px;letter-spacing:2px;text-transform:uppercase;margin:0 0 8px">ARTICLES</p>
+            <table style="width:100%;border-collapse:collapse;border-top:1px solid #c9973a22">
+              <thead><tr>
+                <th style="padding:6px 0;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#999;text-align:left">Article</th>
+                <th style="padding:6px 0;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#999;text-align:center">Qté</th>
+                <th style="padding:6px 0;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#999;text-align:right">Prix</th>
+              </tr></thead>
+              <tbody>${itemsHtml}</tbody>
+              ${r.total != null ? `<tfoot><tr><td colspan="2" style="padding:10px 0 0;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#999;border-top:1px solid #c9973a22">TOTAL ESTIMÉ</td><td style="padding:10px 0 0;font-size:16px;color:#c9973a;text-align:right;border-top:1px solid #c9973a22">${r.total.toLocaleString("fr-BE", { minimumFractionDigits: 2 })} €</td></tr></tfoot>` : ""}
+            </table>
+            <p style="margin-top:24px;font-size:11px;color:#666;letter-spacing:2px;text-transform:uppercase">Desmet Équipement — Réservation en boutique à Wavre</p>
+          </div>
+        `,
+      });
     } else if (type === "installation_request") {
       emails.push({
         to: ADMIN_EMAIL,

@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Phone, Sun, Moon } from "lucide-react";
+import { Menu, X, Phone, Sun, Moon, ShoppingBag } from "lucide-react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useCart } from "@/contexts/CartContext";
 import type { Language } from "@/i18n/translations";
 import { MegaMenuDesktop, MegaMenuMobile, useBrandsForMenu } from "@/components/NavBrandsMenu";
 
@@ -20,6 +21,7 @@ export default function Navbar() {
   const location = useLocation();
   const { lang, setLang, t } = useLanguage();
   const { isDark, toggleTheme } = useTheme();
+  const { totalItems } = useCart();
   const brands = useBrandsForMenu();
   const navRef = useRef<HTMLElement>(null);
 
@@ -129,13 +131,31 @@ export default function Navbar() {
             >
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
+
+            {/* Cart */}
+            <Link to="/panier" className="relative text-muted-foreground hover:text-primary transition-colors" aria-label="Panier">
+              <ShoppingBag className="w-5 h-5" />
+              {totalItems > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center font-display text-[10px] leading-none" style={{ background: "#c9973a", color: "#050505" }}>
+                  {totalItems > 9 ? "9+" : totalItems}
+                </span>
+              )}
+            </Link>
           </div>
 
-          {/* Mobile: theme + hamburger */}
+          {/* Mobile: theme + cart + hamburger */}
           <div className="flex items-center gap-3 lg:hidden">
             <button onClick={toggleTheme} className="text-muted-foreground hover:text-primary transition-colors">
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
+            <Link to="/panier" className="relative text-muted-foreground hover:text-primary transition-colors" aria-label="Panier">
+              <ShoppingBag className="w-5 h-5" />
+              {totalItems > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center font-display text-[10px] leading-none" style={{ background: "#c9973a", color: "#050505" }}>
+                  {totalItems > 9 ? "9+" : totalItems}
+                </span>
+              )}
+            </Link>
             <button onClick={() => setOpen(true)} className="text-foreground">
               <Menu className="w-6 h-6" />
             </button>
