@@ -8,7 +8,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import type { Tables } from "@/integrations/supabase/types";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { useCart } from "@/contexts/CartContext";
+import { colorNameToHex } from "@/lib/colorSwatch";
 import { toast } from "sonner";
 
 type ProductRow = Tables<"products">;
@@ -32,6 +34,7 @@ function parseSbs(v: unknown): Record<string, number> {
 export default function ProductDetail() {
   const { slug, productId } = useParams<{ slug: string; productId: string }>();
   const { t } = useLanguage();
+  const { isDark } = useTheme();
   const { addItem } = useCart();
 
   const [product,       setProduct]       = useState<ProductRow | null>(null);
@@ -225,7 +228,29 @@ export default function ProductDetail() {
 
   return (
     <Layout>
-      <SEO title={`${product.name} — ${brandName} — Desmet Équipement`} />
+      <SEO
+        title={`${product.name} — ${brandName} — Desmet Équipement`}
+        description={`${product.name} de ${brandName} disponible chez Desmet Équipement à Wavre. Revendeur officiel certifié.`}
+        image={product.image_url ?? undefined}
+        canonicalPath={`/marques/${slug}/${productId}`}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Product",
+          "name": product.name,
+          "brand": { "@type": "Brand", "name": brandName },
+          ...(product.image_url ? { "image": product.image_url } : {}),
+          ...(typeof product.price === "number" && product.price > 0 ? {
+            "offers": {
+              "@type": "Offer",
+              "priceCurrency": "EUR",
+              "price": product.price,
+              "availability": "https://schema.org/InStoreOnly",
+              "seller": { "@type": "Organization", "name": "Desmet Équipement" }
+            }
+          } : {}),
+          "seller": { "@type": "Organization", "name": "Desmet Équipement", "url": "https://www.desmetequipement.com" }
+        }}
+      />
 
       <div className="min-h-screen bg-[#0e0e0e]">
         <div className="container mx-auto px-4 py-8">
@@ -246,15 +271,101 @@ export default function ProductDetail() {
             <div>
               {/* Main image */}
               <div
-                className="relative overflow-hidden bg-[#111] cursor-zoom-in"
-                style={{ height: "480px" }}
+                className="relative cursor-zoom-in flex items-center justify-center overflow-hidden"
+                style={{
+                  minHeight: "320px", maxHeight: "600px",
+                  border: `1px solid ${isDark ? "rgba(201,151,58,0.18)" : "rgba(201,151,58,0.25)"}`,
+                  background: isDark
+                    ? "linear-gradient(160deg, #0e0e10 0%, #09090b 50%, #0f0d09 100%)"
+                    : "linear-gradient(160deg, #f0efed 0%, #e8e6e1 50%, #ede9df 100%)",
+                }}
                 onClick={() => gallery.length > 0 && setLightboxIdx(activeImgIdx)}
               >
+                {/* Motif icônes moto répétées */}
+                <svg className="pointer-events-none absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid slice" viewBox="0 0 800 500" aria-hidden="true">
+                  <defs>
+                    {/* Casque intégral */}
+                    <symbol id="ico-helmet" viewBox="0 0 40 40">
+                      <path d="M20 4C11.2 4 4 11.2 4 20c0 5.5 2.7 10.4 6.8 13.4V30h18.4v3.4C33.3 30.4 36 25.5 36 20c0-8.8-7.2-16-16-16z" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+                      <path d="M4 22h4M36 22h-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                      <path d="M8 27c2 1.5 5 2.5 8 2.5h8c3 0 6-1 8-2.5" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round"/>
+                      <rect x="10" y="16" width="20" height="7" rx="2" fill="none" stroke="currentColor" strokeWidth="1"/>
+                    </symbol>
+                    {/* Roue moto */}
+                    <symbol id="ico-wheel" viewBox="0 0 40 40">
+                      <circle cx="20" cy="20" r="15" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+                      <circle cx="20" cy="20" r="4" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+                      <line x1="20" y1="5" x2="20" y2="16" stroke="currentColor" strokeWidth="1"/>
+                      <line x1="20" y1="24" x2="20" y2="35" stroke="currentColor" strokeWidth="1"/>
+                      <line x1="5" y1="20" x2="16" y2="20" stroke="currentColor" strokeWidth="1"/>
+                      <line x1="24" y1="20" x2="35" y2="20" stroke="currentColor" strokeWidth="1"/>
+                      <line x1="9.4" y1="9.4" x2="17.2" y2="17.2" stroke="currentColor" strokeWidth="1"/>
+                      <line x1="22.8" y1="22.8" x2="30.6" y2="30.6" stroke="currentColor" strokeWidth="1"/>
+                      <line x1="30.6" y1="9.4" x2="22.8" y2="17.2" stroke="currentColor" strokeWidth="1"/>
+                      <line x1="17.2" y1="22.8" x2="9.4" y2="30.6" stroke="currentColor" strokeWidth="1"/>
+                    </symbol>
+                    {/* Éclair / vitesse */}
+                    <symbol id="ico-bolt" viewBox="0 0 40 40">
+                      <path d="M22 4L10 22h10l-2 14L30 18H20L22 4z" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+                    </symbol>
+                    {/* Gant */}
+                    <symbol id="ico-glove" viewBox="0 0 40 40">
+                      <path d="M10 34V20l4-12h4l1 8 3-10h3l1 10 3-8h3l1 14v10H10z" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+                      <line x1="10" y1="24" x2="29" y2="24" stroke="currentColor" strokeWidth="1"/>
+                    </symbol>
+                    <radialGradient id="pd-center-fade" cx="50%" cy="50%" r="55%">
+                      <stop offset="0%" stopColor={isDark ? "rgba(14,14,16,0.95)" : "rgba(232,230,225,0.95)"} />
+                      <stop offset="100%" stopColor="transparent" />
+                    </radialGradient>
+                  </defs>
+
+                  {/* Grille de logos — disposition décalée */}
+                  {[
+                    { x: 60,  y: 60,  icon: "ico-helmet", rot: -15, scale: 1.1 },
+                    { x: 200, y: 40,  icon: "ico-wheel",  rot: 0,   scale: 0.9 },
+                    { x: 340, y: 70,  icon: "ico-bolt",   rot: 10,  scale: 1.0 },
+                    { x: 480, y: 45,  icon: "ico-glove",  rot: -8,  scale: 1.0 },
+                    { x: 620, y: 60,  icon: "ico-helmet", rot: 12,  scale: 0.9 },
+                    { x: 740, y: 40,  icon: "ico-wheel",  rot: 0,   scale: 1.0 },
+                    { x: 30,  y: 180, icon: "ico-bolt",   rot: -5,  scale: 0.85 },
+                    { x: 150, y: 160, icon: "ico-glove",  rot: 15,  scale: 1.0 },
+                    { x: 680, y: 170, icon: "ico-bolt",   rot: -10, scale: 1.0 },
+                    { x: 760, y: 160, icon: "ico-helmet", rot: 8,   scale: 0.9 },
+                    { x: 60,  y: 380, icon: "ico-wheel",  rot: 0,   scale: 1.0 },
+                    { x: 190, y: 400, icon: "ico-bolt",   rot: 12,  scale: 0.85 },
+                    { x: 330, y: 380, icon: "ico-glove",  rot: -8,  scale: 1.0 },
+                    { x: 620, y: 390, icon: "ico-helmet", rot: -12, scale: 0.9 },
+                    { x: 740, y: 370, icon: "ico-wheel",  rot: 5,   scale: 1.0 },
+                    { x: 60,  y: 460, icon: "ico-bolt",   rot: 0,   scale: 0.9 },
+                    { x: 480, y: 460, icon: "ico-wheel",  rot: 0,   scale: 0.85 },
+                    { x: 740, y: 450, icon: "ico-glove",  rot: -5,  scale: 0.9 },
+                  ].map(({ x, y, icon, rot, scale }, i) => (
+                    <use
+                      key={i}
+                      href={`#${icon}`}
+                      x={x - 20 * scale} y={y - 20 * scale}
+                      width={40 * scale} height={40 * scale}
+                      color={isDark ? "rgba(201,151,58,0.12)" : "rgba(160,115,25,0.14)"}
+                      transform={`rotate(${rot}, ${x}, ${y})`}
+                    />
+                  ))}
+
+                  {/* Vignettage central pour garder le produit visible */}
+                  <rect width="800" height="500" fill="url(#pd-center-fade)" />
+                </svg>
+
+                {/* Halo doré central */}
+                <div className="pointer-events-none absolute inset-0" style={{
+                  background: isDark
+                    ? "radial-gradient(ellipse 50% 40% at 50% 50%, rgba(201,151,58,0.07), transparent 70%)"
+                    : "radial-gradient(ellipse 50% 40% at 50% 50%, rgba(201,151,58,0.1), transparent 70%)",
+                }} />
                 {gallery.length > 0 ? (
                   <img
                     src={gallery[activeImgIdx]}
                     alt={product.name}
-                    className="h-full w-full object-cover transition-opacity duration-200"
+                    className="relative z-10 w-full object-contain transition-opacity duration-200"
+                    style={{ display: "block", maxHeight: "600px" }}
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center">
@@ -313,12 +424,20 @@ export default function ProductDetail() {
                       <button
                         key={cw.id}
                         onClick={() => { setSelectedColorway(cw); setSelectedSize(""); }}
-                        className={`border px-4 py-2 font-display text-[11px] uppercase tracking-widest transition-all duration-150 ${
+                        className={`flex items-center gap-2 border px-4 py-2 font-display text-[11px] uppercase tracking-widest transition-all duration-150 ${
                           selectedColorway?.id === cw.id
                             ? "border-[#c9973a] bg-[#c9973a]/10 text-[#c9973a]"
                             : "border-white/20 text-white/60 hover:border-white/50"
                         }`}
                       >
+                        <span
+                          className="h-3.5 w-3.5 shrink-0 rounded-full border border-white/20"
+                          style={
+                            cw.image_url
+                              ? { backgroundImage: `url(${cw.image_url})`, backgroundSize: "cover", backgroundPosition: "center" }
+                              : { background: colorNameToHex(cw.name) }
+                          }
+                        />
                         {cw.name}
                       </button>
                     ))}
