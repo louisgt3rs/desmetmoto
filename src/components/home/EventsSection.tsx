@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import bikesCoffeeImg from "@/assets/bikes-coffee.jpg";
 import type { Tables } from "@/integrations/supabase/types";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { pickUpcomingEvent } from "@/lib/events";
 
 type Event = Tables<"events"> & {
   event_date?: string | null;
@@ -47,8 +48,7 @@ export default function EventsSection() {
       .then(({ data }) => {
         const events = (data as Event[] | null) ?? [];
         const today = new Date().toISOString().split("T")[0];
-        const upcoming = events.find((event) => (event.event_date || event.date || "") >= today && event.is_upcoming !== false);
-        setNextEvent(upcoming ?? events[0] ?? null);
+        setNextEvent(pickUpcomingEvent(events, today));
       });
   }, []);
 
