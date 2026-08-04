@@ -228,6 +228,58 @@ function StatBlock({ stat, delay }: { stat: StatItem; delay: number }) {
   );
 }
 
+function ProductLightbox({
+  images, activeIdx, open, onClose, onSelect,
+}: {
+  images: string[]; activeIdx: number; open: boolean; onClose: () => void; onSelect: (i: number) => void;
+}) {
+  return (
+    <AnimatePresence>
+      {open && images.length > 0 && (
+        <motion.div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.93)" }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+        >
+          <button
+            type="button"
+            className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full"
+            style={{ background: "rgba(201,151,58,0.15)", border: "1px solid rgba(201,151,58,0.3)", color: "#c9973a" }}
+            onClick={onClose}
+          >
+            <X className="w-5 h-5" />
+          </button>
+          <motion.img
+            src={images[activeIdx]}
+            alt=""
+            className="max-h-[90vh] max-w-full object-contain"
+            initial={{ scale: 0.92 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0.92 }}
+            onClick={(e) => e.stopPropagation()}
+          />
+          {images.length > 1 && (
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+              {images.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); onSelect(i); }}
+                  className="w-2 h-2 rounded-full transition-colors"
+                  style={{ background: i === activeIdx ? "#c9973a" : "rgba(255,255,255,0.3)" }}
+                />
+              ))}
+            </div>
+          )}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 /* ─────────────────────────────────────────────────────────
    Page
 ───────────────────────────────────────────────────────── */
@@ -239,6 +291,13 @@ export default function IntercomDetailPage() {
   const [activeIdx, setActiveIdx] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [dbData, setDbData] = useState<{ prix: number | null; stock: number | null; pack_duo: boolean; prix_duo: number | null } | null>(null);
+  const [fallbackRecord, setFallbackRecord] = useState<{
+    brand: string;
+    name: string;
+    description: string | null;
+    image_url: string | null;
+  } | null>(null);
+  const [dbChecked, setDbChecked] = useState(false);
 
   const { addItem } = useCart();
   const product = slug ? PRODUCTS[slug] : null;
@@ -248,10 +307,11 @@ export default function IntercomDetailPage() {
     if (!slug) return;
     supabase
       .from("installation_intercoms")
-      .select("gallery_images, prix, stock, pack_duo, prix_duo")
+      .select("brand, name, description, image_url, gallery_images, prix, stock, pack_duo, prix_duo")
       .eq("slug", slug)
       .maybeSingle()
       .then(({ data }) => {
+        setDbChecked(true);
         if (!data) return;
         if (data.gallery_images && Array.isArray(data.gallery_images)) {
           setGallery(data.gallery_images as string[]);
@@ -262,18 +322,170 @@ export default function IntercomDetailPage() {
           pack_duo: (data as any).pack_duo ?? false,
           prix_duo: (data as any).prix_duo ?? null,
         });
+        setFallbackRecord({
+          brand: (data as any).brand,
+          name: (data as any).name,
+          description: (data as any).description ?? null,
+          image_url: (data as any).image_url ?? null,
+        });
       });
   }, [slug]);
 
   if (!product) {
+    if (!dbChecked) {
+      return (
+        <Layout>
+          <div className="flex min-h-[70vh] items-center justify-center" style={{ background: "var(--c-surface-page)" }}>
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#c9973a] border-t-transparent" />
+          </div>
+        </Layout>
+      );
+    }
+
+    if (!fallbackRecord) {
+      return (
+        <Layout>
+          <div className="min-h-[70vh] flex flex-col items-center justify-center" style={{ background: "var(--c-surface-page)" }}>
+            <p className="font-display text-white text-2xl mb-4">Produit introuvable</p>
+            <Link to="/intercoms" className="font-display text-[11px] uppercase tracking-[0.3em]" style={{ color: "#c9973a" }}>
+              ← Retour aux intercoms
+            </Link>
+          </div>
+        </Layout>
+      );
+    }
+
     return (
       <Layout>
-        <div className="min-h-[70vh] flex flex-col items-center justify-center" style={{ background: "var(--c-surface-page)" }}>
-          <p className="font-display text-white text-2xl mb-4">Produit introuvable</p>
-          <Link to="/intercoms" className="font-display text-[11px] uppercase tracking-[0.3em]" style={{ color: "#c9973a" }}>
-            ← Retour aux intercoms
-          </Link>
-        </div>
+        <SEO
+          title={`${fallbackRecord.brand} ${fallbackRecord.name} — Intercom moto | Desmet Équipement Wavre`}
+          description={fallbackRecord.description || `${fallbackRecord.brand} ${fallbackRecord.name} disponible chez Desmet Équipement à Wavre.`}
+          image={fallbackRecord.image_url ?? undefined}
+          canonicalPath={`/intercoms/${slug}`}
+        />
+
+        <section className="relative overflow-hidden" style={{ background: "var(--c-surface-hero)" }}>
+          <svg className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.045]" style={{ mixBlendMode: "overlay" }} aria-hidden="true">
+            <filter id="gFallback"><feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="4" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+            <rect width="100%" height="100%" filter="url(#gFallback)"/>
+          </svg>
+          <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 70% 50% at 50% 0%, rgba(201,151,58,0.08), transparent 60%)" }} />
+
+          <div className="relative container mx-auto px-4 pt-20 pb-16">
+            <Link
+              to="/intercoms"
+              className="inline-flex items-center gap-2 font-display text-[10px] uppercase tracking-[0.35em] mb-8 transition-colors"
+              style={{ color: "var(--c-text-30)" }}
+            >
+              <ArrowLeft className="w-3 h-3" /> Tous les intercoms
+            </Link>
+
+            <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5" style={{ border: "1px solid rgba(201,151,58,0.3)", background: "rgba(201,151,58,0.06)" }}>
+              <Radio className="w-3 h-3" style={{ color: "#c9973a" }} />
+              <span className="font-display text-[10px] uppercase tracking-[0.4em]" style={{ color: "#c9973a" }}>{fallbackRecord.brand} — Intercom Bluetooth</span>
+            </div>
+
+            <h1
+              className="font-display text-white leading-none mb-8"
+              style={{ fontSize: "clamp(3rem,10vw,6rem)", textShadow: "0 0 80px rgba(201,151,58,0.25), 0 0 160px rgba(201,151,58,0.1)" }}
+            >
+              {fallbackRecord.name}
+            </h1>
+
+            <div className="grid gap-8 md:grid-cols-2">
+              <div>
+                {gallery.length > 0 ? (
+                  <div
+                    className="relative overflow-hidden bg-[#111] cursor-zoom-in"
+                    style={{ border: "1px solid rgba(201,151,58,0.1)" }}
+                    onClick={() => setLightboxOpen(true)}
+                  >
+                    <img
+                      src={gallery[activeIdx]}
+                      alt={`${fallbackRecord.brand} ${fallbackRecord.name}`}
+                      className="w-full object-contain"
+                      style={{ display: "block" }}
+                    />
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center bg-[#111]" style={{ height: "360px", border: "1px solid rgba(201,151,58,0.1)" }}>
+                    <Radio className="w-16 h-16" style={{ color: "rgba(201,151,58,0.3)" }} />
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-col justify-center gap-6">
+                {fallbackRecord.description && (
+                  <p className="text-sm leading-relaxed" style={{ color: "var(--c-text-50)" }}>{fallbackRecord.description}</p>
+                )}
+
+                {dbData && (dbData.prix != null || dbData.stock != null) && (
+                  <div className="flex items-center gap-4 flex-wrap">
+                    {dbData.prix != null && (
+                      <p className="font-display leading-none" style={{ fontSize: "clamp(1.8rem,5vw,2.4rem)", color: "#c9973a" }}>
+                        {dbData.prix.toLocaleString("fr-BE", { minimumFractionDigits: 2 })} €
+                      </p>
+                    )}
+                    {dbData.stock != null && (
+                      <span
+                        className="font-display text-[11px] uppercase tracking-[0.25em] px-3 py-1.5"
+                        style={{
+                          border: "1px solid",
+                          borderColor: dbData.stock > 3 ? "rgba(201,151,58,0.5)" : dbData.stock > 0 ? "rgba(255,180,0,0.5)" : "rgba(255,80,80,0.4)",
+                          color: dbData.stock > 3 ? "#c9973a" : dbData.stock > 0 ? "#ffb400" : "#ff5050",
+                          background: dbData.stock > 3 ? "rgba(201,151,58,0.06)" : dbData.stock > 0 ? "rgba(255,180,0,0.06)" : "rgba(255,80,80,0.06)",
+                        }}
+                      >
+                        {dbData.stock > 3 ? "En stock" : dbData.stock > 0 ? `Stock limité — ${dbData.stock} restant${dbData.stock > 1 ? "s" : ""}` : "Rupture de stock"}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={() => {
+                      addItem({
+                        id: slug!,
+                        type: "intercom",
+                        name: `${fallbackRecord.brand} ${fallbackRecord.name}`,
+                        price: dbData?.prix ?? null,
+                        imageUrl: gallery[0] ?? undefined,
+                      });
+                      toast.success("Ajouté au panier");
+                    }}
+                    className="inline-flex items-center gap-3 font-display text-sm uppercase tracking-[0.25em] px-7 py-4 transition-all duration-300"
+                    style={{ background: "#c9973a", color: "#050505" }}
+                  >
+                    <ShoppingBag className="w-4 h-4" /> Ajouter au panier
+                  </button>
+                  <button
+                    onClick={() => setModalOpen(true)}
+                    className="inline-flex items-center gap-3 font-display text-sm uppercase tracking-[0.25em] px-7 py-4 transition-all duration-300"
+                    style={{ border: "1px solid rgba(201,151,58,0.3)", color: "var(--c-text-50)", background: "transparent" }}
+                  >
+                    <Wrench className="w-4 h-4" /> Demander l'installation
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <ProductLightbox
+          images={gallery}
+          activeIdx={activeIdx}
+          open={lightboxOpen}
+          onClose={() => setLightboxOpen(false)}
+          onSelect={setActiveIdx}
+        />
+
+        <InstallationModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          preselectedAccessoryType="Intercom Sena"
+          preselectedIntercomModel={fallbackRecord.name}
+        />
       </Layout>
     );
   }
@@ -283,6 +495,26 @@ export default function IntercomDetailPage() {
       <SEO
         title={`${product.brand} ${product.name} — Intercom moto | Desmet Équipement Wavre`}
         description={product.shortDesc}
+        image={product.imageUrl}
+        canonicalPath={`/intercoms/${slug}`}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Product",
+          "name": `${product.brand} ${product.name}`,
+          "description": product.shortDesc,
+          "brand": { "@type": "Brand", "name": product.brand },
+          "image": product.imageUrl,
+          "category": "Intercom moto",
+          ...(dbData?.prix != null ? {
+            "offers": {
+              "@type": "Offer",
+              "priceCurrency": "EUR",
+              "price": dbData.prix,
+              "availability": dbData.stock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+              "seller": { "@type": "Organization", "name": "Desmet Équipement" }
+            }
+          } : {}),
+        }}
       />
 
       {/* ══════════ HERO ══════════ */}
@@ -328,13 +560,14 @@ export default function IntercomDetailPage() {
                 <>
                   <div
                     className="relative overflow-hidden bg-[#111] cursor-zoom-in mb-2"
-                    style={{ height: "480px", border: "1px solid rgba(201,151,58,0.1)" }}
+                    style={{ border: "1px solid rgba(201,151,58,0.1)" }}
                     onClick={() => setLightboxOpen(true)}
                   >
                     <img
                       src={gallery[activeIdx]}
                       alt={`${product.brand} ${product.name}`}
-                      className="h-full w-full object-cover transition-opacity duration-200"
+                      className="w-full object-contain transition-opacity duration-200"
+                      style={{ display: "block" }}
                     />
                   </div>
                   {gallery.length > 1 && (
@@ -586,49 +819,13 @@ export default function IntercomDetailPage() {
       </section>
 
       {/* Lightbox */}
-      <AnimatePresence>
-        {lightboxOpen && gallery.length > 0 && (
-          <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            style={{ background: "rgba(0,0,0,0.93)" }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setLightboxOpen(false)}
-          >
-            <button
-              type="button"
-              className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full"
-              style={{ background: "rgba(201,151,58,0.15)", border: "1px solid rgba(201,151,58,0.3)", color: "#c9973a" }}
-              onClick={() => setLightboxOpen(false)}
-            >
-              <X className="w-5 h-5" />
-            </button>
-            <motion.img
-              src={gallery[activeIdx]}
-              alt=""
-              className="max-h-[90vh] max-w-full object-contain"
-              initial={{ scale: 0.92 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.92 }}
-              onClick={e => e.stopPropagation()}
-            />
-            {gallery.length > 1 && (
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
-                {gallery.map((_, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={e => { e.stopPropagation(); setActiveIdx(i); }}
-                    className="w-2 h-2 rounded-full transition-colors"
-                    style={{ background: i === activeIdx ? "#c9973a" : "rgba(255,255,255,0.3)" }}
-                  />
-                ))}
-              </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <ProductLightbox
+        images={gallery}
+        activeIdx={activeIdx}
+        open={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        onSelect={setActiveIdx}
+      />
 
       <InstallationModal
         open={modalOpen}
