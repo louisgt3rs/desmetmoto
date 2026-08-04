@@ -185,7 +185,7 @@ export function MegaMenuDesktop({
                   </div>
 
                   <Link
-                    to="/marques"
+                    to="/brands"
                     onClick={onClose}
                     className="mt-4 inline-flex items-center gap-2 font-display text-[10px] uppercase tracking-[0.3em] transition-colors"
                     style={{ color: "rgba(201,151,58,0.5)" }}
@@ -265,7 +265,7 @@ export function MegaMenuMobile({
               ))}
 
               <Link
-                to="/marques"
+                to="/brands"
                 onClick={onClose}
                 className="block pt-1 font-display text-[11px] uppercase tracking-[0.3em] transition-colors"
                 style={{ color: "rgba(201,151,58,0.6)" }}

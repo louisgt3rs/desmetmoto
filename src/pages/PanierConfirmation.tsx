@@ -79,7 +79,7 @@ export default function PanierConfirmation() {
               style={{ background: "#c9973a", color: "#050505" }}>
               Retour à l'accueil
             </Link>
-            <Link to="/marques" className="inline-flex items-center gap-2 font-display text-sm uppercase tracking-[0.2em] px-6 py-3 transition-all"
+            <Link to="/brands" className="inline-flex items-center gap-2 font-display text-sm uppercase tracking-[0.2em] px-6 py-3 transition-all"
               style={{ border: "1px solid rgba(201,151,58,0.3)", color: "#c9973a" }}>
               <ShoppingBag className="w-4 h-4" /> Continuer les achats
             </Link>

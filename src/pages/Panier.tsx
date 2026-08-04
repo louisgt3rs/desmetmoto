@@ -108,7 +108,7 @@ export default function Panier() {
             <div className="text-center py-24">
               <ShoppingBag className="w-12 h-12 mx-auto mb-4 opacity-20" style={{ color: "#c9973a" }} />
               <p className="font-display text-xl text-white/40 mb-6">Votre panier est vide</p>
-              <Link to="/marques" className="inline-flex items-center gap-2 font-display text-sm uppercase tracking-[0.25em] px-6 py-3 transition-all"
+              <Link to="/brands" className="inline-flex items-center gap-2 font-display text-sm uppercase tracking-[0.25em] px-6 py-3 transition-all"
                 style={{ border: "1px solid rgba(201,151,58,0.4)", color: "#c9973a" }}>
                 Découvrir nos produits
               </Link>
