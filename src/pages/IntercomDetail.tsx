@@ -283,6 +283,12 @@ function ProductLightbox({
 /* ─────────────────────────────────────────────────────────
    Page
 ───────────────────────────────────────────────────────── */
+function accessoryTypeForBrand(brand: string): string {
+  if (brand === "Sena") return "Intercom Sena";
+  if (brand === "Cardo") return "Intercom Cardo";
+  return "Autre";
+}
+
 export default function IntercomDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const [modalOpen, setModalOpen] = useState(false);
@@ -442,6 +448,24 @@ export default function IntercomDetailPage() {
                   </div>
                 )}
 
+                {/* Pack duo */}
+                {dbData?.pack_duo && dbData.prix_duo != null && dbData.prix != null && (
+                  <div className="p-4" style={{ background: "rgba(201,151,58,0.06)", border: "1px solid rgba(201,151,58,0.25)" }}>
+                    <p className="font-display text-[10px] uppercase tracking-[0.4em] mb-2" style={{ color: "rgba(201,151,58,0.7)" }}>Pack Duo</p>
+                    <div className="flex items-baseline gap-3 flex-wrap">
+                      <p className="font-display text-2xl" style={{ color: "#c9973a" }}>
+                        {dbData.prix_duo.toLocaleString("fr-BE", { minimumFractionDigits: 2 })} €
+                      </p>
+                      <p className="text-xs" style={{ color: "var(--c-text-50)" }}>pour 2 unités</p>
+                    </div>
+                    {dbData.prix_duo < dbData.prix * 2 && (
+                      <p className="mt-1.5 text-xs" style={{ color: "#c9973a" }}>
+                        Économisez {(dbData.prix * 2 - dbData.prix_duo).toLocaleString("fr-BE", { minimumFractionDigits: 2 })} € par rapport à l'achat séparé
+                      </p>
+                    )}
+                  </div>
+                )}
+
                 <div className="flex flex-wrap gap-3">
                   <button
                     onClick={() => {
@@ -483,7 +507,7 @@ export default function IntercomDetailPage() {
         <InstallationModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
-          preselectedAccessoryType="Intercom Sena"
+          preselectedAccessoryType={accessoryTypeForBrand(fallbackRecord.brand)}
           preselectedIntercomModel={fallbackRecord.name}
         />
       </Layout>
