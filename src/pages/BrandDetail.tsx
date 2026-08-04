@@ -336,7 +336,7 @@ export default function BrandDetailPage() {
                         viewport={{ once: true, margin: "-40px" }}
                         transition={{ duration: 0.4, delay: (i % 4) * 0.06 }}
                         className="group cursor-pointer relative overflow-hidden"
-                        style={{ background: "var(--c-surface-page)", boxShadow: "inset 0 0 0 1px rgba(201,151,58,0.08)" }}
+                        style={{ background: "var(--c-surface-page)", border: "1px solid rgba(201,151,58,0.08)" }}
                         onClick={() => navigate(`/marques/${slug}/${product.id}`)}
                       >
                         {/* Image — portrait 3:4 */}
