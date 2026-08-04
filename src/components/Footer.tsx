@@ -8,7 +8,7 @@ export default function Footer() {
     { label: t("nav_home"),           path: "/" },
     { label: t("footer_products"),    path: "/brands" },
     { label: t("footer_events"),      path: "/community" },
-    { label: t("nav_arai"),           path: "/arai" },
+    { label: t("nav_arai"),           path: "/brands" },
     { label: t("nav_contact"),        path: "/contact" },
   ];
 
@@ -34,7 +34,7 @@ export default function Footer() {
           <div className="flex flex-col gap-3 sm:items-center">
             {NAV_LINKS.map((l) => (
               <Link
-                key={l.path}
+                key={l.label}
                 to={l.path}
                 className="text-sm uppercase tracking-[0.14em] text-white/55 transition-colors hover:text-[#c9973a]"
               >
