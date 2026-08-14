@@ -5,13 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
-import { CalendarDays, ChevronLeft, LayoutDashboard, Loader2, LogOut, Package, ShieldCheck, ShoppingBag, Tag, Wrench, ShoppingCart } from "lucide-react";
+import { BarChart3, CalendarDays, ChevronLeft, LayoutDashboard, Loader2, LogOut, Mail, Package, ShieldCheck, ShoppingBag, Tag, Wrench, ShoppingCart } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import AdminProducts from "@/components/admin/AdminProducts";
+import AdminStock from "@/components/admin/AdminStock";
 import AdminEvents from "@/components/admin/AdminEvents";
 import AdminBrands from "@/components/admin/AdminBrands";
 import AdminReservations from "@/components/admin/AdminReservations";
+import AdminMessages from "@/components/admin/AdminMessages";
 import AdminCartReservations from "@/components/admin/AdminCartReservations";
 import AdminInstallation from "@/components/admin/AdminInstallation";
 import type { AdminBrand, AdminEvent, AdminProduct } from "@/components/admin/types";
@@ -19,8 +21,10 @@ import type { AdminBrand, AdminEvent, AdminProduct } from "@/components/admin/ty
 const tabs = [
   { id: "dashboard",     label: "Dashboard",    icon: LayoutDashboard },
   { id: "products",      label: "Produits",      icon: Package },
+  { id: "stock",         label: "Stock",         icon: BarChart3 },
   { id: "reservations",  label: "Réservations",  icon: ShoppingBag },
   { id: "commandes",     label: "Commandes",     icon: ShoppingCart },
+  { id: "messages",      label: "Messages",      icon: Mail },
   { id: "events",        label: "Événements",    icon: CalendarDays },
   { id: "brands",        label: "Marques",       icon: Tag },
   { id: "installation",  label: "Installation",  icon: Wrench },
@@ -245,8 +249,10 @@ export default function AdminPage() {
             <>
               {tab === "dashboard"    && <AdminDashboard products={products} events={events} />}
               {tab === "products"     && <AdminProducts products={products} brands={brands} onRefresh={loadAdminData} />}
+              {tab === "stock"        && <AdminStock products={products} />}
               {tab === "reservations" && <AdminReservations />}
               {tab === "commandes"    && <AdminCartReservations />}
+              {tab === "messages"     && <AdminMessages />}
               {tab === "events"       && <AdminEvents events={events} onRefresh={loadAdminData} />}
               {tab === "brands"       && <AdminBrands />}
               {tab === "installation" && <AdminInstallation />}
