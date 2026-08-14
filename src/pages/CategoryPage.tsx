@@ -40,7 +40,19 @@ export default function CategoryPage() {
       });
   }, [slug]);
 
-  if (!cat) return null;
+  if (!cat) {
+    return (
+      <Layout>
+        <div className="flex min-h-[70vh] flex-col items-center justify-center px-4 text-center" style={{ background: "var(--c-surface-page)" }}>
+          <Package className="mb-4 h-12 w-12" style={{ color: "rgba(201,151,58,0.25)" }} />
+          <p className="font-display text-2xl uppercase tracking-widest text-white mb-4">Catégorie introuvable</p>
+          <Link to="/brands" className="font-display text-[11px] uppercase tracking-[0.3em]" style={{ color: "#c9973a" }}>
+            ← Voir toutes les marques
+          </Link>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

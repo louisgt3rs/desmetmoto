@@ -10,11 +10,13 @@ import Layout from "@/components/Layout";
 import SectionHeading from "@/components/SectionHeading";
 import SEO from "@/components/SEO";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function ContactPage() {
   const { t } = useLanguage();
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "", rgpd: false });
   const [rgpdErr, setRgpdErr] = useState(false);
+  const [sending, setSending] = useState(false);
 
   const hours = [
     { key: "day_mon", time: "Fermé",      closed: true },
@@ -26,10 +28,31 @@ export default function ContactPage() {
     { key: "day_sun", time: "Fermé",      closed: true },
   ] as const;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.rgpd) { setRgpdErr(true); return; }
     setRgpdErr(false);
+    setSending(true);
+
+    const { error } = await (supabase.from("contact_messages" as any) as any).insert({
+      name: form.name,
+      email: form.email,
+      phone: form.phone || null,
+      message: form.message,
+      status: "pending",
+    });
+
+    if (error) {
+      setSending(false);
+      toast.error(t("error_occurred"));
+      return;
+    }
+
+    await supabase.functions.invoke("send-email", {
+      body: { type: "contact_message", reservation: { ...form } },
+    });
+
+    setSending(false);
     toast.success(t("contact_success"));
     setForm({ name: "", email: "", phone: "", message: "", rgpd: false });
   };
@@ -40,6 +63,27 @@ export default function ContactPage() {
         title="Contact — Desmet Équipement Wavre | Chaussée de Louvain 491"
         description="Contactez Desmet Équipement à Wavre. Chaussée de Louvain 491, 1300 Wavre. Tél : 010 84 21 39. Ouvert du mardi au samedi. Prise de rendez-vous en ligne."
         canonicalPath="/contact"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "MotorcycleDealer",
+          "name": "Desmet Équipement",
+          "url": "https://www.desmetequipement.com",
+          "telephone": "+3210842139",
+          "email": "info@desmetmoto.be",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Chaussée de Louvain 491",
+            "addressLocality": "Wavre",
+            "postalCode": "1300",
+            "addressCountry": "BE"
+          },
+          "geo": { "@type": "GeoCoordinates", "latitude": 50.7176, "longitude": 4.6073 },
+          "openingHoursSpecification": [
+            { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Tuesday","Wednesday","Thursday","Friday"], "opens": "09:30", "closes": "18:00" },
+            { "@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "09:30", "closes": "17:00" }
+          ],
+          "priceRange": "€€"
+        }}
       />
       <section className="py-24">
         <div className="container mx-auto px-4">
@@ -180,7 +224,7 @@ export default function ContactPage() {
                       {rgpdErr && <span className="ml-1 text-xs text-destructive">{t("required")}</span>}
                     </span>
                   </label>
-                  <Button type="submit" className="w-full" size="lg">{t("contact_send")}</Button>
+                  <Button type="submit" className="w-full" size="lg" disabled={sending}>{t("contact_send")}</Button>
                 </form>
               </div>
             </motion.div>

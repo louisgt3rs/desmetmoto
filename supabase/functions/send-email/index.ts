@@ -154,6 +154,26 @@ serve(async (req) => {
           </div>
         `,
       });
+    } else if (type === "contact_message") {
+      emails.push({
+        to: ADMIN_EMAIL,
+        subject: `Message de contact — ${reservation.name}`,
+        html: `
+          <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0e0e0e;color:#fff;padding:32px;border:1px solid #c9973a33">
+            <h1 style="font-family:sans-serif;font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#c9973a;margin:0 0 24px">
+              MESSAGE DE CONTACT
+            </h1>
+            <table style="width:100%;border-collapse:collapse">
+              <tr><td style="padding:8px 0;color:#999;font-size:12px;letter-spacing:2px;text-transform:uppercase;width:160px">NOM</td><td style="padding:8px 0;font-size:14px">${reservation.name}</td></tr>
+              <tr><td style="padding:8px 0;color:#999;font-size:12px;letter-spacing:2px;text-transform:uppercase">EMAIL</td><td style="padding:8px 0;font-size:14px"><a href="mailto:${reservation.email}" style="color:#c9973a">${reservation.email}</a></td></tr>
+              ${reservation.phone ? `<tr><td style="padding:8px 0;color:#999;font-size:12px;letter-spacing:2px;text-transform:uppercase">TÉLÉPHONE</td><td style="padding:8px 0;font-size:14px">${reservation.phone}</td></tr>` : ""}
+              <tr><td style="padding:8px 0;color:#999;font-size:12px;letter-spacing:2px;text-transform:uppercase;vertical-align:top">MESSAGE</td><td style="padding:8px 0;font-size:14px">${reservation.message}</td></tr>
+              <tr><td style="padding:8px 0;color:#999;font-size:12px;letter-spacing:2px;text-transform:uppercase">DATE</td><td style="padding:8px 0;font-size:14px">${new Date().toLocaleDateString("fr-BE", { weekday:"long", day:"numeric", month:"long", year:"numeric" })}</td></tr>
+            </table>
+            <p style="margin-top:24px;font-size:11px;color:#666;letter-spacing:2px;text-transform:uppercase">Desmet Équipement — Formulaire de contact</p>
+          </div>
+        `,
+      });
     } else {
       return new Response(JSON.stringify({ error: "Unknown email type" }), {
         status: 400,

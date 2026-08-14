@@ -91,28 +91,32 @@ export default function InstallationModal({ open, onClose, preselectedAccessoryT
     const accessoryDetail = form.intercom_model
       ? `${form.accessory_type} — ${form.intercom_model}`
       : form.accessory_type;
-    try {
-      await supabase.functions.invoke("send-email", {
-        body: {
-          type: "installation_request",
-          reservation: {
-            first_name: form.first_name,
-            last_name: form.last_name,
-            email: form.email,
-            phone: form.phone,
-            helmet: `${selectedHelmetBrand} ${selectedHelmetModel}`.trim(),
-            accessory_type: accessoryDetail,
-            message: form.message,
-          },
-        },
-      });
-      toast.success("Demande envoyée — nous vous recontactons rapidement.");
-      onClose();
-    } catch {
-      toast.error("Erreur lors de l'envoi. Veuillez réessayer.");
-    } finally {
+    const payload = {
+      first_name: form.first_name,
+      last_name: form.last_name,
+      email: form.email,
+      phone: form.phone,
+      helmet: `${selectedHelmetBrand} ${selectedHelmetModel}`.trim(),
+      accessory_type: accessoryDetail,
+      message: form.message || null,
+    };
+
+    const { error: dbErr } = await (supabase.from("installation_requests" as any) as any)
+      .insert({ ...payload, status: "pending" });
+
+    if (dbErr) {
       setSending(false);
+      toast.error("Erreur lors de l'envoi. Veuillez réessayer.");
+      return;
     }
+
+    await supabase.functions.invoke("send-email", {
+      body: { type: "installation_request", reservation: payload },
+    });
+
+    setSending(false);
+    toast.success("Demande envoyée — nous vous recontactons rapidement.");
+    onClose();
   };
 
   return (
