@@ -29,18 +29,25 @@ const STATUS_STYLE: Record<MessageStatus, string> = {
   cancelled: "border-red-500/30 bg-red-500/10 text-red-400/70",
 };
 
+// Le percent-encoding gonfle le corps d'environ 1,6x : au-delà, on dépasse la
+// limite mailto d'environ 2000 caractères d'Outlook et de ShellExecute.
+const MAX_QUOTED_CHARS = 700;
+
 function buildReplyHref(m: ContactMessage) {
   const subject = `Re: votre message — Desmet Équipement`;
   const sentOn = new Date(m.created_at).toLocaleDateString("fr-BE", {
     day: "2-digit", month: "long", year: "numeric",
   });
+  const quoted = m.message.length > MAX_QUOTED_CHARS
+    ? m.message.slice(0, MAX_QUOTED_CHARS) + "\n[...] (message complet dans l'admin)"
+    : m.message;
   const body =
     `Bonjour ${m.name},\n\n\n\n` +
     `--\nDesmet Équipement — Chaussée de Louvain 491, 1300 Wavre — 010/84 21 39\n\n` +
     `Le ${sentOn}, vous nous avez écrit :\n` +
-    m.message.split("\n").map(line => `> ${line}`).join("\n");
+    quoted.split("\n").map(line => `> ${line}`).join("\n");
 
-  return `mailto:${encodeURIComponent(m.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  return `mailto:${m.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
 export default function AdminMessages() {
@@ -55,9 +62,12 @@ export default function AdminMessages() {
     const { data, error } = await (supabase.from("contact_messages" as any) as any)
       .select("id, name, email, phone, message, status, created_at")
       .order("created_at", { ascending: false });
-    if (error) toast.error("ERREUR DE CHARGEMENT : " + error.message.toUpperCase());
-    setMessages((data || []) as ContactMessage[]);
     setLoading(false);
+    if (error) {
+      toast.error("ERREUR DE CHARGEMENT : " + error.message.toUpperCase());
+      return;
+    }
+    setMessages((data || []) as ContactMessage[]);
   };
 
   useEffect(() => { load(); }, []);
@@ -174,7 +184,7 @@ export default function AdminMessages() {
                       {m.phone && <span>{m.phone}</span>}
                     </div>
 
-                    <p className="whitespace-pre-wrap pt-2 text-sm leading-relaxed text-[hsl(var(--admin-muted-foreground))]">
+                    <p className="whitespace-pre-wrap break-words pt-2 text-sm leading-relaxed text-[hsl(var(--admin-muted-foreground))]">
                       {m.message}
                     </p>
                   </div>
