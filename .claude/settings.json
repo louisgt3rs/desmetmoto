@@ -1,7 +1,18 @@
 {
   "permissions": {
     "allow": [
-      "Bash(ls src/pages/*.tsx)"
+      "Bash(ls src/pages/*.tsx)",
+      "Bash(git commit -m ':*)",
+      "Read(//c/Users/louis/.claude/skills/**)",
+      "Read(//c/Users/louis/.claude/**)",
+      "Bash(gh api:*)",
+      "Bash(node -e ':*)",
+      "Bash(grep -r \"VITE_SUPABASE\" .env*)",
+      "Bash(curl -s 'https://qatsudgpieczmodjbynh.supabase.co/rest/v1/brands?select=id,name&order=name' -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhdHN1ZGdwaWVjem1vZGpieW5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxOTI5OTksImV4cCI6MjA4OTc2ODk5OX0.nyknLVoppUcDeHjQWC-Nmw2wFYQiC4RLGFo51qEEE4w' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhdHN1ZGdwaWVjem1vZGpieW5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxOTI5OTksImV4cCI6MjA4OTc2ODk5OX0.nyknLVoppUcDeHjQWC-Nmw2wFYQiC4RLGFo51qEEE4w')",
+      "Bash(curl -s 'https://qatsudgpieczmodjbynh.supabase.co/rest/v1/products?select=id,name,brand_id,price&order=created_at.desc&limit=10' -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhdHN1ZGdwaWVjem1vZGpieW5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxOTI5OTksImV4cCI6MjA4OTc2ODk5OX0.nyknLVoppUcDeHjQWC-Nmw2wFYQiC4RLGFo51qEEE4w' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhdHN1ZGdwaWVjem1vZGpieW5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxOTI5OTksImV4cCI6MjA4OTc2ODk5OX0.nyknLVoppUcDeHjQWC-Nmw2wFYQiC4RLGFo51qEEE4w')",
+      "WebFetch(domain:www.shoei.com)",
+      "WebFetch(domain:www.shark-helmets.com)",
+      "WebFetch(domain:www.ls2helmets.com)"
     ]
   }
 }

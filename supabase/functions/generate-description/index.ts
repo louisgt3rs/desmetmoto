@@ -5,177 +5,167 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Product-specific descriptions keyed by "brand|name" (lowercase)
-const PRODUCT_DESCRIPTIONS: Record<string, string> = {
-  // ── SHOEI ──────────────────────────────────────────────────────────────────
-  "shoei|gt-air 3": `Le GT-Air 3 est le casque sport-touring de référence chez Shoei. Intégral à écran solaire intégré, il conjugue silence aérodynamique, ventilation à 4 entrées d'air et confort longue distance sans compromis.\n\nCoque AIM+, écran VAS-V Pinlock 120 Max Vision inclus, compatible Sena SRL3, intérieur 3D Fit amovible et lavable. Homologué ECE 22.06.`,
+function n(s: string) { return s.toLowerCase().trim(); }
+function pick<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length)]; }
 
-  "shoei|nxr2": `Le NXR2 incarne la philosophie sport-touring de Shoei dans un gabarit ultra-compact et léger. Taillé pour les motards qui veulent les performances d'un intégral racing avec le confort d'une utilisation quotidienne.\n\nCoque AIM+, système QRM+ pour retrait rapide des joues, écran CWR-F2 Pinlock 70 inclus, ventilation centrale optimisée. Homologué ECE 22.06.`,
+// ─── INTERCOMS ───────────────────────────────────────────────────────────────
 
-  "shoei|neotec 3": `Le Neotec 3 est le modulable premium de Shoei — ouverture one-touch d'une seule main même avec des gants, double homologation intégral et jet. Le compagnon idéal pour les grandes distances.\n\nÉcran solaire intégré, compatible Sena SRL3, ventilation à 5 entrées, coque AIM+ composite, intérieur Moist-Tech amovible. Homologué ECE 22.06 P/J.`,
-
-  "shoei|x-spr pro": `Le X-SPR Pro est le casque racing de route le plus abouti de Shoei, directement inspiré du X-Fifteen de MotoGP. Pour les amateurs de sport et de circuit exigeant le meilleur.\n\nCoque AIM+ ultra-légère, ventilation circuit optimisée en soufflerie, écran CWR-F2 Pinlock 120 Max Vision, spoiler arrière réglable. Homologué ECE 22.06.`,
-
-  // ── SHARK ───────────────────────────────────────────────────────────────────
-  "shark|spartan rs": `Le Spartan RS est le casque sport de Shark au rapport qualité/prix imbattable. Sa coque en fibre de verre multi-densité offre légèreté et rigidité pour une conduite dynamique sur route et sur circuit.\n\nVentilation agressive 3 entrées, écran Large VZ100 Quick Release, préparé intercom, intérieur Ritmo amovible et lavable. Homologué ECE 22.06.`,
-
-  "shark|d-skwal 3": `Le D-Skwal 3 innove avec son système LED intégré à la nuque, rechargeable USB-C, pour être vu de nuit et par mauvais temps. Le casque urbain de Shark qui fait de la visibilité une priorité.\n\nLEDs rechargeables USB-C, coque ABS renforcé, écran anti-rayures grand champ, intérieur Sanitized® antibactérien. Homologué ECE 22.06.`,
-
-  "shark|skwal i3": `Le Skwal i3 pousse l'innovation plus loin : ses LEDs arrière s'activent automatiquement au freinage, en guise de feux stop. Une première mondiale qui renforce concrètement la sécurité sur route.\n\nCapteur de décélération intégré, recharge USB-C, coque composite légère, écran solaire intégré, visière Max Vision. Homologué ECE 22.06.`,
-
-  "shark|oxo": `Le Shark OXO est le modulable haut de gamme de la marque, alliant rigidité de coque composite et facilité d'usage au quotidien. Pensé pour les touristes qui refusent de choisir entre confort et protection.\n\nCoque composite, écran solaire intégré, Pinlock 70 fourni, intérieur mémoire de forme, fermeture micrométrique. Homologué ECE 22.06 P/J.`,
-
-  // ── NOLAN ───────────────────────────────────────────────────────────────────
-  "nolan|n87 plus": `Le N87 Plus est le casque intégral polyvalent de Nolan, pensé pour le quotidien comme la longue distance. Son écran solaire intégré Comfort Fit et sa ventilation efficace le rendent facile à vivre par tous les temps.\n\nÉcran solaire intégré, fermeture Microlock 2, intérieur Clima Comfort amovible, compatible N-Com Bluetooth. Homologué ECE 22.06.`,
-
-  "nolan|n120-1": `Le N120-1 est le casque aventure de Nolan, avec menton relevable et double écran pour s'adapter à toutes les situations — de la piste forestière à l'autoroute. Polyvalence totale, style affirmé.\n\nMenton relevable, écran solaire intégré, mentonnet amovible (usage jet), compatible N-Com, fermeture micrométrique. Homologué ECE 22.06 P/J.`,
-
-  "nolan|n60-6 sport": `Le N60-6 Sport est l'entrée de gamme performante de Nolan — légèreté, bonne ventilation et compatibilité N-Com pour ceux qui veulent un casque fiable sans se ruiner.\n\nCoque en polycarbonate renforcé, ventilation frontale réglable, compatible N-Com Bluetooth, intérieur Clima Comfort amovible. Homologué ECE 22.06.`,
-
-  // ── LS2 ─────────────────────────────────────────────────────────────────────
-  "ls2|ff811 vector ii": `Le FF811 Vector II est la preuve que performance et accessibilité ne s'excluent pas. Sa coque KPA en fibre composite offre un poids et une rigidité dignes de casques bien plus onéreux.\n\nCoque Kinetic Polymer Alloy, ventilation frontale + occipitale, écran anti-rayures avec Pinlock 70 inclus, intérieur 3D amovible. Homologué ECE 22.06.`,
-
-  "ls2|ff906 advant": `Le FF906 Advant est le modulable LS2 le plus complet — menton basculant d'une main, double homologation et Pinlock inclus pour un prix remarquablement accessible.\n\nDouble homologation intégral/modulable, écran solaire intégré, Pinlock 70 fourni, intérieur antibactérien amovible. Homologué ECE 22.06 P/J.`,
-
-  // ── SCORPION ────────────────────────────────────────────────────────────────
-  "scorpion|exo-r1 evo air": `L'EXO-R1 Evo Air est le casque sport flagship de Scorpion — coque KDF en fibres composites pour une légèreté et une rigidité de haut niveau, avec une ventilation Airfit entièrement réglable.\n\nCoque Kwikwick Dry Fiber, ventilation Airfit, Pinlock 120 Max Vision inclus, calottes interchangeables, mentonnet Turbine Channel. Homologué ECE 22.06.`,
-
-  "scorpion|exo-520 evo air": `L'EXO-520 Evo Air conjugue sport et touring dans un casque à écran solaire intégré et ventilation généreuse. Le choix équilibré pour les motards qui roulent loin sans se priver de sensations.\n\nÉcran solaire Pinlock ready, ventilation Airfit, intérieur Kwikwick 3 amovible, préparé intercom, fermeture micrométrique. Homologué ECE 22.06.`,
-
-  // ── ALPINESTARS ─────────────────────────────────────────────────────────────
-  "alpinestars|supertech r10": `Le Supertech R10 est le casque racing d'Alpinestars — coque Dyneema Ultra Fibre parmi les plus légères du marché, issue directement de la compétition mondiale. Pour ceux qui n'acceptent aucun compromis.\n\nCoque carbone/Dyneema, ventilation CRS circuit, Pinlock 120 Max Vision inclus, mentonnet carbone, intérieur RaceFit. Homologué ECE 22.06 / FIM.`,
-
-  // ── ARAI ────────────────────────────────────────────────────────────────────
-  "arai|rx-7v evo": `Le RX-7V Evo est le casque racing le plus abouti d'Arai, directement inspiré du MotoGP. Aérodynamisme extrême, stabilité à haute vitesse et protection maximale — le choix des pilotes professionnels.\n\nCoque PB-SNC2 composite premium, ventilation haute performance, écran VAS-V Pinlock Max Vision, champ de vision optimisé. Homologué ECE 22.06 / Snell.`,
-
-  "arai|quantic": `Le Quantic est le casque sport-touring d'Arai — il réunit le confort d'un routier avec la protection d'un sport, dans une coque composite qui n'a pas d'équivalent à ce prix.\n\nCoque PB-SNC2, ventilation 5 entrées d'air, écran VAS-V Pinlock inclus, compatible intercom, intérieur Arai amovible. Homologué ECE 22.06.`,
-
-  "arai|sz-r evo": `Le SZ-R Evo est le casque jet premium d'Arai — pour les motards qui revendiquent la liberté du jet sans sacrifier la qualité de fabrication et la protection d'une grande marque.\n\nCoque composite Arai, écran large déporté, ventilation optimisée basse vitesse, intérieur comfort amovible et lavable. Homologué ECE 22.06.`,
-
-  // ── REV'IT ──────────────────────────────────────────────────────────────────
-  "rev'it|sand 4 h2o": `La Sand 4 H2O est la veste adventure emblématique de Rev'It, renforcée d'une membrane imperméable intégrée. Polyvalente, robuste et parfaitement équilibrée pour les grands voyages sur tous les terrains.\n\nMembrane SEEFLEX H2O, protections CE Lvl 1 épaules et coudes, poche dorsale incluse, doublure thermique amovible. CE Cat. II Lvl A.`,
-
-  "rev'it|tornado 4 h2o": `La Tornado 4 H2O est la veste sport-touring imperméable de Rev'It — pensée pour les motards qui roulent quelle que soit la météo, sans renoncer au style ni à la liberté de mouvement.\n\nMembrane SEEFLEX imperméable, protections CE Lvl 1 épaules et coudes, inserts réfléchissants 360°, col coupe-vent. CE Cat. II.`,
-
-  // ── DAINESE ─────────────────────────────────────────────────────────────────
-  "dainese|smart jacket ls d-air": `Le Smart Jacket LS est le gilet airbag autonome de Dainese — sans cordon, compatible avec n'importe quelle veste, il offre une protection dorsale et thoracique complète activée en moins de 45 ms.\n\nSystème D-Air autonome GPS + capteurs inertiels, gonflage < 45 ms, rechargeable USB, jusqu'à 10 activations. Compatible toutes tenues.`,
-
-  // ── TCX ─────────────────────────────────────────────────────────────────────
-  "tcx|comp evo 2": `La Comp Evo 2 est la botte racing homologuée de TCX, directement inspirée de la compétition. Sa construction cuir pleine fleur et ses renforts TPU offrent une protection maximale pour les tracés sportifs.\n\nCuir pleine fleur, renforts TPU tibia/talon/cheville, fermeture Velcro + boucle métal, semelle anti-dérapante. Homologuée CE Lvl 2.`,
-
-  "tcx|street ace wp": `La Street Ace WP est la botte urbaine imperméable de TCX — look sneaker discret, protection moto sérieuse. Pour ceux qui veulent une protection réelle sans sacrifier leur style en ville.\n\nMembrane X-Dry imperméable/respirante, protection malléoles et tibia, semelle grip antidérapante, tige renforcée. Homologuée CE Lvl 1.`,
-
-  // ── GIVI ────────────────────────────────────────────────────────────────────
-  "givi|v58 maxia 5": `Le V58 Maxia 5 est le top case voyageur de référence chez Givi — 58 litres de volume pour deux casques intégraux, fermeture double sécurité et design aérodynamique éprouvé sur toutes les routes.\n\n58 litres, 2 casques intégraux, serrure double fermeture, rétroviseur intégré, fixation Monokey universelle.`,
-
-  // ── BERING ──────────────────────────────────────────────────────────────────
-  "bering|reach lady": `La Reach Lady est la veste adventure coupe femme de Bering — imperméable, respirante et conçue pour les grandes distances, avec une coupe adaptée à la morphologie féminine sans compromis sur la protection.\n\nMembrane Bering Dry, protections CE Lvl 1 épaules et coudes, poche dorsale, compatibilité gilet chauffant, doublure thermique amovible. CE Cat. II.`,
-
-  // ── RICHA ───────────────────────────────────────────────────────────────────
-  "richa|stockholm 2": `La Stockholm 2 est la veste sport-touring haut de gamme de Richa — la marque belge livre ici une construction textile imperméable et respirante avec protection dorsale Lvl 2 d'série, rare à ce positionnement.\n\nMembrane Aquamax, protections CE Lvl 1 épaules/coudes + dorsale Lvl 2 incluse, inserts réfléchissants, doublure thermique. CE Cat. II.`,
-
-  // ── SENA ────────────────────────────────────────────────────────────────────
-  "sena|sf2": `Le SF2 est l'intercom Bluetooth slim-line de Sena — un profil ultra-fin qui s'intègre discrètement dans tous les casques pour communiquer à deux, jusqu'à 900 mètres de portée.\n\nBluetooth 3.0, portée 900 m, 2 riders simultanés, autonomie 8 h, microphone filaire + tour de cou inclus. Certifié IP54.`,
+const INTERCOM_MODELS: Record<string, string> = {
+  // SENA
+  "sena|50s":    `Le Sena 50S est le haut de gamme de la gamme Sena, équipé de la technologie Mesh 2.0 pour des communications de groupe jusqu'à 24 motards sans limite de distance intermédiaire. Son audio HD et son processeur de son ambiant en font le compagnon ultime des grandes sorties.\n\nConnectivité Mesh 2.0 + Bluetooth 5, portée point à point 2 km, autonomie 13 h, contrôle vocal, compatible assistant vocal. Disponible chez Desmet Équipement à Wavre.`,
+  "sena|50r":    `Le Sena 50R reprend la technologie Mesh 2.0 du 50S dans un boîtier ultra-compact et discret, pensé pour les casques à faible espace. Même puissance audio, même portée, profil minimal.\n\nMesh 2.0 + Bluetooth 5, portée 2 km, autonomie 13 h, profil slim, microphone à réduction de bruit. Disponible chez Desmet Équipement à Wavre.`,
+  "sena|30k":    `Le Sena 30K a inauguré le réseau Mesh pour les groupes de motards — communication simultanée jusqu'à 16 riders sans appairage individuel. La solution de groupe par excellence.\n\nMesh Intercom 1.0, 16 riders simultanés, portée 2 km, Bluetooth 4.1, autonomie 12 h. Disponible chez Desmet Équipement à Wavre.`,
+  "sena|20s evo":`Le Sena 20S Evo est le best-seller mondial de la communication moto — Bluetooth 4.1, son stéréo HD, jusqu'à 8 riders en conférence et une interface jog-dial intuitive même avec des gants.\n\nBluetooth 4.1, 8 riders, portée 2 km, Jog Dial, autonomie 13 h, son HD. Disponible chez Desmet Équipement à Wavre.`,
+  "sena|10s":    `Le Sena 10S offre les fonctions essentielles — appels, musique, intercom 4 riders — dans un boîtier robuste et facile à installer, à un prix accessible.\n\nBluetooth 3.0+, 4 riders, portée 900 m, autonomie 10 h, installation universelle. Disponible chez Desmet Équipement à Wavre.`,
+  "sena|sf4":    `Le Sena SF4 est la référence entrée de gamme slim — profil fin, installation rapide, intercom 4 riders et audio clair pour les motards qui débutent en communication Bluetooth.\n\nBluetooth 3.0, 4 riders, portée 900 m, autonomie 10 h, format ultra-fin. Disponible chez Desmet Équipement à Wavre.`,
+  "sena|sf2":    `Le SF2 est l'intercom Bluetooth slim-line de Sena — profil ultra-fin pour s'intégrer discrètement dans tous les casques, communication à deux, jusqu'à 900 m de portée.\n\nBluetooth 3.0, portée 900 m, 2 riders, autonomie 8 h, microphone filaire inclus. Disponible chez Desmet Équipement à Wavre.`,
+  "sena|srl3":   `Le Sena SRL3 est conçu exclusivement pour les casques Shoei — il s'encastre parfaitement dans les cavités prévues à cet effet pour une intégration invisible et une qualité audio optimale.\n\nCompatible Shoei exclusivement, Mesh 2.0 + Bluetooth 5, portée 2 km, autonomie 8 h, microphone intégré. Disponible chez Desmet Équipement à Wavre.`,
+  // CARDO
+  "cardo|packtalk edge":  `Le Cardo PackTalk Edge est le vaisseau amiral de Cardo — réseau DMesh dynamique, son signé JBL et recharge sans fil par induction. La référence absolue pour les groupes de motards exigeants.\n\nDMesh illimité, son JBL 45 mm, recharge inductive, portée 1,6 km, autonomie 13 h, commandes tactiles. Disponible chez Desmet Équipement à Wavre.`,
+  "cardo|packtalk bold":  `Le PackTalk Bold introduit le réseau Mesh dynamique de Cardo dans un boîtier robuste — connexion automatique entre riders, son JBL et portée jusqu'à 1,6 km pour les grandes formations.\n\nDMesh illimité, JBL, portée 1,6 km, autonomie 13 h, étanche IP67. Disponible chez Desmet Équipement à Wavre.`,
+  "cardo|packtalk slim":  `Le PackTalk Slim est la déclinaison compacte du PackTalk — même technologie DMesh de Cardo dans un profil fin compatible avec les casques à espace réduit.\n\nDMesh, portée 1,6 km, profil slim, autonomie 13 h, Bluetooth + Mesh. Disponible chez Desmet Équipement à Wavre.`,
+  "cardo|freecom 4+":     `Le Freecom 4+ est l'intercom Bluetooth 4 riders de Cardo, sans réseau Mesh mais avec un audio de qualité et une prise en main immédiate — parfait pour les groupes réguliers.\n\nBluetooth 5, 4 riders, portée 1,2 km, autonomie 10 h, son naturel Cardo. Disponible chez Desmet Équipement à Wavre.`,
+  "cardo|spirit hd":      `Le Cardo Spirit HD est la porte d'entrée dans l'écosystème Cardo — communication solo ou duo avec un son HD clair et une installation simple, pour les motards qui veulent l'essentiel.\n\nBluetooth 5.2, 2 riders, portée 800 m, son HD, autonomie 7 h. Disponible chez Desmet Équipement à Wavre.`,
+  // MIDLAND
+  "midland|btx2 pro s":   `Le Midland BTX2 Pro S est l'intercom haut de gamme de Midland, avec son stéréo HD et la technologie Interphone pour des conférences fluides jusqu'à 8 riders sur une portée de 1,6 km.\n\n8 riders, portée 1,6 km, son stéréo HD, autonomie 12 h, étanche IP65. Disponible chez Desmet Équipement à Wavre.`,
+  "midland|btx1 pro s":   `Le Midland BTX1 Pro S offre des fonctionnalités professionnelles à un tarif accessible — intercom 4 riders, son stéréo et une construction robuste pensée pour toutes les conditions météo.\n\n4 riders, portée 1,6 km, son stéréo, étanche IP65, autonomie 10 h. Disponible chez Desmet Équipement à Wavre.`,
 };
 
-function normalize(s: string): string {
-  return s.toLowerCase().trim().replace(/\s+/g, " ");
-}
+// ─── ACCESSORIES ─────────────────────────────────────────────────────────────
 
-// Smart fallback based on category + brand
-const CAT_FALLBACK: Record<string, { intro: string[]; specs: string[] }> = {
-  casques: {
-    intro: [
-      "confort longue distance et protection certifiée pour tous les types de trajets",
-      "aérodynamisme travaillé et ventilation active pour rouler par tous les temps",
-      "légèreté et rigidité issues d'une coque composite soigneusement étudiée",
-    ],
-    specs: [
-      "coque composite, ventilation réglable, écran anti-rayures Pinlock ready, intérieur amovible. Homologué ECE 22.06.",
-      "aérodynamique optimisée, évent d'urgence, intérieur 3D amovible, écran large champ. Homologué ECE 22.06.",
-      "système de fermeture sécurisé, aération frontale et occipitale, mousse hypoallergénique amovible. Homologué ECE 22.06.",
-    ],
+const ACC_MODELS: Record<string, string> = {
+  // QUAD LOCK
+  "quad lock|motorcycle mount pro":   `Le Quad Lock Motorcycle Mount Pro est le système de fixation moto le plus plébiscité au monde — verrouillage quart de tour instantané, vibrations absorbées par le système anti-vibration intégré, compatible tous smartphones.\n\nInstallation guidon universel, rotation 360°, système anti-vibration, libération sécurisée. Compatible coques Quad Lock. Disponible chez Desmet Équipement à Wavre.`,
+  "quad lock|stem mount":             `Le Quad Lock Stem Mount se fixe sur la potence pour un positionnement central et stable du smartphone, idéal pour les motos à guidon tubulaire. Installation en quelques secondes, sans outils.\n\nCompatible potences 22-32 mm, rotation 360°, libération quart de tour. Disponible chez Desmet Équipement à Wavre.`,
+  "quad lock|wireless charging head": `La tête de charge sans fil Quad Lock transforme n'importe quel support Quad Lock en chargeur induction — jusqu'à 7,5 W sur iPhone, 10 W sur Android, tout en maintenant le smartphone verrouillé.\n\nCharging sans fil 7,5 W / 10 W, étanche IPX6, connecteur USB-C. Disponible chez Desmet Équipement à Wavre.`,
+  // SP CONNECT
+  "sp connect|moto bundle":           `Le SP Connect Moto Bundle réunit le support moto et la coque de fixation pour une solution complète et élégante. Son système de glissière 3D offre un verrouillage sûr et une dépose en une main.\n\nSupport universel guidon 22-29 mm, rotation 360°, système de verrouillage 3D, anti-choc. Disponible chez Desmet Équipement à Wavre.`,
+  "sp connect|phone case":            `La coque SP Connect est l'interface entre votre smartphone et tous les supports SP Connect — protection renforcée des bords et dos avec le système de fixation 3D intégré, compatible sans-fil.\n\nCompatible chargement sans fil, protection renforcée, système 3D, slim. Disponible chez Desmet Équipement à Wavre.`,
+  // GIVI
+  "givi|s901a":                       `Le Givi S901A est un support smartphone universel à fixation rapide, compatible avec la majorité des motos via les tiges de rétroviseur ou le guidon — robuste, résistant aux intempéries.\n\nFixation rétroviseur ou guidon, étanche, rotation réglable. Disponible chez Desmet Équipement à Wavre.`,
+  // RAM MOUNTS
+  "ram mounts|tough-strap":           `Le RAM Tough-Strap est la solution universelle pour fixer un support sur n'importe quel tube ou barre — sangles doubles résistantes aux UV, compatible toute la gamme RAM.\n\nSangles UV-résistantes, diamètre 12-50 mm, compatible bases RAM. Disponible chez Desmet Équipement à Wavre.`,
+};
+
+// ─── BRAND FALLBACKS ─────────────────────────────────────────────────────────
+
+const BRAND_FALLBACKS: Record<string, (name: string, cat: string, price: string | null) => string> = {
+  sena: (name, _cat, price) => {
+    const mesh = /50|30k/i.test(name);
+    const slim = /sf|slim/i.test(name);
+    const p = price ? ` à partir de ${price}` : "";
+    return `Le Sena ${name} est un intercom Bluetooth${mesh ? " Mesh" : ""} pensé pour les motards exigeants — ${slim ? "profil ultra-fin pour une intégration discrète dans tous les casques" : "audio HD et interface intuitive pour rouler connecté en toutes circonstances"}${p}.\n\n${mesh ? "Réseau Mesh multi-riders, " : "Bluetooth fiable, "}communication claire, appairage rapide, autonomie longue durée. Disponible chez Desmet Équipement à Wavre.`;
   },
-  vestes: {
-    intro: [
-      "imperméabilité certifiée et liberté de mouvement pour les longues distances",
-      "protection tous temps et respirabilité en toutes saisons",
-    ],
-    specs: [
-      "membrane imperméable, protections CE Lvl 1 épaules et coudes, doublure thermique amovible. CE Cat. II.",
-      "tissu haute résistance, renforts aux zones d'impact, inserts réfléchissants. CE Cat. II.",
-    ],
+  cardo: (name, _cat, price) => {
+    const mesh = /packtalk|edge|bold/i.test(name);
+    const jbl = /edge|bold/i.test(name);
+    const p = price ? ` à partir de ${price}` : "";
+    return `Le Cardo ${name} est la référence Cardo pour rouler connecté${mesh ? " en groupe grâce à la technologie DMesh" : ""}${p}. ${jbl ? "Le son signé JBL garantit une qualité audio premium même à haute vitesse." : "Une prise en main immédiate et un son naturel pour tous les trajets."}\n\n${mesh ? "Réseau DMesh illimité, " : "Bluetooth 5, "}portée longue distance, étanche, autonomie tout-terrain. Disponible chez Desmet Équipement à Wavre.`;
   },
-  bottes: {
-    intro: ["protection certifiée et confort de marche pour la route comme la ville"],
-    specs: ["membrane imperméable, protection malléoles et tibia, semelle antidérapante. Homologué CE."],
+  midland: (name, _cat, price) => {
+    const p = price ? ` à partir de ${price}` : "";
+    return `Le Midland ${name} est un intercom Bluetooth fiable et performant${p}, conçu pour les motards qui ne veulent pas sacrifier la qualité audio au prix.\n\nSon stéréo HD, portée multi-riders, construction étanche, installation universelle. Disponible chez Desmet Équipement à Wavre.`;
   },
-  bagagerie: {
-    intro: ["volume généreux et fixation universelle pour tous les voyages moto"],
-    specs: ["fermeture double sécurité, réflecteurs intégrés, système de fixation rapide."],
+  "quad lock": (name, _cat, price) => {
+    const p = price ? ` à partir de ${price}` : "";
+    return `Le support Quad Lock ${name} est la solution de fixation moto la plus sécurisée du marché — verrouillage quart de tour, aucun risque de décrochage, compatible tous smartphones avec coque Quad Lock${p}.\n\nInstallation sans outil, rotation 360°, résistant aux vibrations. Disponible chez Desmet Équipement à Wavre.`;
   },
-  accessoires: {
-    intro: ["technologie Bluetooth pensée pour les motards connectés"],
-    specs: ["intercom haute performance, autonomie longue durée, connexion multi-appareils."],
+  "sp connect": (name, _cat, price) => {
+    const p = price ? ` à partir de ${price}` : "";
+    return `Le SP Connect ${name} intègre le système de fixation 3D pour un maintien optimal du smartphone en toutes conditions${p}. Design élégant, libération d'une main, compatible chargement sans fil.\n\nVerrouillage 3D, anti-choc, rotation réglable, compatible toute la gamme SP Connect. Disponible chez Desmet Équipement à Wavre.`;
+  },
+  givi: (name, _cat, price) => {
+    const p = price ? ` à partir de ${price}` : "";
+    return `L'accessoire Givi ${name} s'inscrit dans la tradition de robustesse et de praticité de la marque italienne${p} — conçu pour les motards voyageurs qui ont besoin d'équipements fiables au quotidien.\n\nConstruction solide, fixation sécurisée, compatible moto universelle. Disponible chez Desmet Équipement à Wavre.`;
   },
 };
 
-function getCatKey(cat: string): string {
-  const c = cat.toLowerCase();
-  if (c.includes("casque")) return "casques";
-  if (c.includes("veste") || c.includes("blouson") || c.includes("jacket")) return "vestes";
-  if (c.includes("botte") || c.includes("chaussure")) return "bottes";
-  if (c.includes("bagag") || c.includes("top case") || c.includes("sac")) return "bagagerie";
-  return "accessoires";
+// ─── CATEGORY FALLBACKS ──────────────────────────────────────────────────────
+
+const CAT_FALLBACKS: Record<string, (brand: string, name: string, price: string | null) => string> = {
+  intercom: (brand, name, price) => {
+    const p = price ? ` à partir de ${price}` : "";
+    return `Le ${brand} ${name} est un intercom Bluetooth conçu pour la communication moto${p} — audio clair même à haute vitesse, appairage simple, autonomie longue durée pour les grandes sorties.\n\nInstallation universelle, résistant aux intempéries, compatible musique et appels. Disponible chez Desmet Équipement à Wavre.`;
+  },
+  "support téléphone": (brand, name, price) => {
+    const p = price ? ` à partir de ${price}` : "";
+    return `Le support ${brand} ${name} maintient votre smartphone en position optimale sur la moto${p} — fixation sécurisée, résistance aux vibrations et aux intempéries pour naviguer en toute confiance.\n\nInstallation rapide, rotation réglable, compatible smartphones universels. Disponible chez Desmet Équipement à Wavre.`;
+  },
+  "support gps": (brand, name, price) => {
+    const p = price ? ` à partir de ${price}` : "";
+    return `Le support GPS ${brand} ${name} assure une position stable de votre navigateur moto${p} — vibrations amorties, orientation réglable et résistance aux conditions météo les plus exigeantes.\n\nFixation robuste, anti-vibration, étanche. Disponible chez Desmet Équipement à Wavre.`;
+  },
+  "chargeur / alimentation": (brand, name, price) => {
+    const p = price ? ` à partir de ${price}` : "";
+    return `Le ${brand} ${name} alimente vos appareils embarqués directement depuis l'électronique de la moto${p} — charge rapide, protection contre les surtensions et les inversions de polarité.\n\nProtection multi-sécurité, sortie USB rapide, installation plug-and-play. Disponible chez Desmet Équipement à Wavre.`;
+  },
+  caméra: (brand, name, price) => {
+    const p = price ? ` à partir de ${price}` : "";
+    return `La caméra ${brand} ${name} capture chaque trajet en haute définition${p} — stabilisation intégrée, grand angle et résistance aux intempéries pour des images nettes quelle que soit la vitesse.\n\nEnregistrement HD, grand angle, résistant aux chocs et à la pluie. Disponible chez Desmet Équipement à Wavre.`;
+  },
+};
+
+// ─── GENERIC FALLBACK ────────────────────────────────────────────────────────
+
+function genericFallback(brand: string, name: string, category: string, price: string | null): string {
+  const p = price ? ` à partir de ${price}` : "";
+  return `Le ${brand} ${name} est un accessoire moto${category ? ` de la catégorie ${category}` : ""}${p}, sélectionné par Desmet Équipement pour sa fiabilité et son rapport qualité/prix.\n\nQualité éprouvée, installation simple, conçu pour les motards exigeants. Disponible chez Desmet Équipement à Wavre.`;
 }
 
-function pick<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
+// ─── SERVE ────────────────────────────────────────────────────────────────────
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const { name, brand, category, price } = await req.json();
+    const { name, brand = "", category = "", price } = await req.json();
 
-    if (!name || !brand) {
-      return new Response(JSON.stringify({ error: "name and brand are required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (!name) return new Response(JSON.stringify({ error: "name is required" }), {
+      status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+
+    const priceStr = price
+      ? `${Number(price).toLocaleString("fr-BE", { minimumFractionDigits: 2 })} €`
+      : null;
+
+    const key = `${n(brand)}|${n(name)}`;
+
+    // 1. Exact match intercom
+    let description = INTERCOM_MODELS[key] ?? ACC_MODELS[key] ?? null;
+
+    // 2. Brand fallback
+    if (!description) {
+      const bf = BRAND_FALLBACKS[n(brand)];
+      if (bf) description = bf(name, category, priceStr);
     }
 
-    const key = `${normalize(brand)}|${normalize(name)}`;
-    let description = PRODUCT_DESCRIPTIONS[key] ?? null;
-
-    // Fallback: inject price into known description if missing
+    // 3. Category fallback
     if (!description) {
-      const catKey = getCatKey(category || "");
-      const tpl = CAT_FALLBACK[catKey] ?? CAT_FALLBACK.accessoires;
-      const priceStr = price
-        ? `, positionné à ${Number(price).toLocaleString("fr-BE", { minimumFractionDigits: 2 })} €`
-        : "";
-      const para1 = `Le ${brand} ${name} est un équipement ${category || "moto"} conçu pour ${pick(tpl.intro)}${priceStr}.`;
-      const para2 = pick(tpl.specs) + ` Disponible chez Desmet Équipement à Wavre.`;
-      description = `${para1}\n\n${para2}`;
-    } else if (price) {
-      // Append price note if not already in description
-      const priceStr = Number(price).toLocaleString("fr-BE", { minimumFractionDigits: 2 });
-      if (!description.includes(priceStr) && !description.includes("€")) {
-        description += `\n\nPrix conseillé : ${priceStr} €. Disponible chez Desmet Équipement à Wavre.`;
+      const catKey = Object.keys(CAT_FALLBACKS).find(k => n(category).includes(k));
+      if (catKey) description = CAT_FALLBACKS[catKey](brand, name, priceStr);
+    }
+
+    // 4. Category keyword detection from name
+    if (!description) {
+      const nm = n(name);
+      if (/intercom|bluetooth|mesh|srl|communication/.test(nm)) {
+        description = CAT_FALLBACKS["intercom"](brand, name, priceStr);
+      } else if (/support|mount|holder|fix/.test(nm)) {
+        description = CAT_FALLBACKS["support téléphone"](brand, name, priceStr);
+      } else if (/charger|chargeur|usb|alimentation/.test(nm)) {
+        description = CAT_FALLBACKS["chargeur / alimentation"](brand, name, priceStr);
       }
     }
+
+    // 5. Generic
+    if (!description) description = genericFallback(brand, name, category, priceStr);
 
     return new Response(JSON.stringify({ description }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
     return new Response(JSON.stringify({ error: String(err) }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });

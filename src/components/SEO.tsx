@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
-const SITE_URL = "https://desmetmoto.vercel.app";
-const DEFAULT_OG_IMAGE = "https://desmetmoto.vercel.app/og-image.jpg";
+const SITE_URL = "https://www.desmetequipement.com";
+const DEFAULT_OG_IMAGE = "https://www.desmetequipement.com/og-image.jpg";
 const DEFAULT_DESCRIPTION =
   "Desmet Équipement, votre spécialiste en équipement moto à Wavre. Casques Arai, vestes, gants, bottes et intercoms. Arai Technical Pro Shop certifié.";
 
@@ -10,6 +10,7 @@ interface SEOProps {
   description?: string;
   image?: string;
   canonicalPath?: string;
+  jsonLd?: object;
 }
 
 function setMeta(attr: "name" | "property", key: string, value: string) {
@@ -32,7 +33,7 @@ function setLink(rel: string, href: string) {
   el.setAttribute("href", href);
 }
 
-export default function SEO({ title, description = DEFAULT_DESCRIPTION, image = DEFAULT_OG_IMAGE, canonicalPath }: SEOProps) {
+export default function SEO({ title, description = DEFAULT_DESCRIPTION, image = DEFAULT_OG_IMAGE, canonicalPath, jsonLd }: SEOProps) {
   useEffect(() => {
     const canonical = canonicalPath ? `${SITE_URL}${canonicalPath}` : SITE_URL + window.location.pathname;
 
@@ -53,7 +54,22 @@ export default function SEO({ title, description = DEFAULT_DESCRIPTION, image = 
     setMeta("name", "twitter:title", title);
     setMeta("name", "twitter:description", description);
     setMeta("name", "twitter:image", image);
-  }, [title, description, image, canonicalPath]);
+
+    // Inject or update JSON-LD script
+    const LD_ID = "seo-json-ld";
+    let ldEl = document.getElementById(LD_ID) as HTMLScriptElement | null;
+    if (jsonLd) {
+      if (!ldEl) {
+        ldEl = document.createElement("script");
+        ldEl.id = LD_ID;
+        ldEl.type = "application/ld+json";
+        document.head.appendChild(ldEl);
+      }
+      ldEl.textContent = JSON.stringify(jsonLd);
+    } else if (ldEl) {
+      ldEl.remove();
+    }
+  }, [title, description, image, canonicalPath, jsonLd]);
 
   return null;
 }

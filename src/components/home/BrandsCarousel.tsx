@@ -21,27 +21,40 @@ export default function BrandsCarousel() {
   const navigate = useNavigate();
   const [offset, setOffset] = useState(0);
   const [brands, setBrands] = useState<BrandEntry[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 5000); // timeout 5s
     supabase
       .from("brands")
       .select("name, logo_url")
       .order("sort_order")
       .then(({ data }) => {
+        clearTimeout(timer);
         if (data && data.length > 0) {
           setBrands(data.map((b) => ({ name: b.name, slug: nameToSlug(b.name), logo: b.logo_url })));
         }
+        setLoading(false);
       });
+    return () => clearTimeout(timer);
   }, []);
 
   const maxOffset = Math.max(0, brands.length - VISIBLE);
   const prev = () => setOffset((o) => Math.max(0, o - 1));
   const next = () => setOffset((o) => Math.min(maxOffset, o + 1));
 
-  if (brands.length === 0) {
+  if (loading) {
     return (
       <div className="flex justify-center py-12">
         <span className="text-muted-foreground text-sm">Chargement des marques…</span>
+      </div>
+    );
+  }
+
+  if (brands.length === 0) {
+    return (
+      <div className="flex justify-center py-12">
+        <span className="text-muted-foreground text-sm opacity-40">Aucune marque disponible</span>
       </div>
     );
   }

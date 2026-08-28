@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /reset-password
 
-Sitemap: https://desmetmoto.vercel.app/sitemap.xml
+Sitemap: https://www.desmetequipement.com/sitemap.xml

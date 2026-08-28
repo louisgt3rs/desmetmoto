@@ -5,7 +5,10 @@
       "Bash(npx vercel:*)",
       "Bash(npm run:*)",
       "Bash(npx supabase:*)",
-      "WebSearch"
+      "WebSearch",
+      "WebFetch(domain:www.sportsbikeshop.co.uk)",
+      "Bash(curl -s -X POST https://qatsudgpieczmodjbynh.supabase.co/rest/v1/products -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhdHN1ZGdwaWVjem1vZGpieW5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxOTI5OTksImV4cCI6MjA4OTc2ODk5OX0.nyknLVoppUcDeHjQWC-Nmw2wFYQiC4RLGFo51qEEE4w' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhdHN1ZGdwaWVjem1vZGpieW5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxOTI5OTksImV4cCI6MjA4OTc2ODk5OX0.nyknLVoppUcDeHjQWC-Nmw2wFYQiC4RLGFo51qEEE4w' -H 'Content-Type: application/json' -H 'Prefer: return=representation' -d @insert_products.json)",
+      "Bash(python3 -c \"import sys,json; data=json.load\\(sys.stdin\\); print\\(f'Inserted {len\\(data\\)} products' if isinstance\\(data,list\\) else data\\)\")"
     ]
   }
 }

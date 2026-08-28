@@ -33,6 +33,25 @@ export default function AboutPage() {
         title="À Propos — Desmet Équipement, Boutique Moto à Wavre | Arai Pro Shop"
         description="Desmet Équipement, spécialiste en équipement moto à Wavre depuis de nombreuses années. Arai Technical Pro Shop certifié. Conseil expert par des passionnés de moto."
         canonicalPath="/about"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "AboutPage",
+          "name": "À Propos — Desmet Équipement",
+          "description": "Spécialiste indépendant en équipement moto à Wavre. Arai Technical Pro Shop certifié.",
+          "url": "https://www.desmetequipement.com/about",
+          "about": {
+            "@type": "MotorcycleDealer",
+            "name": "Desmet Équipement",
+            "url": "https://www.desmetequipement.com",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Chaussée de Louvain 491",
+              "addressLocality": "Wavre",
+              "postalCode": "1300",
+              "addressCountry": "BE"
+            }
+          }
+        }}
       />
 
       <div className="bg-[#0e0e0e]">

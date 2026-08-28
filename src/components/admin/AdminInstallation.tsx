@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Save, X, Star } from "lucide-react";
+import { Plus, Pencil, Trash2, Save, X, Star, Sparkles, Loader2 } from "lucide-react";
 import { ImageUploadSingle, ImageUploadMulti } from "./ImageUpload";
 
 type InstBrand   = { id: string; name: string; sort_order: number };
 type InstModel   = { id: string; brand_id: string; name: string; is_modular: boolean; is_coming_soon: boolean; sort_order: number };
 type InstIntercom = { id: string; brand: string; name: string; image_url: string | null; is_coming_soon: boolean; sort_order: number; gallery_images: string[]; prix: number | null; description: string | null; stock: number | null; pack_duo: boolean; prix_duo: number | null; featured: boolean };
+type InstAccessory = { id: string; name: string; brand: string; category: string; slug: string | null; image_url: string | null; gallery_images: string[]; prix: number | null; stock: number; description: string | null; is_coming_soon: boolean; featured: boolean; sort_order: number };
 
 const kicker = "admin-kicker text-[10px] text-[hsl(var(--admin-muted-foreground))]";
 const inp    = "admin-input h-9 text-sm";
@@ -251,11 +252,14 @@ function formFromRecord(i: InstIntercom): typeof EMPTY_FORM {
   };
 }
 
+const ANON_KEY_INT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhdHN1ZGdwaWVjem1vZGpieW5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxOTI5OTksImV4cCI6MjA4OTc2ODk5OX0.nyknLVoppUcDeHjQWC-Nmw2wFYQiC4RLGFo51qEEE4w";
+
 function IntercomsTab() {
   const [intercoms, setIntercoms] = useState<InstIntercom[]>([]);
   const [editing, setEditing] = useState<InstIntercom | null>(null);
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState<typeof EMPTY_FORM>(EMPTY_FORM);
+  const [generatingDesc, setGeneratingDesc] = useState(false);
 
   const load = async () => {
     const { data } = await supabase.from("installation_intercoms").select("*").order("brand").order("sort_order");
@@ -290,6 +294,23 @@ function IntercomsTab() {
   };
 
   const uniqueBrands = [...new Set(intercoms.map(i => i.brand))];
+
+  const generateDescription = async () => {
+    if (!form.name.trim()) { toast.error("ENTREZ D'ABORD LE NOM"); return; }
+    setGeneratingDesc(true);
+    try {
+      const res = await fetch("https://qatsudgpieczmodjbynh.supabase.co/functions/v1/generate-description", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${ANON_KEY_INT}`, "apikey": ANON_KEY_INT },
+        body: JSON.stringify({ name: form.name, brand: form.brand, category: "intercom", price: form.prix ? parseFloat(form.prix) : null }),
+      });
+      if (!res.ok) { toast.error("ERREUR GÉNÉRATION"); return; }
+      const json = await res.json();
+      if (json.description) setForm(f => ({ ...f, description: json.description }));
+      else toast.error("RÉPONSE VIDE");
+    } catch { toast.error("ERREUR GÉNÉRATION"); }
+    finally { setGeneratingDesc(false); }
+  };
 
   const prixNum = parseFloat(form.prix) || 0;
   const prixDuoNum = parseFloat(form.prix_duo) || 0;
@@ -332,7 +353,20 @@ function IntercomsTab() {
 
           {/* Description */}
           <div>
-            <p className={kicker + " mb-1"}>DESCRIPTION</p>
+            <div className="flex items-center justify-between mb-1">
+              <p className={kicker}>DESCRIPTION</p>
+              <button
+                type="button"
+                onClick={generateDescription}
+                disabled={generatingDesc}
+                className="inline-flex items-center gap-1.5 px-3 py-1 font-adminDisplay text-[10px] uppercase tracking-[0.18em] border transition-all disabled:opacity-50"
+                style={{ borderColor: "rgba(201,151,58,0.35)", color: "#c9973a", background: "rgba(201,151,58,0.06)" }}
+                onMouseEnter={e => { if (!generatingDesc) (e.currentTarget as HTMLElement).style.background = "rgba(201,151,58,0.14)"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(201,151,58,0.06)"; }}
+              >
+                {generatingDesc ? <><Loader2 className="h-3 w-3 animate-spin" /> Génération...</> : <><Sparkles className="h-3 w-3" /> Générer avec IA</>}
+              </button>
+            </div>
             <textarea
               value={form.description}
               onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
@@ -407,6 +441,238 @@ function IntercomsTab() {
   );
 }
 
+/* ══════════════════ ACCESSORIES TAB ══════════════════ */
+const EMPTY_ACC = { name: "", brand: "", category: "", image_url: "", gallery_images: [] as string[], prix: "", stock: "", description: "", is_coming_soon: false, featured: false };
+
+function makeAccSlug(brand: string, name: string): string {
+  return `${brand}-${name}`.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+function toAccPayload(form: typeof EMPTY_ACC) {
+  return {
+    name: form.name,
+    brand: form.brand,
+    category: form.category,
+    slug: makeAccSlug(form.brand, form.name),
+    image_url: form.image_url || null,
+    gallery_images: form.gallery_images,
+    description: form.description || null,
+    prix: form.prix !== "" ? parseFloat(form.prix) : null,
+    stock: form.stock !== "" ? parseInt(form.stock, 10) : 0,
+    is_coming_soon: form.is_coming_soon,
+    featured: form.featured,
+  };
+}
+
+function accFromRecord(a: InstAccessory): typeof EMPTY_ACC {
+  return {
+    name: a.name,
+    brand: a.brand,
+    category: a.category,
+    image_url: a.image_url || "",
+    gallery_images: a.gallery_images || [],
+    description: a.description || "",
+    prix: a.prix != null ? String(a.prix) : "",
+    stock: String(a.stock),
+    is_coming_soon: a.is_coming_soon,
+    featured: a.featured,
+  };
+}
+
+const ACC_CATEGORIES = ["Support téléphone", "Support GPS", "Caméra", "Interphone / Intercom", "Chargeur / Alimentation", "Fixation", "Autre"];
+
+const ANON_KEY_ACC = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhdHN1ZGdwaWVjem1vZGpieW5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxOTI5OTksImV4cCI6MjA4OTc2ODk5OX0.nyknLVoppUcDeHjQWC-Nmw2wFYQiC4RLGFo51qEEE4w";
+
+function AccessoriesTab() {
+  const [accessories, setAccessories] = useState<InstAccessory[]>([]);
+  const [editing, setEditing] = useState<InstAccessory | null>(null);
+  const [adding, setAdding] = useState(false);
+  const [form, setForm] = useState<typeof EMPTY_ACC>(EMPTY_ACC);
+  const [generatingDesc, setGeneratingDesc] = useState(false);
+
+  const load = async () => {
+    const { data } = await supabase.from("installation_accessories").select("*").order("category").order("sort_order");
+    if (data) setAccessories(data.map(d => ({ ...d, gallery_images: Array.isArray(d.gallery_images) ? (d.gallery_images as string[]) : [] })) as InstAccessory[]);
+  };
+  useEffect(() => { load(); }, []);
+
+  const save = async () => {
+    if (!form.name.trim()) { toast.error("NOM REQUIS"); return; }
+    const payload = toAccPayload(form);
+    if (form.featured) {
+      await supabase.from("installation_accessories").update({ featured: false }).neq("id", editing?.id ?? "");
+    }
+    if (editing) {
+      const { error } = await supabase.from("installation_accessories").update(payload).eq("id", editing.id);
+      if (error) { toast.error(error.message); return; }
+      toast.success("ACCESSOIRE MODIFIÉ");
+    } else {
+      const sameC = accessories.filter(a => a.category === form.category).length;
+      const { error } = await supabase.from("installation_accessories").insert({ ...payload, sort_order: sameC });
+      if (error) { toast.error(error.message); return; }
+      toast.success("ACCESSOIRE AJOUTÉ");
+    }
+    setAdding(false); setEditing(null); load();
+  };
+
+  const del = async (id: string) => {
+    if (!confirm("SUPPRIMER CET ACCESSOIRE ?")) return;
+    const { error } = await supabase.from("installation_accessories").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("ACCESSOIRE SUPPRIMÉ"); load();
+  };
+
+  const uniqueCats = [...new Set(accessories.map(a => a.category || "Autre"))];
+  const knownBrands = [...new Set(accessories.map(a => a.brand).filter(Boolean))].sort();
+
+  const generateDescription = async () => {
+    if (!form.name.trim()) { toast.error("ENTREZ D'ABORD LE NOM"); return; }
+    setGeneratingDesc(true);
+    try {
+      const res = await fetch("https://qatsudgpieczmodjbynh.supabase.co/functions/v1/generate-description", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${ANON_KEY_ACC}`, "apikey": ANON_KEY_ACC },
+        body: JSON.stringify({ name: form.name, brand: form.brand, category: form.category, price: form.prix ? parseFloat(form.prix) : null, image_url: form.image_url || null }),
+      });
+      if (!res.ok) { toast.error("ERREUR GÉNÉRATION"); return; }
+      const json = await res.json();
+      if (json.description) setForm(f => ({ ...f, description: json.description }));
+      else toast.error("RÉPONSE VIDE");
+    } catch {
+      toast.error("ERREUR GÉNÉRATION");
+    } finally {
+      setGeneratingDesc(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className={kicker}>ACCESSOIRES ({accessories.length})</p>
+        <Button onClick={() => { setAdding(true); setEditing(null); setForm(EMPTY_ACC); }} className="admin-button h-9 rounded-none px-4 font-adminDisplay text-xs tracking-[0.16em]">
+          <Plus className="h-3 w-3" /> AJOUTER
+        </Button>
+      </div>
+
+      {(adding || editing) && (
+        <div className="border border-[hsl(var(--admin-accent)/0.25)] bg-[hsl(var(--admin-card))] p-4 space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <p className={kicker + " mb-1"}>NOM</p>
+              <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Quad Lock Pro" className={inp} />
+            </div>
+            <div>
+              <p className={kicker + " mb-1"}>MARQUE</p>
+              <input
+                list="acc-brands-list"
+                value={form.brand}
+                onChange={e => setForm(f => ({ ...f, brand: e.target.value }))}
+                placeholder="Quad Lock"
+                className={`admin-input h-9 w-full text-sm ${inp}`}
+              />
+              <datalist id="acc-brands-list">
+                {knownBrands.map(b => <option key={b} value={b} />)}
+              </datalist>
+            </div>
+          </div>
+
+          <div>
+            <p className={kicker + " mb-1"}>CATÉGORIE</p>
+            <select
+              value={form.category}
+              onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
+              className="admin-input h-9 w-full text-sm"
+            >
+              <option value="">— Choisir —</option>
+              {ACC_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <p className={kicker + " mb-1"}>PRIX (€)</p>
+              <Input type="number" min="0" step="0.01" value={form.prix} onChange={e => setForm(f => ({ ...f, prix: e.target.value }))} placeholder="49.99" className={inp} />
+            </div>
+            <div>
+              <p className={kicker + " mb-1"}>STOCK</p>
+              <Input type="number" min="0" step="1" value={form.stock} onChange={e => setForm(f => ({ ...f, stock: e.target.value }))} placeholder="10" className={inp} />
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <p className={kicker}>DESCRIPTION</p>
+              <button
+                type="button"
+                onClick={generateDescription}
+                disabled={generatingDesc}
+                className="inline-flex items-center gap-1.5 px-3 py-1 font-adminDisplay text-[10px] uppercase tracking-[0.18em] border transition-all disabled:opacity-50"
+                style={{ borderColor: "rgba(201,151,58,0.35)", color: "#c9973a", background: "rgba(201,151,58,0.06)" }}
+                onMouseEnter={e => { if (!generatingDesc) (e.currentTarget as HTMLElement).style.background = "rgba(201,151,58,0.14)"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(201,151,58,0.06)"; }}
+              >
+                {generatingDesc ? <><Loader2 className="h-3 w-3 animate-spin" /> Génération...</> : <><Sparkles className="h-3 w-3" /> Générer avec IA</>}
+              </button>
+            </div>
+            <textarea
+              value={form.description}
+              onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+              placeholder="Description de l'accessoire…"
+              rows={3}
+              className="admin-input w-full text-sm resize-none p-2"
+            />
+          </div>
+
+          <Toggle checked={form.is_coming_soon} onChange={v => setForm(f => ({ ...f, is_coming_soon: v }))} label="BIENTÔT DISPONIBLE" />
+          <Toggle checked={form.featured} onChange={v => setForm(f => ({ ...f, featured: v }))} label="MIS EN AVANT" />
+
+          <div>
+            <p className={kicker + " mb-2"}>PHOTO PRINCIPALE</p>
+            <ImageUploadSingle value={form.image_url} onChange={v => setForm(f => ({ ...f, image_url: v }))} folder="accessories" previewClass="h-24 w-24" />
+          </div>
+          <div>
+            <p className={kicker + " mb-2"}>PHOTOS GALERIE</p>
+            <ImageUploadMulti value={form.gallery_images} onChange={v => setForm(f => ({ ...f, gallery_images: v }))} folder="accessories" label="" />
+          </div>
+
+          <div className="flex gap-2">
+            <Button onClick={save} className="admin-button h-9 rounded-none px-4 font-adminDisplay text-xs tracking-[0.16em]"><Save className="h-3 w-3" /> ENREGISTRER</Button>
+            <Button onClick={() => { setAdding(false); setEditing(null); }} className="admin-button-secondary h-9 rounded-none px-4 font-adminDisplay text-xs tracking-[0.16em]"><X className="h-3 w-3" /> ANNULER</Button>
+          </div>
+        </div>
+      )}
+
+      {uniqueCats.map(cat => (
+        <div key={cat}>
+          <p className="mb-1.5 font-adminDisplay text-[11px] uppercase tracking-[0.3em] text-[hsl(var(--admin-accent))]">{cat}</p>
+          <div className="space-y-1">
+            {accessories.filter(a => (a.category || "Autre") === cat).map(a => (
+              <div key={a.id} className={rowCls}>
+                <div className="flex items-center gap-3">
+                  {a.image_url ? <img src={a.image_url} alt={a.name} className="h-10 w-10 object-cover rounded" /> : <div className="h-10 w-10 rounded border border-[hsl(var(--admin-accent)/0.15)] bg-[hsl(var(--admin-card))]" />}
+                  <div>
+                    <span className="text-sm text-[hsl(var(--admin-foreground))] flex items-center gap-1.5">
+                      {a.featured && <Star className="h-3 w-3 fill-[#c9973a] text-[#c9973a]" />}
+                      {a.name}
+                      {a.brand && <span className="text-[hsl(var(--admin-muted-foreground))] text-[11px]">· {a.brand}</span>}
+                      {a.is_coming_soon && <span className={comingSoonBadge}>· BIENTÔT</span>}
+                    </span>
+                    {a.prix != null && <p className="text-[11px] text-[hsl(var(--admin-muted-foreground))]">{a.prix} € · Stock : {a.stock}</p>}
+                  </div>
+                </div>
+                <div className="flex gap-1">
+                  <Button onClick={() => { setEditing(a); setAdding(false); setForm(accFromRecord(a)); }} className="h-8 w-8 rounded-none border border-[hsl(var(--admin-accent)/0.2)] bg-transparent p-0 text-[hsl(var(--admin-muted-foreground))] hover:text-[hsl(var(--admin-accent))]"><Pencil className="h-3 w-3" /></Button>
+                  <Button onClick={() => del(a.id)} className="h-8 w-8 rounded-none border border-destructive/30 bg-transparent p-0 text-destructive hover:bg-destructive hover:text-destructive-foreground"><Trash2 className="h-3 w-3" /></Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /* ══════════════════ MAIN ══════════════════ */
 export default function AdminInstallation() {
   return (
@@ -422,6 +688,7 @@ export default function AdminInstallation() {
             { value: "brands", label: "MARQUES DE CASQUES" },
             { value: "models", label: "MODÈLES DE CASQUES" },
             { value: "intercoms", label: "INTERCOMS" },
+            { value: "accessories", label: "ACCESSOIRES" },
           ].map(t => (
             <TabsTrigger
               key={t.value}
@@ -435,7 +702,8 @@ export default function AdminInstallation() {
 
         <TabsContent value="brands"   className="m-0"><BrandsTab /></TabsContent>
         <TabsContent value="models"   className="m-0"><ModelsTab /></TabsContent>
-        <TabsContent value="intercoms" className="m-0"><IntercomsTab /></TabsContent>
+        <TabsContent value="intercoms"   className="m-0"><IntercomsTab /></TabsContent>
+        <TabsContent value="accessories" className="m-0"><AccessoriesTab /></TabsContent>
       </Tabs>
     </div>
   );

@@ -12,7 +12,7 @@ export default function BrandsPage() {
       <SEO
         title="Nos Marques Moto — Arai, Shoei, Alpinestars, Shark | Desmet Équipement Wavre"
         description="Découvrez nos plus de 30 marques d'équipement moto : Arai, Shoei, Alpinestars, Shark, Sena, Cardo et bien d'autres. Disponibles en boutique à Wavre."
-        canonicalPath="/marques"
+        canonicalPath="/brands"
       />
       <section className="py-24 min-h-[80vh] flex flex-col justify-center bg-background">
         <div className="container mx-auto px-4">

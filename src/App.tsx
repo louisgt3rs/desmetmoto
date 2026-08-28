@@ -3,6 +3,7 @@ import { LanguageProvider } from "./contexts/LanguageContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { CartProvider } from "./contexts/CartContext";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import ScrollToTop from "./components/ScrollToTop";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -23,6 +24,7 @@ import NotFound from "./pages/NotFound";
 import CategoryPage from "./pages/CategoryPage";
 import Intercoms from "./pages/Intercoms";
 import IntercomDetail from "./pages/IntercomDetail";
+import AccessoryDetail from "./pages/AccessoryDetail";
 import Panier from "./pages/Panier";
 import PanierConfirmation from "./pages/PanierConfirmation";
 
@@ -37,6 +39,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/brands" element={<Brands />} />
@@ -54,8 +57,11 @@ const App = () => (
           <Route path="/categorie/:slug" element={<CategoryPage />} />
           <Route path="/intercoms" element={<Intercoms />} />
           <Route path="/intercoms/:slug" element={<IntercomDetail />} />
+          <Route path="/intercoms/accessoires/:slug" element={<AccessoryDetail />} />
           <Route path="/panier" element={<Panier />} />
           <Route path="/panier/confirmation" element={<PanierConfirmation />} />
+          <Route path="/nl" element={<Navigate to="/" replace />} />
+          <Route path="/en" element={<Navigate to="/" replace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
